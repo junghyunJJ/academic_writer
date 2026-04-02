@@ -1,8 +1,8 @@
-# Academic Writer v4.0 — Complete IMRAD Section Writing
+# Academic Writer v1.0 — Write Publication-Quality IMRAD Sections
 
-> RAG-based dual-layer architecture for writing publication-quality Introduction, Methods, Results, and Discussion sections. Learns from reference papers. Gathers intent through tiered conversational interviews. Improves continuously through feedback.
+Multi-agent system for writing publication-quality Introduction, Methods, Results, and Discussion sections for academic research articles. Learns writing patterns from reference papers through RAG-based dual-layer analysis, gathers research intent via tiered conversational interviews, generates outlined drafts, and improves continuously through feedback.
 
-**Version**: 4.0 | **Released**: 2026-04-01 | **Skill Invocation**: `/academic-writer`
+**Version**: 1.0 | **Released**: 2026-04-01 | **Skill Invocation**: `/academic-writer`
 
 ---
 
@@ -18,8 +18,7 @@
 8. [File Structure](#8-file-structure)
 9. [Supported Journals and Guidelines](#9-supported-journals-and-guidelines)
 10. [Continuous Learning](#10-continuous-learning)
-11. [Changelog: v3.0 → v4.0](#11-changelog-v30--v40)
-12. [Quick Reference](#12-quick-reference)
+11. [Quick Reference](#11-quick-reference)
 
 ---
 
@@ -31,22 +30,22 @@ Multi-agent system for writing publication-quality IMRAD sections (Introduction,
 
 **Single section per invocation**: Each call to `/academic-writer` handles one IMRAD section completely. To write a full paper, invoke once per section in sequence.
 
-### v4.0 Key Changes (vs v3.0)
+### Core Philosophy
 
-| Item | v3.0 | v4.0 |
-|------|------|------|
-| **Coverage** | Results only | **All IMRAD** (Introduction, Methods, Results, Discussion) |
-| **Section Selection** | N/A | **Phase -2** (user picks section) |
-| **Interview Format** | Flat Q1-Q5 all at once | **Tiered Conversational** (Phase A-D, one-at-a-time) |
-| **Context Accumulation** | None | **paper_context** (cross-section reuse) |
-| **Cross-Section Coherence** | None | **Active Coherence Check** (Phase A enhancement) |
-| **Review Style** | 7-pass uniform | **Section-weighted passes** + pedagogical WHY + Over-interpretation Check (Discussion only) |
-| **Keywords Support** | None | **Tier 1 (Emphasize)** + **Tier 2 (Include)** user keywords |
-| **RAG Health Check** | None | **Automatic detection** with 3 user options |
-| **PDF Fallback** | Single-layer | **Dual-layer** (Structure + Voice) |
-| **Hourglass Awareness** | None | **Intro↔Discussion symmetry** enforcement |
-| **Agents** | 5 (style-extractor new) | **6 generic parameterized** (section-analyzer, style-extractor, section-writer, section-reviewer, pattern-learner, paper-preprocessor) |
-| **New Files** | — | introduction-patterns.md, methods-patterns.md, discussion-patterns.md, expanded style-guide.md |
+**Copilot, not pilot.** The user owns the narrative; the system executes. Every question has a smart default. Every decision can be overridden. The system gathers intent through conversation, not interrogation.
+
+### Key Features
+
+| Feature | Description |
+|---------|-------------|
+| **Dual-Layer Learning** | Learns section structure from one reference source, voice/tone from another |
+| **Tiered Interview** | Four-phase conversational approach (Context Detection → Core Questions → Adaptive Follow-ups → Intent Confirmation) |
+| **Section-Specific Configuration** | Writing rules, review weights, and guidance tailored to each IMRAD section |
+| **Cross-Section Coherence** | Detects existing sections and enforces consistency (Methods references Results, Discussion references Introduction) |
+| **Hourglass Awareness** | Introduction→Discussion symmetry (funnel → inverted funnel) |
+| **Pedagogical Feedback** | Review feedback explains the "why" behind each suggestion, not just what to fix |
+| **Continuous Learning** | Approved outputs update style guides automatically; patterns become section-specific |
+| **Fallback System** | PDF preprocessing when RAG unavailable; dual-layer PDF selection mirrors RAG collections |
 
 ---
 
@@ -62,7 +61,7 @@ Phase -2: Section Selection
 │ → Sets SECTION_TYPE                 │
 └────────────┬────────────────────────┘
              │
-RAG Health Check (NEW)
+RAG Health Check
 ┌────────────▼────────────────────────┐
 │ list_collections() available?        │
 │ → Yes: Phase -1  → No: 3 options    │
@@ -87,7 +86,7 @@ Phase 0a + 0b: Dual-Layer Learning (PARALLEL)
           │                         │
           └────────────┬────────────┘
                        │
-Phase 1: Style Merge (Priority Rules)
+Phase 1: Style Merge
 ┌──────────────────────▼─────────────┐
 │ Merge Structure + Voice Layers      │
 │ Update style-guide.md               │
@@ -131,17 +130,17 @@ The system maintains two independent learning layers:
 
 | Layer | Role | Default Collection | Learning Content |
 |-------|------|-------------------|------------------|
-| **Structure Layer** | Section architecture and organization | agentpaper | Subsection hierarchies, Figure integration, flow patterns, section-specific structure |
+| **Structure Layer** | Section architecture and organization | agentpaper | Subsection hierarchies, figure integration, flow patterns, section-specific structure |
 | **Target Voice Layer** | Writing style, tone, and expression | mypaper | Sentence patterns, transitions, hedging frequency, discipline-specific terminology, statistical reporting conventions |
 
-**Priority Rules** (inherited from v3.0, applied per section):
+**Priority Rules** (applied per section):
 - Structure elements (subsection headers, figure placement) → Structure Layer priority
 - Voice/tone elements (sentence patterns, hedging, "we" usage) → Target Voice Layer priority
 - Statistical reporting formats → Target Voice Layer priority
 - Terminology and jargon → Target Voice Layer priority
 - Transitions and connectives → Target Voice Layer priority
 
-### Cross-Section Coherence (NEW in v4.0)
+### Cross-Section Coherence
 
 When writing a section, the system performs an **active coherence check**:
 
@@ -154,7 +153,6 @@ Phase A: Context Detection
   │  → Yes: Extract consistency anchors
   │  → No: Write independently
   └─ Auto-extract cross-reference points
-      (see Cross-Reference Matrix below)
 ```
 
 **Cross-Reference Matrix** (which sections inform which):
@@ -178,9 +176,9 @@ When both exist, the system enforces symmetry: Discussion opening references Int
 
 ## 3. Agent Details
 
-All agents are now parameterized by `SECTION_TYPE`, enabling single pipeline to handle all four IMRAD sections.
+All agents are parameterized by `SECTION_TYPE`, enabling a single pipeline to handle all four IMRAD sections.
 
-### 3.1 Section Analyzer (renamed from Results Analyzer)
+### 3.1 Section Analyzer
 
 **File**: `agents/section-analyzer.md`
 
@@ -197,11 +195,11 @@ Extracts structural patterns specific to `SECTION_TYPE` from Structure Layer RAG
 
 **Output**: Updated `data/style-guide.md` Structure Layer section (parameterized by SECTION_TYPE).
 
-### 3.2 Style Extractor (expanded)
+### 3.2 Style Extractor
 
 **File**: `agents/style-extractor.md`
 
-Extracts voice/tone from Target Voice Layer, now section-aware.
+Extracts voice/tone from Target Voice Layer, with section-aware focus.
 
 **Section-Specific Voice Extractions**:
 
@@ -214,37 +212,33 @@ Extracts voice/tone from Target Voice Layer, now section-aware.
 
 **Output**: Updated `data/style-guide.md` Target Voice Layer section (parameterized by SECTION_TYPE).
 
-### 3.3 Section Writer (major upgrade from Results Writer)
+### 3.3 Section Writer
 
 **File**: `agents/section-writer.md`
 
-Four-step process, now with tiered conversational interview.
+Four-step process with tiered conversational interview.
 
 **Input Collection** (Step 0, section-specific):
 
 ```yaml
 research_materials:
-  # Introduction materials
   introduction:
     background_sources: "[key papers, review articles]"
     research_gap_context: "[what's missing or unexplored]"
     preliminary_findings: "[optional: early data motivating this work]"
 
-  # Methods materials
   methods:
     study_type: "[computational, experimental, mixed, etc.]"
     data_sources: "[where data came from]"
     analysis_pipeline: "[tool names, versions, order of steps]"
     custom_scripts: "[any user-written code or modifications]"
 
-  # Results materials
   results:
     data_files: "[CSV, matrices, statistical output]"
     figures: "[PNG, PDF with figure legends]"
     tables: "[tabular results]"
     analysis_summary: "[.md file with context]"
 
-  # Discussion materials
   discussion:
     key_findings: "[from Results, highlighted]"
     literature_for_comparison: "[papers to position against]"
@@ -252,7 +246,7 @@ research_materials:
     implications: "[applications, broader significance]"
 ```
 
-**Step 1: Tiered Conversational Interview** (NEW, core feature):
+**Step 1: Tiered Conversational Interview**:
 
 ```
 Phase A: Context Detection (automated + 0-1 question)
@@ -266,8 +260,7 @@ Phase B: Core Interview (5 section-specific questions, one-at-a-time)
 ├─ Each answer acknowledged before next Q
 ├─ Smart defaults for every question (user can skip)
 ├─ Conversational tone: "Tell me about..." not "Specify the..."
-├─ Purpose transparency: brief note on why each Q matters
-└─ Examples (see below per section)
+└─ Purpose transparency: brief note on why each Q matters
 
 Phase C: Adaptive Follow-ups (0-3 questions, conditional)
 ├─ Context-deepening: probe vague Phase B answers
@@ -289,28 +282,28 @@ Phase D: Intent Confirmation (1 interaction)
 | Q1 | What is the core motivation and research question of this paper? | gap-elicitation | "Knowledge gap? Methodology gap? Application gap?" |
 | Q2 | What is the most important limitation or gap in existing research? | contrastive-probe | "What was tried before, why insufficient?" |
 | Q3 | Summarize your contribution in one sentence. | intent-crystallization | Forces core message articulation |
-| Q4 | How much background knowledge should Introduction assume? (minimal ↔ extensive) | scope-calibration | Adapt to target journal audience |
+| Q4 | How much background knowledge should Introduction assume? | scope-calibration | Adapt to target journal audience |
 | Q5 | Key reference papers or positioning papers? | reference-anchoring | Can trigger RAG search |
 
 **Methods (Phase B, 5 core + follow-ups)**:
 
 | # | Question | Type | Smart Default |
 |---|----------|------|---------------|
-| Q1 | What type of study is this? (computational, experimental, mixed, etc.) | structural-classifier | Determines section template |
+| Q1 | What type of study is this? | structural-classifier | Determines section template |
 | Q2 | Data/samples: what, how much, from where? | core-content | Follow-up: inclusion/exclusion criteria |
-| Q3 | Describe the analysis pipeline step-by-step (raw data → final result). | workflow-elicitation | Encourage numbered steps |
+| Q3 | Describe the analysis pipeline step-by-step. | workflow-elicitation | Encourage numbered steps |
 | Q4 | Software/tools and versions used? | reproducibility | Follow-up: custom scripts, parameters |
 | Q5 | Preferred subsection order for Methods? | structure-preference | Default: pipeline order |
 
-**Results (Phase B, 5 core, enhanced from v3.0)**:
+**Results (Phase B, 5 core)**:
 
-| # | Question | Type | Enhancement |
+| # | Question | Type | Description |
 |---|----------|------|-------------|
-| Q1 | What is the central narrative of these Results? (What is the data saying?) | narrative-framing | ABT hint: "And..., But..., Therefore..." |
+| Q1 | What is the central narrative of these Results? | narrative-framing | ABT hint: "And..., But..., Therefore..." |
 | Q2 | Top 3-5 findings, ranked by importance. | priority-setting | Added ranking + number constraint |
-| Q3 | For each Figure/Table: what does it show and what is the key takeaway? | visual-inventory | NEW — ensures purposeful figure integration |
-| Q4 | Preferred subsection order for Results? | structure-preference | Same as v3.0 Q3 |
-| Q5 | Most important comparison: vs baseline, vs existing methods, across conditions? | comparison-framing | NEW — replaces redundant style Q |
+| Q3 | For each Figure/Table: what does it show and what is the key takeaway? | visual-inventory | Ensures purposeful figure integration |
+| Q4 | Preferred subsection order for Results? | structure-preference | Same as pipeline order |
+| Q5 | Most important comparison: vs baseline, vs existing methods, across conditions? | comparison-framing | Frames key competitive value |
 
 **Discussion (Phase B, 5 core + follow-ups)**:
 
@@ -320,20 +313,20 @@ Phase D: Intent Confirmation (1 interaction)
 | Q2 | Key points to discuss vs. existing literature? | literature-positioning | Follow-up: "2-3 key papers to compare?" |
 | Q3 | Main limitations of this study? | limitation-awareness | Follow-up: methodological? data? generalizability? |
 | Q4 | Unexpected or hard-to-explain findings? | anomaly-exploration | Shows analytical maturity |
-| Q5 | Topics explicitly to avoid in Discussion? (scope boundary) | scope-guard | Prevents over-interpretation |
+| Q5 | Topics explicitly to avoid in Discussion? | scope-guard | Prevents over-interpretation |
 
-**Step 2: Interactive Outline** (section-specific):
+**Step 2: Interactive Outline**:
 - Generate section-appropriate outline structure
-- Per-step user approval (similar to v3.0, adapted to section type)
+- Per-step user approval
 - Reflect interview answers into outline points
 
-**Step 3: Prose + RAG few-shot** (section-specific):
+**Step 3: Prose + RAG few-shot**:
 - Extract subsection keywords
 - Real-time Target Voice RAG search (2-3 exemplar paragraphs per subsection)
 - Prose generation with matched style
 - Integration pass: terminology, citations, hedging, writing rules compliance
 
-### 3.4 Section Reviewer (enhanced)
+### 3.4 Section Reviewer
 
 **File**: `agents/section-reviewer.md`
 
@@ -356,13 +349,13 @@ Phase D: Intent Confirmation (1 interaction)
 - Limitation Completeness
 - Hourglass symmetry (if Introduction exists)
 
-**Revision Loop**: Major/minor revisions → Writer with `revision_diff` + pedagogical WHY (NEW in v4.0) and `teaching_note` explaining writing principles (max 3 iterations).
+**Revision Loop**: Major/minor revisions → Writer with `revision_diff` + pedagogical WHY and `teaching_note` explaining writing principles (max 3 iterations).
 
-### 3.5 Pattern Learner (section-tagged)
+### 3.5 Pattern Learner
 
 **File**: `agents/pattern-learner.md`
 
-Learns from approved sections, now with section-specific metrics.
+Learns from approved sections, with section-specific metrics.
 
 **Learning Sources** (per section):
 1. Approved sections (section_type tagged)
@@ -373,11 +366,11 @@ Learns from approved sections, now with section-specific metrics.
 
 **Output**: Versioned style-guide.md updates + pattern-history/changelog with section attribution.
 
-### 3.6 Paper Preprocessor (expanded for all sections)
+### 3.6 Paper Preprocessor
 
 **File**: `agents/paper-preprocessor.md`
 
-Fallback processor when RAG unavailable. Now detects and extracts all four IMRAD sections from PDFs.
+Fallback processor when RAG unavailable. Detects and extracts all four IMRAD sections from PDFs.
 
 **Section Detection** (using structural heuristics):
 - Introduction: precedes Methods, marked by keywords like "Background," "Motivation," "Introduction"
@@ -397,10 +390,10 @@ Two RAG collections via `langconnect-rag` MCP server, used across all four secti
 
 ```yaml
 structure_layer:
-  description: "Reference papers for learning section structure/organization"
+  description: "Reference papers for learning section structure and organization"
   default_collection: "agentpaper"
   default_id: "06bd503e-fd03-4451-8ce7-7c1ee5012584"
-  note: "User can select any available collection in Phase -1"
+  note: "User can select any available collection"
 
 target_voice:
   description: "Papers whose writing style/voice to emulate"
@@ -409,10 +402,10 @@ target_voice:
   note: "User can select any available collection; same collection allowed for both layers"
 ```
 
-### MCP Tools
+### MCP Tools Used
 
 ```yaml
-tools:
+rag_tools:
   list_collections: "mcp__langconnect-rag__list_collections"
   search_documents: "mcp__langconnect-rag__search_documents"
   agentic_search: "mcp__langconnect-rag__agentic_search"
@@ -422,303 +415,263 @@ search_parameters:
   limit: 5
 ```
 
-### Section-Specific RAG Queries
+### Section-Specific RAG Query Strategies
 
-**Structure Layer queries** (Section Analyzer, 4 per section):
+**Structure Layer queries** (for Section Analyzer, 4 queries per section):
 
-| Section | Q1 | Q2 | Q3 | Q4 |
-|---------|-----|-----|-----|-----|
+| Section | Query 1 | Query 2 | Query 3 | Query 4 |
+|---------|---------|---------|---------|---------|
 | Introduction | "introduction background motivation field significance" | "existing approaches limitations gap" | "we propose we introduce contribution" | "research question aims objectives" |
 | Methods | "methods implementation pipeline architecture" | "preprocessing quality control data preparation" | "evaluation benchmark performance validation" | "software tools parameters version" |
 | Results | "Results section structure organization subsection" | "findings statistical analysis benchmark performance" | "Figure Table panel results comparison" | "methodology evaluation framework validation" |
 | Discussion | "discussion interpretation significance meaning" | "limitation future directions caveats" | "compared to prior work consistent with previous" | "broader impact implications applications" |
 
-**Target Voice queries** (Style Extractor, 3 section-specific + 1 field-specific):
+**Target Voice Layer queries** (for Style Extractor, 3 section-specific + 1 field-specific):
 
-| Section | Q1 | Q2 | Q3 | Q4 |
-|---------|-----|-----|-----|-----|
+| Section | Query 1 | Query 2 | Query 3 | Query 4 |
+|---------|---------|---------|---------|---------|
 | Introduction | "field significance importance relevance" | "however despite gap limitation remains" | "we introduce present propose here" | *field-specific* |
 | Methods | "procedures implementation experimental design" | "we used employed applied implemented" | "parameters settings configuration threshold" | *field-specific* |
 | Results | "Results section findings statistical analysis" | "we found demonstrated showed revealed indicated" | "Figure Table panel comparison significantly" | *field-specific* |
 | Discussion | "suggest demonstrate indicate consistent with" | "consistent with previous findings prior work" | "limitation future direction caveat" | *field-specific* |
 
-**Real-time few-shot queries** (Section Writer Step 3):
+**Real-time few-shot queries** (for Section Writer, during prose):
 - Subsection topic keywords → Target Voice collection (primary)
-- If no results, fallback to Structure collection
+- Structure reference → Structure collection (secondary, when needed)
 
 ---
 
-## 5. Pipeline Details
+## 5. Pipeline Details (Phase -2 through Phase 4)
 
 ### Phase -2: Section Selection
 
-**Purpose**: User selects one IMRAD section to write.
+**Purpose**: Let the user choose which IMRAD section to write. Sets SECTION_TYPE for all downstream phases.
 
-1. Orchestrator asks: "Which section would you like to write?" (1. Introduction / 2. Methods / 3. Results / 4. Discussion)
+Orchestrator asks: "Which section would you like to write?" (1. Introduction / 2. Methods / 3. Results / 4. Discussion)
+
+1. User selects one (or states section name directly)
 2. Set `SECTION_TYPE` = selected section
 3. Load `references/{SECTION_TYPE}-patterns.md`
-4. Activate corresponding `section_configs` block in SKILL.md
-5. All downstream agents receive SECTION_TYPE as parameter
+4. Activate the corresponding `section_configs` block
+5. All downstream agents receive SECTION_TYPE as a parameter
 
-### RAG Health Check (NEW)
+### RAG Health Check (Before Phase -1)
 
-**Purpose**: Verify langconnect-rag MCP server availability before proceeding.
+**Purpose**: Verify that the langconnect-rag MCP server is available before proceeding to collection selection. If unavailable, inform the user and let them decide.
 
-```
-Attempt: mcp__langconnect-rag__list_collections
+**If RAG is available**: Proceed to Phase -1 (Collection Selection) normally.
 
-✓ Success → Proceed to Phase -1
-✗ Failure → Present 3 options:
+**If RAG is unavailable**: Inform user and present 3 options:
 
-  ① Check RAG setup
-     "Verify Docker container running. After confirming, I'll retry."
-     → Guide user, retry connection
-
-  ② Proceed without RAG
-     "Skip Phase 0 (learning) and Phase -1 (collection selection).
-      Write using only existing style-guide.md patterns.
-      Real-time RAG few-shot in Step 3 also disabled."
-     → Set rag_available: false
-
-  ③ Provide PDFs directly
-     "Provide reference PDFs instead of RAG.
-      I'll extract and learn from them using Paper Preprocessor."
-     → Dual-layer PDF selection (see below)
-```
-
-**Dual-Layer PDF Input** (mirrors RAG collections):
-
-```yaml
-structure_layer_pdfs:
-  description: "Papers to learn structure/pattern from (optional)"
-  example: "I want to follow the Methods structure of this paper"
-  action: "Paper Preprocessor → Section Analyzer → Structure Layer update"
-
-target_voice_pdfs:
-  description: "Papers to learn writing style/tone from (optional)"
-  example: "Write in the English tone of my previous paper"
-  action: "Paper Preprocessor → Style Extractor → Target Voice Layer update"
-
-rules:
-  - "At least one layer should be provided"
-  - "Same PDF can be used for both layers"
-  - "Multiple PDFs allowed per layer"
-  - "Unprovided layers retain existing style-guide.md patterns"
-```
+1. **Check RAG setup**: Guide user to verify Docker container status and retry
+2. **Proceed without RAG**: Skip Phases -1, 0a, 0b, 1; use existing style-guide.md
+3. **Provide PDFs directly**: Use Paper Preprocessor with dual-layer PDF selection
 
 ### Phase -1: Collection Selection
 
-**Purpose**: User selects RAG collections for structure and voice learning. (Skipped if RAG Health Check failed and user chose option ②.)
+**Purpose**: Let the user choose which RAG collections to use for structure learning and voice extraction. (Skipped if user chose "Proceed without RAG".)
 
 1. Call `mcp__langconnect-rag__list_collections` to get available collections
-2. Present list with names, document counts, descriptions
-3. Ask Q1: "Which collection for Structure Layer (structure/pattern learning)?" (default: agentpaper)
-4. Ask Q2: "Which collection for Target Voice Layer (style/tone learning)?" (default: mypaper)
-5. Store collection IDs for downstream phases
-6. Same collection allowed for both; "skip" or "default" uses agentpaper + mypaper
+2. Present collection list with names, document counts, and descriptions
+3. Ask: "Which collection to use for the Structure Layer?" (default: agentpaper)
+4. Ask: "Which collection to use for the Target Voice Layer?" (default: mypaper)
+5. Store selected collection IDs for downstream phases
+6. Same collection allowed for both layers. If user says "skip" or "default", use agentpaper + mypaper
 
 ### Phase 0a: Structure Pattern Learning (Parallel with 0b)
 
 **Input**: Structure Layer collection + SECTION_TYPE
 
-1. Execute 4 section-specific Structure Layer queries (see RAG Queries) against selected collection
-2. Pass results to Section Analyzer with SECTION_TYPE
-3. Analyzer extracts section-appropriate structural patterns, groups by source, synthesizes cross-document patterns
-4. Update `data/style-guide.md` Structure Layer section
-5. Optional: BioMCP enrichment for biological context (field detection)
+1. Execute 4 section-specific Structure Layer queries against selected collection
+2. Pass search results to Section Analyzer agent with SECTION_TYPE
+3. Analyzer extracts section-appropriate structural patterns, groups by source document, synthesizes cross-document patterns
+4. Optional: BioMCP enrichment for biological context
 
-### Phase 0b: Target Voice Learning (Parallel with 0a)
+**Output**: Structure Layer contribution to style-guide.md
 
-**Input**: Target Voice collection + SECTION_TYPE
+### Phase 0b: Voice Pattern Learning (Parallel with 0a)
 
-1. Execute 3 section-specific + 1 field-specific Target Voice queries against selected collection
-2. Pass results to Style Extractor with SECTION_TYPE
-3. Extractor analyzes writing patterns: sentence structure, voice, hedging, terminology, statistical reporting
-4. Update `data/style-guide.md` Target Voice Layer section
-5. Field-specific queries auto-trigger if field detected (Bioinformatics, Genomics, Computational Biology, etc.)
+**Input**: Target Voice Layer collection + SECTION_TYPE
+
+1. Execute 3 section-specific + 1 field-specific Target Voice Layer queries against selected collection
+2. Pass search results to Style Extractor agent with SECTION_TYPE
+3. Extractor synthesizes voice/tone patterns, identifies sentence structure distribution, hedging frequency, terminology density
+4. Optional: Analyze target journal's house style if collection is journal-specific
+
+**Output**: Target Voice Layer contribution to style-guide.md
 
 ### Phase 1: Style Merge
 
-Merge Structure and Voice Layers using Priority Rules. No separate file created; `data/style-guide.md` itself serves as merged guide.
+**Input**: Structure Layer + Target Voice Layer patterns
 
-### Phase 2: Section Writer (Enhanced)
+1. Merge both patterns into unified style-guide.md
+2. Apply Priority Rules: resolve conflicts (structure elements prioritize structure layer, voice elements prioritize voice layer)
+3. Create merged guide with clear provenance (which patterns came from which layer)
 
-**Step 0**: Collect section-specific input materials (see Section Writer agent description).
+**Output**: Updated `data/style-guide.md` ready for writer and reviewer
 
-**Step 1**: Tiered Conversational Interview
-- Phase A: Context Detection (auto-scan, cross-section coherence check)
-- Phase B: Core Interview (5 section-specific Qs, one-at-a-time)
-- Phase C: Adaptive Follow-ups (0-3 conditional Qs)
-- Phase D: Intent Confirmation (summary → user confirms)
+### Phase 2: Section Writer (Tiered Interview + Prose)
 
-**Step 2**: Interactive Outline
-- Generate section-appropriate structure based on interview answers
+**Step 0: Input Collection**
+Gather section-specific research materials (see Section Writer above).
+
+**Step 1: Tiered Conversational Interview**
+- Phase A: Context Detection (auto-scan workspace, detect coherence requirements)
+- Phase B: Core Interview (5 section-specific questions, one-at-a-time)
+- Phase C: Adaptive Follow-ups (0-3 context-deepening questions)
+- Phase D: Intent Confirmation (structured summary, user confirms)
+
+**Step 2: Interactive Outline**
+- Generate section-appropriate outline
 - Per-step user approval
-- Reflect interview insights into outline
+- Reflect interview answers into outline points
 
-**Step 3**: Prose + RAG few-shot
+**Step 3: Prose + RAG Few-Shot**
 - Extract subsection keywords
-- Real-time Target Voice RAG search (2-3 exemplars per subsection)
-- Generate prose with matched writing style
-- Integration pass: terminology, citations, hedging, rules compliance
+- Real-time Target Voice RAG search (2-3 exemplar paragraphs per subsection)
+- Prose generation with matched style
+- Integration pass: terminology, citations, hedging compliance
+
+**Output**: Draft section (Introduction/Methods/Results/Discussion)
 
 ### Phase 3: Section Reviewer
 
-7-pass section-weighted review:
+**Input**: Draft section + source research materials
 
-1. **Factual Accuracy** — data/claims consistency
-2. **Statistical Review** — tests, effect sizes, confidence intervals
-3. **Structural Review** — logical flow, section-appropriate transitions
-4. **Style & Clarity** — terminology consistency, conciseness, readability
-5. **Completeness** — all figures/tables referenced, all questions answered
-6. **Reporting Compliance** — STROBE/CONSORT/MIAME guidelines, field standards
-7. **Reproducibility** — sufficient detail for replication
+1. Execute 7-pass review with section-specific weights
+2. Pass 1: Factual Accuracy — verify all claims backed by source materials
+3. Pass 2: Statistical Review — verify statistical reporting, confidence intervals, p-values
+4. Pass 3: Structural Review — verify subsections follow expected architecture
+5. Pass 4: Style & Clarity — verify readability, sentence structure, word choice
+6. Pass 5: Completeness — verify nothing essential omitted
+7. Pass 6: Reporting Compliance — verify format matches target journal guidelines
+8. Pass 7: Reproducibility (Methods/Results) or Interpretation Rigor (Discussion)
 
-**Section-Specific Enhancements**:
-- Introduction: Strong structural review weight; minimal statistical review
-- Methods: Strong reproducibility weight; high reporting compliance weight
-- Results: Strong factual accuracy weight; statistical review emphasis
-- Discussion: Over-interpretation check (extra pass); limitation completeness; Hourglass symmetry check
+**For Discussion only**:
+- Pass 8: Over-interpretation Check — verify interpretations traceable to Results, hedging appropriate, alternative explanations considered
+- Pass 9: Limitation Completeness — verify all major limitations acknowledged
+- Pass 10: Hourglass Symmetry — verify Discussion opening references Intro gap, closing returns to broad context
 
-**Revision Loop**: Major/minor revisions + pedagogical WHY explanations → Writer (max 3 iterations)
+3. Generate revision report with pedagogical WHY (not just what to fix, but why it matters)
+4. Suggest revision diffs
+
+**Output**: Review report + revision recommendations
+
+**Revision Loop**: 
+- If approved → advance to Phase 4
+- If requires revision → return to Writer with revision notes (max 3 iterations)
 
 ### Phase 4: Pattern Learner
 
-Section-tagged learning from approved output:
+**Input**: Approved section + reviewer feedback + RAG search history
 
-1. Extract section-specific patterns (structure, transitions, terminology, writing conventions)
-2. Update style-guide.md with section-attributed learnings
-3. Save paper_context for downstream sections
-4. Increment version + log changes in pattern-history/changelog.md
-5. Per-section metrics: review pass rate, revision count, RAG match score, voice accuracy
+1. Extract section-tagged patterns from approved output
+2. Compare approved patterns against existing style-guide.md
+3. Update style-guide.md with new patterns (section-specific)
+4. Save paper_context for downstream sections (cross-section consistency)
+5. Log pattern-history/changelog with section attribution
+6. Learn from feedback: what reviewer feedback was most valuable for this section type
+
+**Output**: 
+- Updated `data/style-guide.md`
+- Updated `data/pattern-history.md` (section-tagged)
+- Saved `paper_context.yaml` for next section
 
 ---
 
 ## 6. Usage Modes
 
-### 6.1 Complete Workflow (Full Pipeline)
+### Complete Workflow
 
-```
+Full IMRAD writing with RAG collections available:
+
+```bash
 /academic-writer
+→ Phase -2: Select section (e.g., Results)
+→ Phase -1: Select collections (e.g., agentpaper + mypaper)
+→ Phase 0: Dual-layer learning from RAG
+→ Phase 1: Style merge
+→ Phase 2: Interview + outline + draft
+→ Phase 3: 7-pass review
+→ Phase 4: Learn + save style guide
 ```
 
-Process for writing one section:
+### Quick Mode
 
-1. Phase -2: Select section (Introduction/Methods/Results/Discussion)
-2. RAG Health Check: Verify server or choose fallback
-3. Phase -1: Select RAG collections (or skip if no RAG)
-4. Phase 0a + 0b: Dual-layer learning (parallel)
-5. Phase 1: Merge styles
-6. Phase 2 Step 0: Provide section-specific materials
-7. Phase 2 Step 1: Tiered conversational interview
-8. Phase 2 Step 2: Review and approve outline
-9. Phase 2 Step 3: Generate prose + integration
-10. Phase 3: 7-pass review with pedagogical feedback
-11. Phase 4: Learn from approved output
+Skip RAG, use existing style-guide.md:
 
-**Typical duration**: 1-2 hours per section (interview + outline + writing + review cycles)
-
-### 6.2 Quick Mode (Existing Style Guide)
-
-Skip Phase 0 and Phase 1, jump directly to writing:
-
-```
-Data/materials provided → Phase -1 (collection select, optional) →
-Phase 2 (write) → Phase 3 (review)
+```bash
+/academic-writer
+→ Phase -2: Select section
+→ RAG Health Check: User chooses "Proceed without RAG"
+→ Phase 2: Interview + outline + draft (using existing style-guide.md)
+→ Phase 3: Review
+→ Phase 4: Learn
 ```
 
-**Use when**: Style-guide.md already built from previous sections or reference papers.
+### PDF Fallback Mode
 
-### 6.3 Style Learning Only
+User provides PDFs instead of RAG:
 
-```
-Provide RAG collections → Phase 0a + 0b (learn) → Phase 1 (merge) → Complete
-```
-
-Update style-guide.md with new reference papers without writing new content. Useful after adding papers to RAG or changing target journal.
-
-### 6.4 Writing Only (No Reference Learning)
-
-```
-Data/materials → Phase 2 (write) → Phase 3 (review) → Complete
+```bash
+/academic-writer
+→ Phase -2: Select section
+→ RAG Health Check: User chooses "Provide PDFs directly"
+→ Paper Preprocessor: Extract section from PDFs
+→ Phase 0: Learn from preprocessed PDFs
+→ Phase 1: Style merge
+→ Phase 2-4: Normal workflow
 ```
 
-Write with existing style-guide.md without updating it. Faster for routine sections.
+### Revision Mode
 
-### 6.5 Input Format Guide
+Continue revising existing draft:
 
-Per-section materials provided by user:
-
-```yaml
-# Introduction
-introduction_materials:
-  background_sources: "[key papers, review articles]"
-  research_gap_context: "[what is missing or unexplored]"
-  preliminary_findings: "[optional: early data motivating this work]"
-
-# Methods
-methods_materials:
-  study_type: "[computational, experimental, mixed]"
-  data_sources: "[origin, sample count, inclusion/exclusion]"
-  analysis_pipeline: "[numbered steps, tool names, versions]"
-  custom_scripts: "[any user-written code or modifications]"
-  parameters: "[thresholds, settings, configurations]"
-
-# Results
-results_materials:
-  data_files: "[CSV, matrices, statistical outputs]"
-  figures: "[PNG/PDF with legends]"
-  tables: "[tabular results]"
-  analysis_summary: "[.md file with context]"
-
-# Discussion
-discussion_materials:
-  key_findings: "[from Results, highlighted for discussion]"
-  literature_for_comparison: "[papers for positioning]"
-  limitations_draft: "[preliminary limitations identified]"
-  implications: "[applications, broader significance]"
+```bash
+/academic-writer revision
+→ Load existing draft from workspace
+→ Skip phases 0-2
+→ Proceed to Phase 3 review
+→ If revisions needed: return to Phase 2 writer
+→ Phase 4: Learn from revisions
 ```
-
-### 6.6 Journal Target Setting
-
-Specify journal to trigger:
-- Word limit recognition and overage warnings
-- Figure/table limits
-- Journal-specific style rules
-- Reviewer checks against journal requirements
-
-**Supported journals**: Nature Methods, Bioinformatics, Genome Biology, Nucleic Acids Research, Cell Systems, Cell Reports Methods, PLOS Computational Biology
 
 ---
 
 ## 7. Fallback System
 
-Three-layer fallback when RAG unavailable or user prefers direct input:
+### When RAG Is Unavailable
 
-```
-Primary              Fallback 1                Fallback 2
-────────             ──────────                ──────────
-RAG Search    ──X──→ Paper Preprocessor ──X──→ User Input
-              (Phase -1, -2)          (text/summary)
-```
+If `list_collections()` fails, user sees 3 options:
 
-**Fallback Triggers**:
+1. **Check RAG Setup**: Verify Docker container running
+2. **Proceed without RAG**: Use existing style-guide.md (no new pattern learning from references)
+3. **Provide PDFs Directly**: Upload reference PDFs for Paper Preprocessor
 
-| Condition | Action |
-|-----------|--------|
-| RAG server connection fails | → Present 3 options in Health Check |
-| Collections empty or < 3 results | → Offer to use PDFs instead |
-| User explicitly provides PDFs | → Activate Paper Preprocessor |
-| Preprocessor fails to extract section | → Request manual summary |
-| No materials provided | → Request written context |
+### PDF Dual-Layer Selection
 
-**User-Facing Notification**:
+Mirrors RAG collection structure:
 
-```
-⚠️ RAG search returned insufficient results.
-   Switching to Paper Preprocessor for direct PDF analysis.
-   (Or provide PDF files for me to process.)
-```
+**Structure Layer PDFs**: Papers whose section structure, subsection organization, or figure integration you want to emulate.
+
+**Target Voice Layer PDFs**: Papers whose writing tone, sentence patterns, or statistical reporting style you want to emulate.
+
+Rules:
+- At least one layer should be provided
+- The same PDF can be used for both layers
+- Multiple PDFs can be provided per layer
+- Only provided layers are processed; unprovided layers retain existing style-guide.md
+
+### Paper Preprocessor Extraction
+
+Paper Preprocessor detects IMRAD sections using structural heuristics:
+
+- **Introduction**: Precedes Methods; contains "Background," "Motivation," "Introduction"
+- **Methods**: Between Introduction and Results; contains "Methods," "Materials & Methods," "Approach"
+- **Results**: Between Methods and Discussion; contains "Results," "Findings"; starts with data presentation
+- **Discussion**: Follows Results; contains "Discussion," "Interpretation," "Implications"
+
+Output: Extracted section text + metadata (page range, confidence, subsection markers).
 
 ---
 
@@ -726,284 +679,166 @@ RAG Search    ──X──→ Paper Preprocessor ──X──→ User Input
 
 ```
 academic-writer/
-│
-├── SKILL.md                             # Orchestrator (pipeline definition)
-├── README.md                            # This file
-│
+├── README.md                              # This file
+├── SKILL.md                               # Orchestrator logic and configuration
 ├── agents/
-│   ├── section-analyzer.md              # [RENAMED] Structure Layer extraction
-│   ├── style-extractor.md               # Target Voice extraction
-│   ├── section-writer.md                # [RENAMED] Tiered interview + prose
-│   ├── section-reviewer.md              # [RENAMED] 7-pass section-weighted review
-│   ├── pattern-learner.md               # [RENAMED] Section-tagged learning
-│   └── paper-preprocessor.md            # [EXPANDED] All 4 section detection
-│
+│   ├── section-analyzer.md                # Extract structure patterns
+│   ├── style-extractor.md                 # Extract voice/tone patterns
+│   ├── section-writer.md                  # Tiered interview + prose generation
+│   ├── section-reviewer.md                # 7-pass section-weighted review
+│   ├── pattern-learner.md                 # Learn from approved sections
+│   └── paper-preprocessor.md              # PDF fallback processor
 ├── data/
-│   ├── style-guide.md                   # [EXPANDED v4.0] Dual-layer, all sections
-│   │                                   #   ├── Structure Layer (all 4 sections)
-│   │                                   #   ├── Target Voice Layer (all 4 sections)
-│   │                                   #   ├── Priority Rules
-│   │                                   #   ├── Statistical Reporting
-│   │                                   #   ├── Transitions & Voice
-│   │                                   #   ├── Reporting Guidelines
-│   │                                   #   ├── Journal Conventions
-│   │                                   #   ├── Hourglass Model (Intro-Discussion)
-│   │                                   #   └── Learned Patterns (section-tagged)
-│   │
-│   ├── feedback-log.md                  # [ENHANCED] section_type, section-weighted feedback
-│   ├── samples/
-│   │   ├── introduction-samples.md
-│   │   ├── methods-samples.md
-│   │   ├── results-samples.md
-│   │   └── discussion-samples.md
-│   │
-│   ├── approved-sections/
-│   │   ├── approved-introductions/
-│   │   ├── approved-methods/
-│   │   ├── approved-results/
-│   │   └── approved-discussions/
-│   │
-│   └── pattern-history/
-│       ├── style-guide-v1.md
-│       ├── style-guide-v2.md
-│       ├── style-guide-v3.md
-│       └── changelog.md
-│
-└── references/
-    ├── introduction-patterns.md         # [NEW] Intro section structures
-    ├── methods-patterns.md              # [NEW] Methods section structures
-    ├── results-patterns.md              # [CARRIED OVER] Results patterns
-    └── discussion-patterns.md           # [NEW] Discussion section structures
+│   ├── style-guide.md                     # Merged structure + voice patterns
+│   ├── pattern-history.md                 # Changelog of learned patterns (section-tagged)
+│   ├── section-configs.yaml               # Writing rules + review weights per section
+│   └── paper_context.yaml                 # Cross-section consistency anchors
+├── references/
+│   ├── introduction-patterns.md            # Intro-specific reference patterns
+│   ├── methods-patterns.md                 # Methods-specific reference patterns
+│   ├── results-patterns.md                 # Results-specific reference patterns
+│   └── discussion-patterns.md              # Discussion-specific reference patterns
+└── tests/
+    ├── test-workflow.md                    # Test: complete workflow
+    ├── test-pdf-fallback.md                # Test: PDF fallback when RAG unavailable
+    ├── test-revision-loop.md               # Test: revision loop (max 3 iterations)
+    └── test-cross-coherence.md             # Test: cross-section coherence check
 ```
 
 ---
 
 ## 9. Supported Journals and Guidelines
 
-### Supported Journals
+The system adapts to various journal guidelines through the `section_configs` block:
 
-| Journal | Word Limit | Figure Limit | Notes |
-|---------|-----------|-------------|-------|
-| Nature Methods | ~2,000-3,000 | 6-8 main | Concise, figure-centric narrative |
-| Bioinformatics | ~2,000-4,000 | varies | Technical precision, benchmarking |
-| Genome Biology | Unlimited | Unlimited | Comprehensive biological context |
-| Nucleic Acids Research | Category-dependent | varies | Methods-heavy, detailed protocols |
-| Cell Systems | ~3,000-5,000 | 4-7 main | Systems biology framing |
-| Cell Reports Methods | ~3,000-4,000 | 3-7 main | Method validation focus |
-| PLOS Computational Biology | Unlimited | Unlimited | Educational detail, code publication |
+**Target Disciplines**:
+- Bioinformatics
+- Genomics
+- Computational Biology
+- Related computational/data science fields
 
-### Reporting Guidelines
+**Journal Compatibility**:
+- Journals with IMRAD structure (Introduction, Methods, Results, Discussion)
+- Both open-access and subscription journals
+- Guidelines loaded from `data/section-configs.yaml`
 
-| Guideline | Target | Key Items |
-|-----------|--------|-----------|
-| **STROBE** | Observational studies | Participant count, descriptive stats, key results, subgroup analyses |
-| **CONSORT** | Randomized controlled trials | Participant flow, baseline data, ITT, effect sizes, adverse events |
-| **PRISMA** | Systematic reviews | Selection process, study characteristics, bias risk, synthesis results |
-| **ARRIVE** | Animal studies | Baseline data, sample size, effect sizes, adverse events |
-| **MIAME/MINSEQE** | -omics data | Experimental design, normalization, QC, differential analysis |
-
-### Field-Specific Conventions
-
-The system supports field-specific queries and terminology patterns for:
-- Single-Cell Genomics (clustering, dimension reduction, annotations)
-- Machine Learning/AI Methods (benchmarking, baselines, evaluation metrics)
-- Pathway Analysis (network interpretation, enrichment statistics)
-- Spatial Transcriptomics (tissue location, spatial coordinates, annotation)
-- Metagenomics/Microbiome (taxonomy, abundance, diversity)
-- Structural Biology/Protein Analysis (structure validation, active sites)
+**Customization**:
+1. Add journal-specific `section_configs` block to SKILL.md
+2. Create journal-specific style-guide.md variant
+3. Update reference patterns (introduction-patterns.md, etc.) with journal examples
 
 ---
 
 ## 10. Continuous Learning
 
-The system improves with use:
+### How Patterns Are Learned
 
+1. **Approval Trigger**: When user approves a section (Phase 4), Pattern Learner activates
+2. **Source Extraction**: Pull patterns from approved section (sentence structures, terminology, hedging frequency)
+3. **Section Tagging**: Tag all patterns with SECTION_TYPE for section-specific learning
+4. **RAG Effectiveness Scoring**: Score how useful the Structure Layer and Target Voice Layer were
+5. **Style Guide Update**: Merge learned patterns back into style-guide.md (section-tagged)
+6. **Pattern History**: Record all changes in pattern-history.md with approval timestamp
+
+### Learning Across Sections
+
+When user writes multiple sections (e.g., Results, then Discussion):
+
+1. Results approval → Learn Results-specific patterns → Update style-guide.md
+2. Discussion writing → Load paper_context from Results → Enforce coherence → Ask about cross-references
+3. Discussion approval → Learn Discussion-specific patterns → Update style-guide.md
+4. Next project → User can choose to start from previous style-guide.md or reset to defaults
+
+### Style Guide Structure
+
+```yaml
+style-guide.md:
+  structure_layer:
+    introduction:
+      subsection_hierarchy: "[patterns learned from introduction-specific RAG searches]"
+      figure_integration: "..."
+      flow_patterns: "..."
+    methods:
+      pipeline_granularity: "[patterns learned from methods-specific RAG searches]"
+      subsection_organization: "..."
+    results:
+      finding_order: "[patterns learned from results-specific RAG searches]"
+      figure_alignment: "..."
+    discussion:
+      interpretation_hedging: "[patterns learned from discussion-specific RAG searches]"
+      limitation_framing: "..."
+
+  target_voice_layer:
+    introduction:
+      sentence_patterns: "[patterns learned from introduction voice collection]"
+      hedging_frequency: "..."
+    methods:
+      procedural_language: "[patterns learned from methods voice collection]"
+      passive_ratio: "..."
+    results:
+      finding_verbs: "[patterns learned from results voice collection]"
+      statistical_abbreviations: "..."
+    discussion:
+      interpretation_patterns: "[patterns learned from discussion voice collection]"
+      limitation_tone: "..."
+
+  version: "1.0"
+  last_updated: "YYYY-MM-DD"
+  learned_from_sections: "[list of approved sections that contributed to this guide]"
 ```
-Approve section
-    ├─ Extract section-specific patterns
-    ├─ Track effectiveness metrics (review pass rate, revision count)
-    ├─ Save paper_context for downstream sections
-    ├─ Update style-guide.md (both layers, section-tagged)
-    ├─ Version and log in changelog.md
-    └─ Repeat for next section
-```
-
-### Learning Triggers
-
-| Trigger | Action |
-|---------|--------|
-| Section approved after review | Extract patterns + update style guide |
-| 3+ edits on same style element | Flag as learning opportunity |
-| 10 sections written | Periodic style guide review + version bump |
-| Voice accuracy below threshold | Trigger Style Extractor re-run |
-| New journal/field selected | Load field-specific RAG queries |
-
-### Tracked Metrics (Per Section)
-
-- **Review Pass Rate**: First-submission approval % (per section)
-- **Revision Patterns**: Type + frequency of edits (per section)
-- **RAG Match Score**: Relevance of few-shot examples to generated prose
-- **Voice Accuracy**: Degree of match between learned voice and user edits
-- **Reporting Compliance**: Adherence to journal/guideline requirements
-- **Cross-Section Coherence**: Method-Result alignment, Intro-Discussion symmetry
 
 ---
 
-## 11. Changelog: v3.0 → v4.0
-
-### Major Features
-
-| Feature | v3.0 | v4.0 | Impact |
-|---------|------|------|--------|
-| **Section Coverage** | Results only | All IMRAD | Replaces 4 separate tools with one |
-| **Section Selection** | N/A | Phase -2 | User-driven section routing |
-| **Interview Model** | Flat Q1-Q5 | Tiered A-D | 86% higher completion rate |
-| **Paper Context** | None | Cross-section | Reuse context for coherence |
-| **RAG Health Check** | None | Automatic | 3 user options on failure |
-| **PDF Fallback** | Single-layer | Dual-layer | Both structure and voice |
-| **Review Style** | Uniform 7-pass | Section-weighted | Better focus per section |
-| **Pedagogical Review** | Revision suggestions | + WHY + teaching_note | Explains writing principles |
-| **Over-interpretation Check** | N/A | Discussion only | Prevents over-claims |
-| **Hourglass Awareness** | None | Intro-Discussion check | Enforces narrative symmetry |
-| **Cross-Section Coherence** | None | Active Phase A check | Consistency anchors extracted |
-| **Keywords Support** | None | Tier 1 + Tier 2 | User emphasis control |
-
-### Agent Changes
-
-| Agent | v3.0 Name | v4.0 Name | Change Level |
-|-------|-----------|-----------|--------------|
-| Section pattern analyzer | Results Analyzer | Section Analyzer | Renamed, parameterized by SECTION_TYPE |
-| Voice extractor | Style Extractor | Style Extractor | Section-aware queries added |
-| Writer | Results Writer | Section Writer | Major — Tiered interview, all sections |
-| Reviewer | Results Reviewer | Section Reviewer | Section-weighted passes, pedagogical explanations |
-| Learner | Pattern Learner | Pattern Learner | Section tagging added |
-| Preprocessor | Paper Preprocessor | Paper Preprocessor | All 4 section detection added |
-
-### New Files
-
-- `references/introduction-patterns.md`
-- `references/methods-patterns.md`
-- `references/discussion-patterns.md`
-- Expanded `data/style-guide.md` (v4.0)
-
-### Backward Compatibility
-
-**Results section writing in v4.0 is backward compatible with v3.0**:
-- Same interview questions (Q1-Q5)
-- Same prose protocol
-- Same 7-pass review at weight 1.0
-- Same RAG queries
-- Same Priority Rules
-
-**Invoking `/academic-writer` with section=Results produces v3.0-equivalent behavior**, allowing drop-in replacement.
-
----
-
-## 12. Quick Reference
+## 11. Quick Reference
 
 ### Invocation
 
+```bash
+/academic-writer                    # Start fresh workflow
+/academic-writer revision           # Revise existing draft
 ```
-/academic-writer
-```
 
-### Phases at a Glance
+### Keyboard Shortcuts (in conversation)
 
-| Phase | Duration | User Input | Output |
-|-------|----------|-----------|--------|
-| **-2** Section Selection | 1 min | Pick section | SECTION_TYPE set |
-| **-1** Collection Select | 2-3 min | Choose RAG collections | Collection IDs |
-| **0a+0b** Learning | 5-10 min | None (automated) | Updated style-guide.md |
-| **1** Style Merge | < 1 min | None (automated) | Merged guide |
-| **2** Writing | 45-90 min | Interview + outline approval + prose | Draft section |
-| **3** Review | 15-30 min | Iterate revisions | Approved section |
-| **4** Learning | 5-10 min | None (automated) | Pattern updates |
-| **Total** | 1.5-3 hours per section | — | One publication-ready IMRAD section |
+- Type section name directly: "Write Results" instead of "Option 3"
+- Skip interview questions: Hit Enter to accept smart default
+- Defer follow-ups: "I have enough to start"
+- Request specific revision: "Fix the statistical reporting"
 
-### Section-Specific Quick Tips
+### Common Answers by Section
 
-**Introduction**:
-- Q1 focuses on motivation (why does this matter?)
-- Q2 focuses on gap (what's missing?)
-- Q3 is your thesis (one sentence contribution)
-- Heavy citations expected
+**Introduction Q1** (research question): "We want to understand whether X can improve Y" / "There's a gap in how X is measured"
 
-**Methods**:
-- Q1 determines template (computational vs. experimental)
-- Q2 requires specific sample counts and inclusion criteria
-- Q3 is your pipeline (encourage numbered steps)
-- Maximum reproducibility detail expected
+**Methods Q1** (study type): "computational" / "experimental" / "mixed"
 
-**Results**:
-- Q1 is your narrative frame (ABT: And-But-Therefore)
-- Q2 prioritizes findings (top 3-5 only)
-- Q3 links figures to takeaways (no orphan figures)
-- No interpretation allowed (save for Discussion)
+**Results Q2** (top findings): "1) X is significantly higher in treatment group; 2) Y correlates with Z; 3) Method outperforms baseline"
 
-**Discussion**:
-- Q1 is your thesis statement (recap Results)
-- Q2 frames against literature (positioning)
-- Q3 acknowledges limitations (required)
-- Q5 guards scope (what NOT to discuss)
-- Hedging language expected
+**Discussion Q3** (limitations): "Small sample size" / "Limited generalizability beyond our dataset" / "Computational cost may limit adoption"
 
-### Key Files
+### Review Pass Weights Recap
 
-| File | Purpose |
-|------|---------|
-| `SKILL.md` | Complete orchestrator pipeline |
-| `data/style-guide.md` | Dual-layer reference (both sections) |
-| `references/{section}-patterns.md` | Section-specific patterns from RAG |
-| `agents/section-*.md` | 6 parameterized agents |
+| Section | Emphasis | De-emphasis |
+|---------|----------|-------------|
+| **Introduction** | Structural clarity (1.2×) | Statistical detail (0.3×) |
+| **Methods** | Reproducibility (1.5×) | Interpretation (N/A) |
+| **Results** | Factual accuracy (1.5×), statistical rigor (1.3×) | Interpretation (N/A) |
+| **Discussion** | Completeness (1.2×) | Statistical detail (0.5×) |
 
-### Agents
+### RAG Query Cheat Sheet
 
-| Agent | Input | Output | Key Function |
-|-------|-------|--------|--------------|
-| **section-analyzer** | RAG results + SECTION_TYPE | Structure Layer | Extract patterns |
-| **style-extractor** | RAG results + SECTION_TYPE | Target Voice Layer | Extract voice |
-| **section-writer** | Materials + interview + outline | Draft prose | Tiered interview + generation |
-| **section-reviewer** | Draft + source data + SECTION_TYPE | Review report + diffs | Section-weighted 7-pass |
-| **pattern-learner** | Approved section + SECTION_TYPE | Updated style-guide | Continuous learning |
-| **paper-preprocessor** | PDFs + SECTION_TYPE | Extracted section text | Fallback extraction |
+If user wants to customize RAG searches, these are the default query strategies:
 
-### Supported Sections
+- **Introduction Structure**: "motivation field significance existing approaches limitations"
+- **Results Structure**: "Results section findings statistical analysis Figure Table"
+- **Discussion Voice**: "suggest indicate interpretation limitations future directions"
 
-- **Introduction**: Gap + motivation + contribution
-- **Methods**: Pipeline + reproducibility + tools
-- **Results**: Findings + figures + statistics (no interpretation)
-- **Discussion**: Interpretation + limitations + implications
+### Learning Cycle
+
+1. Write section → Interview → Outline → Draft
+2. Reviewer → Approved?
+3. If yes: Pattern Learner updates style-guide.md, save paper_context for next section
+4. If no: Writer revises (max 3 iterations), then Pattern Learner learns from final approved version
 
 ---
 
-## Getting Started
-
-1. **First section of a new paper?**
-   - Invoke `/academic-writer`
-   - Select section
-   - Choose RAG collections (or provide PDFs)
-   - Answer tiered interview questions one at a time
-   - Approve outline step-by-step
-   - Review and iterate
-
-2. **Subsequent sections of same paper?**
-   - System loads `paper_context` from prior sections
-   - Interview skips already-answered questions
-   - Cross-section coherence checks activate automatically
-
-3. **Multiple papers with same style?**
-   - Use Quick Mode: Skip Phase 0, jump to writing
-   - System reuses learned style-guide.md
-
-4. **New style or journal?**
-   - Use Style Learning Only mode
-   - Add new reference papers to RAG
-   - System updates both layers of style-guide.md
-
----
-
-**For detailed agent specifications, see**: `agents/section-*.md`
-
-**For complete pipeline logic, see**: `SKILL.md`
-
-**For style guide format, see**: `data/style-guide.md`
+**For detailed orchestrator logic, see SKILL.md. For agent-specific implementations, see agents/*.md.**
