@@ -25,7 +25,7 @@ Required from user:
 research_materials:
   data_files:
     - file: "[path to CSV]"
-      description: "[데이터 내용]"
+      description: "[data content]"
 
   figures:
     - file: "[path]"
@@ -45,7 +45,7 @@ research_materials:
 
   results_context:           # ← Supplementary context
     - file: "[path to .md]"
-      description: "[Results 관련 분석 맥락, 핵심 발견 등]"
+      description: "[Analysis context related to Results, key findings, etc.]"
 
   experimental_context:
     study_type: "[description]"
@@ -64,28 +64,28 @@ Before outlining, conduct a structured interview to understand the user's writin
 ```yaml
 writing_intent_interview:
   q1:
-    question: "이번 Results에서 어떤 내용을 중심으로 작성하고 싶으세요?"
+    question: "What should be the central focus of this Results section?"
     purpose: "Identify the central narrative and focus of this Results section"
     follow_up: "Helps determine subsection weighting and emphasis"
 
   q2:
-    question: "특별히 강조하고 싶은 발견이나 비교가 있나요?"
+    question: "Are there any findings or comparisons you want to particularly emphasize?"
     purpose: "Identify key findings that deserve prominent placement"
     follow_up: "Affects figure/table ordering and statistical detail level"
 
   q3:
-    question: "서브섹션 순서에 대한 선호가 있나요?"
+    question: "Do you have a preferred subsection order?"
     purpose: "Respect user's preferred logical flow"
     follow_up: "If no preference, propose order based on style guide patterns"
 
   q4:
-    question: "이전에 작성한 Results 부분이 있나요?"
+    question: "Do you have a previously written Results section?"
     purpose: "Determine if this is a continuation or standalone section"
-    follow_up_if_yes: "어떤 내용이었나요? → Plan transition from previous section"
-    follow_up_if_no: "이번이 Results의 첫 부분인가요? → Plan opening strategy"
+    follow_up_if_yes: "What did it cover? → Plan transition from previous section"
+    follow_up_if_no: "Is this the first part of Results? → Plan opening strategy"
 
   q5:
-    question: "특별히 참고하고 싶은 논문이나 스타일이 있나요?"
+    question: "Are there any papers or styles you would particularly like to reference?"
     purpose: "Additional style references beyond the style guide"
     follow_up: "Can trigger additional RAG queries for specific papers"
 

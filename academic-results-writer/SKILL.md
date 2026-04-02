@@ -150,12 +150,12 @@ Orchestrator calls list_collections()
 ┌─────────────────────────────────────────────┐
 │  Display available collections to user      │
 │                                             │
-│  Q1: "Structure Layer (구조/패턴 학습)에     │
-│       사용할 컬렉션은?"                      │
+│  Q1: "Which collection for the Structure     │
+│       Layer (structure/pattern learning)?"  │
 │       → Show list (default: agentpaper)     │
 │                                             │
-│  Q2: "Target Voice Layer (문체/톤 학습)에    │
-│       사용할 컬렉션은?"                      │
+│  Q2: "Which collection for the Target Voice │
+│       Layer (style/tone learning)?"         │
 │       → Show list (default: mypaper)        │
 │                                             │
 │  ※ Same collection allowed for both layers  │
@@ -332,11 +332,11 @@ User provides:
 **Step 0 — Input Collection**: Gather user's data files, figures, tables, and context.
 
 **Step 1 — Writing Intent Interview** (Required, Q1-Q5):
-- Q1: "이번 Results에서 어떤 내용을 중심으로 작성하고 싶으세요?"
-- Q2: "특별히 강조하고 싶은 발견이나 비교가 있나요?"
-- Q3: "서브섹션 순서에 대한 선호가 있나요?"
-- Q4: "이전에 작성한 Results 부분이 있나요?" (있으면 전환 연결 계획)
-- Q5: "특별히 참고하고 싶은 논문이나 스타일이 있나요?"
+- Q1: "What should be the central focus of this Results section?"
+- Q2: "Are there any findings or comparisons you want to particularly emphasize?"
+- Q3: "Do you have a preferred subsection order?"
+- Q4: "Do you have a previously written Results section?" (if yes, plan the transition)
+- Q5: "Are there any papers or styles you would particularly like to reference?"
 
 **Step 2 — Interactive Outline** (Each step requires user approval):
 - 2a: Overall structure → USER APPROVAL REQUIRED
@@ -450,7 +450,7 @@ Fallback 2: User Input (paste text, provide page ranges)
 - User explicitly provides PDF files instead of using RAG
 
 When fallback activates:
-1. Inform user: "RAG 검색이 충분한 결과를 반환하지 못했습니다. PDF 직접 처리로 전환합니다."
+1. Inform user: "RAG search did not return sufficient results. Switching to direct PDF processing."
 2. Activate Paper Preprocessor for PDF-based extraction
 3. Pass preprocessed content to Results Analyzer (same downstream pipeline)
 4. If PDF also unavailable, ask user for direct text input
