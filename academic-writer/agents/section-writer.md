@@ -517,7 +517,7 @@ intent_confirmation:
 
 Build the pre-draft plan incrementally. Introduction and Discussion use the standard interactive outline. Methods and Results use a stronger Blueprint gate: a hierarchical skeleton plus verification matrix must be explicitly approved before prose generation.
 
-For Methods and Results, Lite Mode is available only when the user explicitly says "outline only", "skip blueprint", or "lite mode". In Lite Mode, preserve the older outline-only flow and record `blueprint_alignment: skipped_by_user` for the reviewer. Strong HITL Blueprint gating is the default.
+For Methods and Results, Lite Mode is available only when the user explicitly says "outline only", "skip blueprint", or "lite mode". Strong HITL Blueprint gating is the default. In Lite Mode, build a reduced outline-only plan and still emit `approved_blueprint.approval_status: skipped_by_user` so the reviewer can skip Blueprint Alignment intentionally.
 
 ### Introduction Outline
 
@@ -766,6 +766,19 @@ discussion_outline:
 ```
 
 For Methods and Results, also output the `approved_blueprint` object after Step 2d approval. This object is passed to the Section Reviewer as `approved_blueprint` and constrains Step 3 prose generation.
+
+When Lite Mode is explicitly requested, output a reduced `approved_blueprint` instead of omitting the object:
+
+```yaml
+approved_blueprint:
+  section_type: "methods|results"
+  approval_status: "skipped_by_user"
+  approved_at_stage: "Step 2d"
+  skeleton: "[user-approved lite outline]"
+  matrix: "N/A - Lite Mode"
+  gap_risk_decisions: "N/A - Lite Mode"
+  revision_history: "[user explicitly requested Lite Mode]"
+```
 
 ---
 

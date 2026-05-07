@@ -541,15 +541,15 @@ Gather section-specific research materials (see Section Writer above).
 
 **Input**: Draft section + source research materials
 
-1. Execute section-weighted review passes
-2. Pass 1: Factual Accuracy — verify all claims backed by source materials
-3. Pass 2: Statistical Review — verify statistical reporting, confidence intervals, p-values
-4. Pass 3: Structural Review — verify subsections follow expected architecture
-5. Pass 4: Style & Clarity — verify readability, sentence structure, word choice
-6. Pass 5: Completeness — verify nothing essential omitted
-7. Pass 6: Reporting Compliance — verify format matches target journal guidelines
-8. Pass 7: Reproducibility (Methods/Results) or Interpretation Rigor (Discussion)
-9. Pass 8: Blueprint Alignment — verify Methods/Results prose follows the approved Blueprint
+- Execute section-weighted review passes
+- Pass 1: Factual Accuracy — verify all claims backed by source materials
+- Pass 2: Statistical Review — verify statistical reporting, confidence intervals, p-values
+- Pass 3: Structural Review — verify subsections follow expected architecture
+- Pass 4: Style & Clarity — verify readability, sentence structure, word choice
+- Pass 5: Completeness — verify nothing essential omitted
+- Pass 6: Reporting Compliance — verify format matches target journal guidelines
+- Pass 7: Reproducibility (Methods/Results) or Interpretation Rigor (Discussion)
+- Pass 8: Blueprint Alignment — verify Methods/Results prose follows the approved Blueprint
 
 **For Discussion only**:
 - Over-interpretation Check — verify interpretations traceable to Results, hedging appropriate, alternative explanations considered
