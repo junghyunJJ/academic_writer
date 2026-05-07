@@ -513,9 +513,11 @@ intent_confirmation:
 
 ---
 
-## Step 2: Interactive Outline (User Approval Required at Each Step)
+## Step 2: Interactive Outline / Blueprint
 
-Build the outline incrementally with user approval at each stage. Structure varies by section type.
+Build the pre-draft plan incrementally. Introduction and Discussion use the standard interactive outline. Methods and Results use a stronger Blueprint gate: a hierarchical skeleton plus verification matrix must be explicitly approved before prose generation.
+
+For Methods and Results, Lite Mode is available only when the user explicitly says "outline only", "skip blueprint", or "lite mode". In Lite Mode, preserve the older outline-only flow and record `blueprint_alignment: skipped_by_user` for the reviewer. Strong HITL Blueprint gating is the default.
 
 ### Introduction Outline
 
@@ -554,78 +556,148 @@ introduction_outline:
     requirement: "USER APPROVAL REQUIRED before proceeding"
 ```
 
-### Methods Outline
+### Methods Blueprint (Strong HITL Gate)
+
+Methods uses a stronger pre-draft Blueprint gate instead of the standard outline-only flow. The writer must not proceed to Step 3 prose until the user explicitly approves the complete Methods Blueprint.
 
 ```yaml
-methods_outline:
-  step_2a:
-    action: "Propose overall procedural structure"
+methods_blueprint:
+  step_2a_section_skeleton:
+    action: "Propose the Methods section skeleton"
     content:
-      - "Subsection order matching analysis pipeline"
-      - "Subsection titles (e.g., Data Collection, Preprocessing, Analysis, Evaluation)"
-      - "Overall organizational principle (chronological / modular / hierarchical)"
-    requirement: "USER APPROVAL REQUIRED before proceeding"
+      - "Target length or journal word budget, if known"
+      - "Organization principle: chronological, pipeline, modular, or hierarchical"
+      - "Subsection order and titles"
+      - "Major procedure/method step under each subsection"
+    output_format: |
+      ## Methods Blueprint
 
-  step_2b:
-    action: "Detail per-subsection tools, parameters, and key details"
-    content:
-      - "Each subsection: tools used, versions, key parameters"
-      - "Decision points and rationale"
-      - "Reproducibility-critical details flagged"
-    requirement: "USER APPROVAL REQUIRED before proceeding"
+      **Target length**: [word budget if known]
+      **Organization principle**: [chronological / pipeline / modular / hierarchical]
 
-  step_2c:
-    action: "Plan figure/algorithm/pseudocode placement"
-    content:
-      - "Pipeline/architecture figure placement"
-      - "Algorithm pseudocode boxes (if applicable)"
-      - "Supplementary methods vs. main text division"
-    requirement: "USER APPROVAL REQUIRED before proceeding"
+      1. [Subsection title]
+         1. [procedure or method step]
+         2. [data/tool/parameter note]
+      2. [Subsection title]
+         1. [procedure or method step]
+         2. [data/tool/parameter note]
+    requirement: "Collaborate with user and revise as needed; final hard gate occurs at Step 2d"
 
-  step_2d:
-    action: "Plan cross-reference to Results"
+  step_2b_blueprint_matrix:
+    action: "Generate the Methods Blueprint matrix"
     content:
-      - "Which method feeds which result (method-result alignment map)"
-      - "Forward references to Results subsections"
-      - "Transition strategy to Results section"
-    requirement: "USER APPROVAL REQUIRED before proceeding"
+      - "One row per method block or procedure step"
+      - "Inputs, tools, versions, parameters, outputs, and reproducibility risks"
+      - "Explicit marker for missing values that must be resolved before prose"
+    output_format: |
+      | Block | Subsection | Procedure/Step | Data/Input | Tool/Version | Parameters | Output | Reproducibility Risk |
+      |-------|------------|----------------|------------|--------------|------------|--------|----------------------|
+      | M1 | Cohort construction | Select eligible patient records | EHR medication and laboratory tables | SQL query + Python 3.11 | inclusion window, exclusion criteria | analysis-ready cohort table | needs_user_input: unresolved exclusion criteria |
+    requirement: "Collaborate with user and revise as needed; final hard gate occurs at Step 2d"
+
+  step_2c_gap_and_risk_check:
+    action: "Check the Methods Blueprint for missing reproducibility details"
+    checks:
+      - "Every procedure step has an input and output"
+      - "Every software/tool has a version or is flagged for user resolution"
+      - "Every key parameter has a value or is flagged for user resolution"
+      - "Intermediate data transformations are represented"
+      - "Custom scripts, special thresholds, or non-default settings are visible"
+    risk_status_values:
+      - "resolved"
+      - "accepted_by_user"
+      - "needs_user_input"
+    output: "List unresolved gaps and propose specific fixes"
+    requirement: "All major reproducibility gaps must be resolved or explicitly accepted by the user before Step 2d approval"
+
+  step_2d_strong_hitl_gate:
+    action: "Request explicit approval of the complete Methods Blueprint"
+    approval_rule: "Do not proceed to Step 3 prose until the user clearly approves the complete Blueprint"
+    revision_rule: "If the user requests changes, revise the Blueprint and repeat Step 2d"
+    approved_blueprint_output:
+      section_type: "methods"
+      approval_status: "approved|skipped_by_user"
+      approved_at_stage: "Step 2d"
+      skeleton: "[approved hierarchical Methods skeleton]"
+      matrix: "[approved Methods Blueprint matrix]"
+      gap_risk_decisions: "[resolved or user-accepted gaps]"
+      revision_history: "[summary of user-requested changes before approval]"
+    contract_rule: |
+      After approval, prose generation must not introduce new subsections, method steps,
+      tools, parameters, data sources, outputs, or figure/algorithm placements unless the
+      user first approves a Blueprint revision.
 ```
 
-### Results Outline
+### Results Blueprint (Strong HITL Gate)
+
+Results uses a stronger pre-draft Blueprint gate instead of the standard outline-only flow. The writer must not proceed to Step 3 prose until the user explicitly approves the complete Results Blueprint.
 
 ```yaml
-results_outline:
-  step_2a:
-    action: "Propose overall Results structure"
+results_blueprint:
+  step_2a_section_skeleton:
+    action: "Propose the Results section skeleton"
     content:
-      - "Number of subsections"
-      - "Subsection titles"
-      - "Overall narrative arc"
-    requirement: "USER APPROVAL REQUIRED before proceeding"
+      - "Target length or journal word budget, if known"
+      - "Central narrative arc"
+      - "Subsection order and titles"
+      - "Planned claim or finding under each subsection"
+    output_format: |
+      ## Results Blueprint
 
-  step_2b:
-    action: "Detail each subsection's key points"
-    content:
-      - "Bullet-point key findings per subsection"
-      - "Statistics to include"
-      - "Supporting observations"
-    requirement: "USER APPROVAL REQUIRED before proceeding"
+      **Target length**: [word budget if known]
+      **Narrative arc**: [central Results story]
 
-  step_2c:
-    action: "Plan Figure/Table placement"
-    content:
-      - "Which figures go in which subsection"
-      - "Figure reference order"
-      - "Table placement strategy"
-    requirement: "USER APPROVAL REQUIRED before proceeding"
+      1. [Subsection title]
+         1. [planned claim/finding]
+         2. [supporting evidence]
+      2. [Subsection title]
+         1. [planned claim/finding]
+         2. [supporting evidence]
+    requirement: "Collaborate with user and revise as needed; final hard gate occurs at Step 2d"
 
-  step_2d:
-    action: "Plan transitions and connections"
+  step_2b_blueprint_matrix:
+    action: "Generate the Results Blueprint matrix"
     content:
-      - "Transition from previous Results section (if exists)"
-      - "Inter-subsection transition plan"
-      - "Opening and closing strategies"
-    requirement: "USER APPROVAL REQUIRED before proceeding"
+      - "One row per planned claim or finding"
+      - "Evidence source, figure/table mapping, statistics, and scope limits"
+      - "Explicit marker for missing values that must be resolved before prose"
+    output_format: |
+      | Block | Subsection | Claim/Finding | Evidence Source | Figure/Table | Statistics | Scope Limits |
+      |-------|------------|---------------|-----------------|--------------|------------|--------------|
+      | R1 | Signal detection performance | Proposed signal detects known interaction pairs | gold-standard DDI list + EHR/lab output | Figure 2A, Table 1 | PPV, NPV, sensitivity, specificity, patient count | report detection performance only; save causal interpretation for Discussion |
+    requirement: "Collaborate with user and revise as needed; final hard gate occurs at Step 2d"
+
+  step_2c_gap_and_risk_check:
+    action: "Check the Results Blueprint for unsupported or risky claims"
+    checks:
+      - "Every planned claim has an evidence source"
+      - "Every figure/table listed by the user is placed or explicitly excluded"
+      - "Statistics include sample size, test name, effect estimate, or p-value when applicable"
+      - "No row asks the Results prose to interpret beyond the data"
+      - "Null or negative findings are represented when the interview identified them"
+    risk_status_values:
+      - "resolved"
+      - "accepted_by_user"
+      - "needs_user_input"
+    output: "List unresolved gaps and propose specific fixes"
+    requirement: "All major evidence/statistics gaps must be resolved or explicitly accepted by the user before Step 2d approval"
+
+  step_2d_strong_hitl_gate:
+    action: "Request explicit approval of the complete Results Blueprint"
+    approval_rule: "Do not proceed to Step 3 prose until the user clearly approves the complete Blueprint"
+    revision_rule: "If the user requests changes, revise the Blueprint and repeat Step 2d"
+    approved_blueprint_output:
+      section_type: "results"
+      approval_status: "approved|skipped_by_user"
+      approved_at_stage: "Step 2d"
+      skeleton: "[approved hierarchical Results skeleton]"
+      matrix: "[approved Results Blueprint matrix]"
+      gap_risk_decisions: "[resolved or user-accepted gaps]"
+      revision_history: "[summary of user-requested changes before approval]"
+    contract_rule: |
+      After approval, prose generation must not introduce new subsections, claims,
+      findings, figure/table placements, statistical comparisons, or scope expansions
+      unless the user first approves a Blueprint revision.
 ```
 
 ### Discussion Outline
@@ -665,7 +737,7 @@ discussion_outline:
     requirement: "USER APPROVAL REQUIRED before proceeding"
 ```
 
-### Outline Output Format
+### Outline / Blueprint Output Format
 
 ```markdown
 ## [Section Type] — Outline
@@ -693,11 +765,15 @@ discussion_outline:
 - [ ] [Consistency point to verify during writing]
 ```
 
+For Methods and Results, also output the `approved_blueprint` object after Step 2d approval. This object is passed to the Section Reviewer as `approved_blueprint` and constrains Step 3 prose generation.
+
 ---
 
 ## Step 3: Prose with Real-Time RAG Few-Shot References
 
-Convert the approved outline into complete, flowing academic prose, enhanced by real-time RAG queries for stylistic reference.
+Convert the approved outline or Blueprint into complete, flowing academic prose, enhanced by real-time RAG queries for stylistic reference.
+
+For Methods and Results, Step 3 is constrained by the approved Blueprint from Step 2. The writer must treat the Blueprint as a contract. If prose generation reveals the need for a new method step, result claim, statistic, figure/table placement, tool, parameter, or subsection, pause prose generation and return to Step 2d for explicit Blueprint revision approval.
 
 ### 3a: RAG Few-Shot Retrieval (Per Subsection)
 
@@ -1038,13 +1114,14 @@ Match Target Voice Layer for preferred figure reference style.
 Generate section-type-appropriate outputs at each stage:
 
 - **Step 1 output**: Interview summary with user-confirmed intent (Phase D confirmation)
-- **Step 2 output**: Structured outline in Markdown (incrementally approved through Steps 2a-2d)
+- **Step 2 output**: Structured outline in Markdown for Introduction/Discussion; approved Blueprint for Methods/Results
 - **Step 3 output**: Complete section in Markdown
   - Proper heading hierarchy (`##` for main, `###` for subsections)
   - Word-compatible formatting
   - Inline figure/table references (where applicable)
   - Complete statistical reporting (where applicable)
   - Citation placeholders `[Author, Year]` for all referenced works
+  - `approved_blueprint` passed to Reviewer for Methods/Results unless Lite Mode was explicitly requested
   - Updated `paper_context` for downstream sections
 
 ---
@@ -1055,7 +1132,7 @@ Before submission to Reviewer, verify all applicable items:
 
 ### Universal Checklist
 - [ ] Tiered conversational interview completed (Phases A-D)
-- [ ] Outline approved by user (Steps 2a-2d)
+- [ ] Outline approved by user (Introduction/Discussion) or Blueprint approved by user (Methods/Results)
 - [ ] Logical flow maintained across subsections
 - [ ] Consistent terminology throughout
 - [ ] Voice matches Target Voice Layer profile
@@ -1073,6 +1150,7 @@ Before submission to Reviewer, verify all applicable items:
 - [ ] Paper roadmap included (if journal expects it)
 
 ### Methods Checklist
+- [ ] Approved Methods Blueprint exists, or Lite Mode was explicitly requested
 - [ ] Every software tool has version number
 - [ ] Every key parameter has its value stated
 - [ ] Pipeline steps are complete and ordered
@@ -1080,6 +1158,7 @@ Before submission to Reviewer, verify all applicable items:
 - [ ] Reproducibility detail is sufficient
 
 ### Results Checklist
+- [ ] Approved Results Blueprint exists, or Lite Mode was explicitly requested
 - [ ] Every figure/table referenced at least once
 - [ ] All key findings from user data included
 - [ ] Statistics properly formatted (matching Target Voice Layer)

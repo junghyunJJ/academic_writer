@@ -65,13 +65,13 @@ Multi-agent system for writing publication-quality IMRAD sections by learning fr
 │                    │               │    B: Core Interview (1×1)   │
 │                    │               │    C: Adaptive Follow-ups    │
 │                    │               │    D: Intent Confirmation    │
-│                    │               │  Step 2: Interactive Outline  │
+│                    │               │  Step 2: Outline / Blueprint Gate│
 │                    │               │  Step 3: Prose + RAG         │
 │                    └───────┬───────┘                              │
 │                            │                                      │
 │  Phase 3: Section Reviewer │                                      │
 │  ┌───────────────┐ ┌──────▼───────┐                               │
-│  │  Source Data   │→│   Section    │  7-pass review               │
+│  │  Source Data   │→│   Section    │  section-weighted review     │
 │  └───────────────┘ │   Reviewer   │  + pedagogical WHY           │
 │                    └───────┬───────┘  + section-weighted passes   │
 │                            │                                      │
@@ -570,18 +570,37 @@ paper_context:
 
 Each section interview checks paper_context first, skips already-answered questions, and adds new information for downstream sections.
 
-#### Step 2: Interactive Outline (each step requires USER APPROVAL)
+#### Step 2: Interactive Outline / Blueprint Gate
+
+Introduction and Discussion use the existing interactive outline process. Methods and Results use a stronger Blueprint gate before prose: a hierarchical skeleton plus verification matrix is drafted with the user, gap/risk issues are resolved or explicitly accepted, and prose generation is blocked until the user approves the complete Blueprint.
+
+Methods/Results Lite Mode is available only when the user explicitly says "outline only", "skip blueprint", or "lite mode". In that case, record `approved_blueprint.approval_status: skipped_by_user` and skip Blueprint Alignment review.
 
 | Step | Introduction | Methods | Results | Discussion |
 |------|-------------|---------|---------|------------|
-| 2a: Overall structure | Funnel: broad -> problem -> gap -> contribution | Procedural: subsection order matching pipeline | Narrative arc: subsection count, titles | Interpretive: summary -> comparison -> limitations -> future |
-| 2b: Per-unit details | Per-paragraph key points + citations | Per-subsection tools, params, details | Per-subsection findings + statistics | Per-subsection interpretation + citations |
-| 2c: Figure placement | Conceptual overview figure (if any) | Pipeline/algorithm/pseudocode figure | Figure/Table placement per subsection | Back-references to specific Results |
-| 2d: Connection plan | Transition leading into Methods/Results | Cross-reference to Results | Transition and connection plan | Limitation <-> future direction pairing |
+| 2a: Skeleton | Funnel: broad -> problem -> gap -> contribution | **Blueprint skeleton**: subsection order, organization principle, method steps | **Blueprint skeleton**: subsection order, narrative arc, planned findings | Interpretive: summary -> comparison -> limitations -> future |
+| 2b: Details / Matrix | Per-paragraph key points + citations | **Blueprint matrix**: procedure, data/input, tool/version, parameters, output, reproducibility risk | **Blueprint matrix**: claim/finding, evidence source, figure/table, statistics, scope limits | Per-subsection interpretation + citations |
+| 2c: Verification | Conceptual figure placement (if any) | Gap/risk check: missing versions, parameters, input/output transitions | Gap/risk check: unsupported claims, orphan figures, missing statistics | Back-references to specific Results |
+| 2d: Approval / Connection | Transition leading into Methods/Results | **Strong HITL approval gate** before prose; emits `approved_blueprint` | **Strong HITL approval gate** before prose; emits `approved_blueprint` | Limitation <-> future direction pairing |
+
+For Methods and Results, the approved Blueprint is passed to the reviewer as `approved_blueprint`:
+
+```yaml
+approved_blueprint:
+  section_type: "methods|results"
+  approval_status: "approved|skipped_by_user"
+  approved_at_stage: "Step 2d"
+  skeleton: "[approved hierarchical skeleton]"
+  matrix: "[approved Blueprint matrix]"
+  gap_risk_decisions: "[resolved or user-accepted gaps]"
+  revision_history: "[summary of user-requested changes before approval]"
+```
 
 #### Step 3: Prose + RAG Few-Shot
 
 Per subsection: extract topic keywords -> RAG search Target Voice collection -> use as style exemplars -> write prose matching merged style guide.
+
+For Methods and Results, Step 3 is constrained by `approved_blueprint`. The writer must pause and return to Step 2d for Blueprint revision approval before adding any new method step, result claim, statistic, figure/table placement, tool, parameter, or subsection that is not represented in the approved Blueprint.
 
 **Section-specific paragraph flow**:
 
@@ -615,6 +634,7 @@ Full prose protocols with paragraph templates: see `agents/section-writer.md` St
 | 5. Completeness | All required elements present | Higher for Methods/Results/Discussion (1.2) |
 | 6. Reporting Compliance | STROBE/CONSORT/PRISMA/etc. | Higher for Methods/Results (1.0) |
 | 7. Reproducibility | Sufficient detail for section type | Highest for Methods (1.5) |
+| 8. Blueprint Alignment | Prose matches approved Blueprint | Methods/Results only (1.4) |
 
 Discussion adds: **Over-interpretation Check** (each interpretation traceable to specific Result, appropriate hedging, alternative explanations considered).
 
@@ -704,10 +724,10 @@ Phase 0:  Dual-layer learning (parallel)
 Phase 1:  Style merge (Priority Rules applied)
 Phase 2:  Provide your materials (section-specific inputs)
           → Tiered Conversational Interview (Phase A-D)
-          → Interactive Outline (user approves each step)
+          → Interactive Outline / Blueprint Gate
           → Prose + real-time RAG few-shot references
 Phase 3:  Review generated draft
-          → Section Reviewer runs 7-pass review (section-weighted)
+          → Section Reviewer runs section-weighted review
           → Pedagogical revision diffs with WHY
           → Auto-revision if issues found (max 3 cycles)
 Phase 4:  Approve or request revisions
@@ -722,7 +742,7 @@ When you already have a style guide or want to write without reference paper ana
 Phase -2: Section selection (always required)
 Phase -1: Collection selection (preserved for real-time RAG in Phase 2)
 Phase 2:  Writer (uses existing style-guide.md + real-time RAG few-shot)
-Phase 3:  Reviewer (section-weighted 7-pass review)
+Phase 3:  Reviewer (section-weighted review)
 Phase 4:  Pattern Learner (section-tagged)
 ```
 
@@ -752,8 +772,8 @@ Provide your research materials (section-specific):
 
 Phase -2: Section selection
 Phase -1: Collection selection (for real-time RAG)
-Phase 2:  Tiered Interview → Interactive Outline → Prose + RAG
-Phase 3:  Section Reviewer checks quality (section-weighted 7 passes)
+Phase 2:  Tiered Interview → Interactive Outline / Blueprint Gate → Prose + RAG
+Phase 3:  Section Reviewer checks quality (section-weighted review)
 ```
 
 ### Journal Target Setting
@@ -782,6 +802,7 @@ Word-ready markdown:
 - Citation placeholders: `[Author, Year]`
 - Professional academic tone matching Target Voice Layer
 - Section-appropriate tense, voice, and hedging per `section_configs`
+- For Methods/Results: approved Blueprint metadata passed to Reviewer unless Lite Mode was explicitly requested
 
 ---
 
@@ -795,7 +816,7 @@ Before final approval:
 - [ ] Structure Layer populated from reference papers
 - [ ] Target Voice Layer populated from target voice papers
 - [ ] Tiered interview completed (Phases A-D)
-- [ ] Outline approved by user (Steps 2a-2d)
+- [ ] Outline approved by user (Introduction/Discussion) or Blueprint approved by user (Methods/Results)
 - [ ] Structure matches learned patterns
 - [ ] Voice matches Target Voice Layer profile
 - [ ] Consistent terminology throughout
@@ -812,6 +833,7 @@ Before final approval:
 - [ ] Background scope appropriate for target audience
 
 **Methods-specific**:
+- [ ] Approved Methods Blueprint exists, or Lite Mode was explicitly requested
 - [ ] All tools and software versions stated
 - [ ] All parameters explicitly specified (not "default")
 - [ ] Sufficient detail for replication
@@ -820,6 +842,7 @@ Before final approval:
 - [ ] Code/data availability mentioned
 
 **Results-specific**:
+- [ ] Approved Results Blueprint exists, or Lite Mode was explicitly requested
 - [ ] All figures/tables referenced and described
 - [ ] Statistics complete (values, tests, p-values, n)
 - [ ] No interpretation beyond data

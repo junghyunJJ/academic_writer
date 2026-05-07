@@ -10,6 +10,18 @@
 
 ---
 
+## Review Amendment
+
+Claude Code review identified that the original plan needed an explicit `approved_blueprint` handoff. Implement the reviewed version with these additional requirements:
+
+- `section-writer.md` must emit `approved_blueprint` after Methods/Results Step 2d approval.
+- `section-reviewer.md` must accept `approved_blueprint` as optional input and run a separate `Pass 8: Blueprint Alignment` for Methods/Results.
+- Methods/Results Lite Mode is allowed only when the user explicitly says "outline only", "skip blueprint", or "lite mode"; then record `blueprint_alignment: skipped_by_user`.
+- Step 2 hard gating should happen at final Step 2d approval, not separately at 2a and 2b.
+- `SKILL.md` and `README.md` must update architecture diagrams and public workflow wording so they no longer describe Methods/Results as outline-only.
+
+---
+
 ### Task 1: Update Section Writer Blueprint Protocol
 
 **Files:**
@@ -55,7 +67,7 @@ methods_blueprint:
       2. [Subsection title]
          1. [procedure or method step]
          2. [data/tool/parameter note]
-    requirement: "USER APPROVAL REQUIRED before generating the matrix"
+    requirement: "Collaborate with user and revise as needed; final hard gate occurs at Step 2d"
 
   step_2b_blueprint_matrix:
     action: "Generate the Methods Blueprint matrix"
@@ -67,16 +79,7 @@ methods_blueprint:
       | Block | Subsection | Procedure/Step | Data/Input | Tool/Version | Parameters | Output | Reproducibility Risk |
       |-------|------------|----------------|------------|--------------|------------|--------|----------------------|
       | M1 | Cohort construction | Select eligible patient records | EHR medication and laboratory tables | SQL query + Python 3.11 | inclusion window, exclusion criteria | analysis-ready cohort table | unresolved exclusion criteria must be confirmed |
-    required_fields:
-      - "Block"
-      - "Subsection"
-      - "Procedure/Step"
-      - "Data/Input"
-      - "Tool/Version"
-      - "Parameters"
-      - "Output"
-      - "Reproducibility Risk"
-    requirement: "USER APPROVAL REQUIRED before gap/risk check is finalized"
+    requirement: "Collaborate with user and revise as needed; final hard gate occurs at Step 2d"
 
   step_2c_gap_and_risk_check:
     action: "Check the Methods Blueprint for missing reproducibility details"
@@ -130,7 +133,7 @@ results_blueprint:
       2. [Subsection title]
          1. [planned claim/finding]
          2. [supporting evidence]
-    requirement: "USER APPROVAL REQUIRED before generating the matrix"
+    requirement: "Collaborate with user and revise as needed; final hard gate occurs at Step 2d"
 
   step_2b_blueprint_matrix:
     action: "Generate the Results Blueprint matrix"
@@ -142,15 +145,7 @@ results_blueprint:
       | Block | Subsection | Claim/Finding | Evidence Source | Figure/Table | Statistics | Scope Limits |
       |-------|------------|---------------|-----------------|--------------|------------|--------------|
       | R1 | Signal detection performance | Proposed signal detects known interaction pairs | gold-standard DDI list + EHR/lab output | Figure 2A, Table 1 | PPV, NPV, sensitivity, specificity, patient count | report detection performance only; save causal interpretation for Discussion |
-    required_fields:
-      - "Block"
-      - "Subsection"
-      - "Claim/Finding"
-      - "Evidence Source"
-      - "Figure/Table"
-      - "Statistics"
-      - "Scope Limits"
-    requirement: "USER APPROVAL REQUIRED before gap/risk check is finalized"
+    requirement: "Collaborate with user and revise as needed; final hard gate occurs at Step 2d"
 
   step_2c_gap_and_risk_check:
     action: "Check the Results Blueprint for unsupported or risky claims"
@@ -218,24 +213,16 @@ In the top `Responsibilities` list, add this item after cross-section consistenc
 10. **Blueprint Alignment** (Methods/Results only): Verify that prose follows the user-approved Blueprint and does not introduce unapproved structure, claims, procedures, statistics, tools, parameters, or figure/table placements
 ```
 
-- [ ] **Step 3: Add Methods and Results Blueprint checks after structure checks**
+- [ ] **Step 3: Add Pass 8 Blueprint Alignment**
 
-After the Results structure check block, add:
+After the reproducibility/reporting pass section and before the Discussion over-interpretation pass, add a separate pass:
 
 ```markdown
-**Methods Blueprint Alignment** (when `SECTION_TYPE: methods` and an approved Blueprint exists):
-- Every procedure or method step in prose maps to a Methods Blueprint row
-- Every tool/version required by the Blueprint appears in prose
-- Every parameter required by the Blueprint appears in prose
-- Every data/input and output transition in the Blueprint is represented
-- No new tool, parameter, data source, output, method step, or subsection appears without approved Blueprint revision
+### Pass 8: Blueprint Alignment (Methods/Results only)
 
-**Results Blueprint Alignment** (when `SECTION_TYPE: results` and an approved Blueprint exists):
-- Every claim/finding in prose maps to a Results Blueprint row
-- Every figure/table placement matches the approved Blueprint
-- Every reported statistic is present in, or directly supported by, the Blueprint
-- Scope limits are respected; Results prose does not include Discussion-level interpretation
-- No new claim, finding, statistic, comparison, figure/table placement, or subsection appears without approved Blueprint revision
+This pass runs only when `SECTION_TYPE == "methods"` or `SECTION_TYPE == "results"`.
+
+If `approved_blueprint.approval_status == "skipped_by_user"`, record `blueprint_alignment: skipped_by_user` and do not perform Blueprint-based checks. If Methods or Results is reviewed without `approved_blueprint` and Lite Mode was not explicitly requested, flag this as a major process issue before evaluating prose quality.
 ```
 
 - [ ] **Step 4: Add issue checklist items**

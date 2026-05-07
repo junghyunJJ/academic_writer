@@ -40,6 +40,7 @@ Multi-agent system for writing publication-quality IMRAD sections (Introduction,
 |---------|-------------|
 | **Dual-Layer Learning** | Learns section structure from one reference source, voice/tone from another |
 | **Tiered Interview** | Four-phase conversational approach (Context Detection → Core Questions → Adaptive Follow-ups → Intent Confirmation) |
+| **Methods/Results Blueprint Gate** | Requires user-approved hierarchical skeleton + verification matrix before Methods or Results prose generation |
 | **Section-Specific Configuration** | Writing rules, review weights, and guidance tailored to each IMRAD section |
 | **Cross-Section Coherence** | Detects existing sections and enforces consistency (Methods references Results, Discussion references Introduction) |
 | **Hourglass Awareness** | Introduction→Discussion symmetry (funnel → inverted funnel) |
@@ -100,14 +101,14 @@ Phase 2: Section Writer (Tiered Interview + Prose)
 │   Phase B: Core Questions (1×1)     │
 │   Phase C: Adaptive Follow-ups      │
 │   Phase D: Intent Confirmation      │
-│ Step 2: Interactive Outline         │
-│   (per-step user approval)          │
+│ Step 2: Outline / Blueprint Gate    │
+│   (Methods/Results require approval)│
 │ Step 3: Prose + RAG few-shot        │
 └──────────────────────┬──────────────┘
                        │
 Phase 3: Section Reviewer
 ┌──────────────────────▼─────────────┐
-│ 7-pass section-weighted review      │
+│ Section-weighted review             │
 │ + pedagogical WHY explanations      │
 │ + section-specific checks           │
 └──────────┬───────────┬──────────────┘
@@ -315,10 +316,10 @@ Phase D: Intent Confirmation (1 interaction)
 | Q4 | Unexpected or hard-to-explain findings? | anomaly-exploration | Shows analytical maturity |
 | Q5 | Topics explicitly to avoid in Discussion? | scope-guard | Prevents over-interpretation |
 
-**Step 2: Interactive Outline**:
-- Generate section-appropriate outline structure
-- Per-step user approval
-- Reflect interview answers into outline points
+**Step 2: Interactive Outline / Blueprint Gate**:
+- Generate section-appropriate outline structure for Introduction/Discussion
+- Generate Methods/Results Blueprint with hierarchical skeleton + verification matrix
+- Require explicit Blueprint approval before Methods/Results prose
 
 **Step 3: Prose + RAG few-shot**:
 - Extract subsection keywords
@@ -330,7 +331,7 @@ Phase D: Intent Confirmation (1 interaction)
 
 **File**: `agents/section-reviewer.md`
 
-7-pass review with section-specific weights and pedagogical explanations.
+Multi-pass review with section-specific weights and pedagogical explanations.
 
 **Review Passes** (section-weighted):
 
@@ -521,24 +522,26 @@ Gather section-specific research materials (see Section Writer above).
 - Phase C: Adaptive Follow-ups (0-3 context-deepening questions)
 - Phase D: Intent Confirmation (structured summary, user confirms)
 
-**Step 2: Interactive Outline**
-- Generate section-appropriate outline
-- Per-step user approval
-- Reflect interview answers into outline points
+**Step 2: Interactive Outline / Blueprint Gate**
+- Introduction and Discussion: generate section-appropriate outline
+- Methods and Results: generate a Blueprint with hierarchical skeleton + verification matrix
+- For Methods/Results, prose is blocked until the user explicitly approves the complete Blueprint
+- Lite Mode is allowed only when the user explicitly requests "outline only", "skip blueprint", or "lite mode"
 
 **Step 3: Prose + RAG Few-Shot**
 - Extract subsection keywords
 - Real-time Target Voice RAG search (2-3 exemplar paragraphs per subsection)
 - Prose generation with matched style
+- For Methods/Results, constrain prose to the approved Blueprint and return to Blueprint approval before adding new claims, method steps, figures/tables, statistics, tools, or parameters
 - Integration pass: terminology, citations, hedging compliance
 
-**Output**: Draft section (Introduction/Methods/Results/Discussion)
+**Output**: Draft section (Introduction/Methods/Results/Discussion) plus `approved_blueprint` metadata for Methods/Results unless Lite Mode was explicitly requested
 
 ### Phase 3: Section Reviewer
 
 **Input**: Draft section + source research materials
 
-1. Execute 7-pass review with section-specific weights
+1. Execute section-weighted review passes
 2. Pass 1: Factual Accuracy — verify all claims backed by source materials
 3. Pass 2: Statistical Review — verify statistical reporting, confidence intervals, p-values
 4. Pass 3: Structural Review — verify subsections follow expected architecture
@@ -546,11 +549,12 @@ Gather section-specific research materials (see Section Writer above).
 6. Pass 5: Completeness — verify nothing essential omitted
 7. Pass 6: Reporting Compliance — verify format matches target journal guidelines
 8. Pass 7: Reproducibility (Methods/Results) or Interpretation Rigor (Discussion)
+9. Pass 8: Blueprint Alignment — verify Methods/Results prose follows the approved Blueprint
 
 **For Discussion only**:
-- Pass 8: Over-interpretation Check — verify interpretations traceable to Results, hedging appropriate, alternative explanations considered
-- Pass 9: Limitation Completeness — verify all major limitations acknowledged
-- Pass 10: Hourglass Symmetry — verify Discussion opening references Intro gap, closing returns to broad context
+- Over-interpretation Check — verify interpretations traceable to Results, hedging appropriate, alternative explanations considered
+- Limitation Completeness — verify all major limitations acknowledged
+- Hourglass Symmetry — verify Discussion opening references Intro gap, closing returns to broad context
 
 3. Generate revision report with pedagogical WHY (not just what to fix, but why it matters)
 4. Suggest revision diffs
@@ -591,8 +595,8 @@ Full IMRAD writing with RAG collections available:
 → Phase -1: Select collections (e.g., agentpaper + mypaper)
 → Phase 0: Dual-layer learning from RAG
 → Phase 1: Style merge
-→ Phase 2: Interview + outline + draft
-→ Phase 3: 7-pass review
+→ Phase 2: Interview + outline/Blueprint + draft
+→ Phase 3: section-weighted review
 → Phase 4: Learn + save style guide
 ```
 
@@ -604,7 +608,7 @@ Skip RAG, use existing style-guide.md:
 /academic-writer
 → Phase -2: Select section
 → RAG Health Check: User chooses "Proceed without RAG"
-→ Phase 2: Interview + outline + draft (using existing style-guide.md)
+→ Phase 2: Interview + outline/Blueprint + draft (using existing style-guide.md)
 → Phase 3: Review
 → Phase 4: Learn
 ```
@@ -685,7 +689,7 @@ academic-writer/
 │   ├── section-analyzer.md                # Extract structure patterns
 │   ├── style-extractor.md                 # Extract voice/tone patterns
 │   ├── section-writer.md                  # Tiered interview + prose generation
-│   ├── section-reviewer.md                # 7-pass section-weighted review
+│   ├── section-reviewer.md                # Section-weighted multi-pass review
 │   ├── pattern-learner.md                 # Learn from approved sections
 │   └── paper-preprocessor.md              # PDF fallback processor
 ├── data/
