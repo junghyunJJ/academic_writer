@@ -23,6 +23,7 @@ optional_input:
     section_type: "methods|results"
     approval_status: "approved|skipped_by_user"
     approved_at_stage: "Step 2d"
+    source: "paper_context.methods_blueprint|paper_context.results_blueprint|direct writer handoff"
     skeleton: "[approved hierarchical skeleton]"
     matrix: "[approved Blueprint matrix]"
     gap_risk_decisions: "[resolved or user-accepted gaps]"
@@ -403,11 +404,13 @@ blueprint_alignment:
       - "Every tool/version required by the Blueprint appears in prose"
       - "Every parameter required by the Blueprint appears in prose"
       - "Every data/input and output transition in the Blueprint is represented"
-      - "No new tool, parameter, data source, output, method step, or subsection appears without approved Blueprint revision"
+      - "Every figure/algorithm placement in prose maps to a Methods Blueprint row"
+      - "No new tool, parameter, data source, output, method step, figure/algorithm placement, or subsection appears without approved Blueprint revision"
     severity:
       missing_approved_blueprint: "major"
       prose_outside_blueprint: "major"
       omitted_blueprint_parameter: "major"
+      figure_algorithm_outside_blueprint: "major"
 
   results:
     required_input: "approved_blueprint with section_type: results"
@@ -493,6 +496,10 @@ cross_section_consistency:
 - [ ] Tool/version listed in the Blueprint is missing from prose
 - [ ] Parameter listed in the Blueprint is missing from prose
 - [ ] Blueprint input/output transition is not represented in prose
+- [ ] Data source appears in prose but not in the approved Blueprint
+- [ ] Output appears in prose but not in the approved Blueprint
+- [ ] Figure/algorithm placement differs from the approved Blueprint
+- [ ] Subsection added beyond the approved Blueprint
 - [ ] Software version numbers missing
 - [ ] "Default settings" used without specifying values
 - [ ] Data source not cited or accession number absent

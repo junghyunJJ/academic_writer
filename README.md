@@ -535,11 +535,11 @@ Gather section-specific research materials (see Section Writer above).
 - For Methods/Results, constrain prose to the approved Blueprint and return to Blueprint approval before adding new claims, method steps, figures/tables, statistics, tools, or parameters
 - Integration pass: terminology, citations, hedging compliance
 
-**Output**: Draft section (Introduction/Methods/Results/Discussion) plus `approved_blueprint` metadata for Methods/Results unless Lite Mode was explicitly requested
+**Output**: Draft section (Introduction/Methods/Results/Discussion) plus `approved_blueprint` metadata persisted to `paper_context.methods_blueprint` or `paper_context.results_blueprint` for Methods/Results
 
 ### Phase 3: Section Reviewer
 
-**Input**: Draft section + source research materials
+**Input**: Draft section + source research materials + `approved_blueprint` for Methods/Results
 
 - Execute section-weighted review passes
 - Pass 1: Factual Accuracy — verify all claims backed by source materials

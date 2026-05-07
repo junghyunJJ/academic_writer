@@ -622,6 +622,7 @@ methods_blueprint:
       matrix: "[approved Methods Blueprint matrix]"
       gap_risk_decisions: "[resolved or user-accepted gaps]"
       revision_history: "[summary of user-requested changes before approval]"
+      persistence_target: "paper_context.methods_blueprint"
     contract_rule: |
       After approval, prose generation must not introduce new subsections, method steps,
       tools, parameters, data sources, outputs, or figure/algorithm placements unless the
@@ -694,6 +695,7 @@ results_blueprint:
       matrix: "[approved Results Blueprint matrix]"
       gap_risk_decisions: "[resolved or user-accepted gaps]"
       revision_history: "[summary of user-requested changes before approval]"
+      persistence_target: "paper_context.results_blueprint"
     contract_rule: |
       After approval, prose generation must not introduce new subsections, claims,
       findings, figure/table placements, statistical comparisons, or scope expansions
@@ -765,7 +767,15 @@ discussion_outline:
 - [ ] [Consistency point to verify during writing]
 ```
 
-For Methods and Results, also output the `approved_blueprint` object after Step 2d approval. This object is passed to the Section Reviewer as `approved_blueprint` and constrains Step 3 prose generation.
+For Methods and Results, also output the `approved_blueprint` object after Step 2d approval. Persist the same object to `paper_context.methods_blueprint` or `paper_context.results_blueprint`, pass it to the Section Reviewer as `approved_blueprint`, and use it to constrain Step 3 prose generation.
+
+```yaml
+step_2e_persist_blueprint:
+  action: "Persist approved Blueprint to paper_context and reviewer handoff"
+  target_field: "paper_context.methods_blueprint OR paper_context.results_blueprint"
+  reviewer_handoff: "approved_blueprint"
+  payload_rule: "The reviewer_handoff object must match the persisted paper_context Blueprint"
+```
 
 When Lite Mode is explicitly requested, output a reduced `approved_blueprint` instead of omitting the object:
 
@@ -778,6 +788,7 @@ approved_blueprint:
   matrix: "N/A - Lite Mode"
   gap_risk_decisions: "N/A - Lite Mode"
   revision_history: "[user explicitly requested Lite Mode]"
+  persistence_target: "paper_context.methods_blueprint OR paper_context.results_blueprint"
 ```
 
 ---

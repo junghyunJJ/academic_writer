@@ -557,6 +557,8 @@ paper_context:
   hypotheses: "[from Introduction interview]"
   study_design: "[from Methods interview]"
   key_findings: "[from Results interview]"
+  methods_blueprint: "[approved Methods Blueprint object from Step 2d, or skipped_by_user Lite Mode object]"
+  results_blueprint: "[approved Results Blueprint object from Step 2d, or skipped_by_user Lite Mode object]"
   target_journal: "[set once, used everywhere]"
   reporting_guideline: "[set once]"
   research_field: "[detected once]"
@@ -579,7 +581,7 @@ Methods/Results Lite Mode is available only when the user explicitly says "outli
 | Step | Introduction | Methods | Results | Discussion |
 |------|-------------|---------|---------|------------|
 | 2a: Skeleton | Funnel: broad -> problem -> gap -> contribution | **Blueprint skeleton**: subsection order, organization principle, method steps | **Blueprint skeleton**: subsection order, narrative arc, planned findings | Interpretive: summary -> comparison -> limitations -> future |
-| 2b: Details / Matrix | Per-paragraph key points + citations | **Blueprint matrix**: procedure, data/input, tool/version, parameters, output, reproducibility risk | **Blueprint matrix**: claim/finding, evidence source, figure/table, statistics, scope limits | Per-subsection interpretation + citations |
+| 2b: Details / Matrix | Per-paragraph key points + citations | **Blueprint matrix**: block, subsection, procedure, data/input, tool/version, parameters, output, reproducibility risk | **Blueprint matrix**: block, subsection, claim/finding, evidence source, figure/table, statistics, scope limits | Per-subsection interpretation + citations |
 | 2c: Verification | Conceptual figure placement (if any) | Gap/risk check: missing versions, parameters, input/output transitions | Gap/risk check: unsupported claims, orphan figures, missing statistics | Back-references to specific Results |
 | 2d: Approval / Connection | Transition leading into Methods/Results | **Strong HITL approval gate** before prose; emits `approved_blueprint` | **Strong HITL approval gate** before prose; emits `approved_blueprint` | Limitation <-> future direction pairing |
 
@@ -590,11 +592,14 @@ approved_blueprint:
   section_type: "methods|results"
   approval_status: "approved|skipped_by_user"
   approved_at_stage: "Step 2d"
+  source: "paper_context.methods_blueprint OR paper_context.results_blueprint"
   skeleton: "[approved hierarchical skeleton]"
   matrix: "[approved Blueprint matrix]"
   gap_risk_decisions: "[resolved or user-accepted gaps]"
   revision_history: "[summary of user-requested changes before approval]"
 ```
+
+The writer must persist the same object in `paper_context.methods_blueprint` or `paper_context.results_blueprint` before prose generation and reviewer handoff.
 
 #### Step 3: Prose + RAG Few-Shot
 
@@ -621,7 +626,7 @@ Full prose protocols with paragraph templates: see `agents/section-writer.md` St
 
 ### Phase 3: Quality Review (Section Reviewer)
 
-**Input**: Draft section + source data + SECTION_TYPE + section_configs
+**Input**: Draft section + source data + SECTION_TYPE + section_configs + `approved_blueprint` for Methods/Results
 
 **7-Pass Review** (weighted by SECTION_TYPE via `review_weight_overrides`):
 
