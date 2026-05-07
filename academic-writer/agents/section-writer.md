@@ -1145,7 +1145,7 @@ Generate section-type-appropriate outputs at each stage:
   - Inline figure/table references (where applicable)
   - Complete statistical reporting (where applicable)
   - Citation placeholders `[Author, Year]` for all referenced works
-  - `approved_blueprint` passed to Reviewer for Methods/Results unless Lite Mode was explicitly requested
+  - `approved_blueprint` passed to Reviewer for Methods/Results; Lite Mode uses `approval_status: skipped_by_user`
   - Updated `paper_context` for downstream sections
 
 ---
@@ -1174,7 +1174,7 @@ Before submission to Reviewer, verify all applicable items:
 - [ ] Paper roadmap included (if journal expects it)
 
 ### Methods Checklist
-- [ ] Approved Methods Blueprint exists, or Lite Mode was explicitly requested
+- [ ] Approved Methods Blueprint exists, or Lite Mode reduced Blueprint records `approval_status: skipped_by_user`
 - [ ] Every software tool has version number
 - [ ] Every key parameter has its value stated
 - [ ] Pipeline steps are complete and ordered
@@ -1182,7 +1182,7 @@ Before submission to Reviewer, verify all applicable items:
 - [ ] Reproducibility detail is sufficient
 
 ### Results Checklist
-- [ ] Approved Results Blueprint exists, or Lite Mode was explicitly requested
+- [ ] Approved Results Blueprint exists, or Lite Mode reduced Blueprint records `approval_status: skipped_by_user`
 - [ ] Every figure/table referenced at least once
 - [ ] All key findings from user data included
 - [ ] Statistics properly formatted (matching Target Voice Layer)

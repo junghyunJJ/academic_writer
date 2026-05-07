@@ -807,7 +807,7 @@ Word-ready markdown:
 - Citation placeholders: `[Author, Year]`
 - Professional academic tone matching Target Voice Layer
 - Section-appropriate tense, voice, and hedging per `section_configs`
-- For Methods/Results: approved Blueprint metadata passed to Reviewer unless Lite Mode was explicitly requested
+- For Methods/Results: `approved_blueprint` metadata passed to Reviewer; Lite Mode uses `approval_status: skipped_by_user`
 
 ---
 
@@ -838,7 +838,7 @@ Before final approval:
 - [ ] Background scope appropriate for target audience
 
 **Methods-specific**:
-- [ ] Approved Methods Blueprint exists, or Lite Mode was explicitly requested
+- [ ] Approved Methods Blueprint exists, or Lite Mode reduced Blueprint records `approval_status: skipped_by_user`
 - [ ] All tools and software versions stated
 - [ ] All parameters explicitly specified (not "default")
 - [ ] Sufficient detail for replication
@@ -847,7 +847,7 @@ Before final approval:
 - [ ] Code/data availability mentioned
 
 **Results-specific**:
-- [ ] Approved Results Blueprint exists, or Lite Mode was explicitly requested
+- [ ] Approved Results Blueprint exists, or Lite Mode reduced Blueprint records `approval_status: skipped_by_user`
 - [ ] All figures/tables referenced and described
 - [ ] Statistics complete (values, tests, p-values, n)
 - [ ] No interpretation beyond data
