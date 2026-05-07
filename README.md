@@ -40,7 +40,7 @@ Multi-agent system for writing publication-quality IMRAD sections (Introduction,
 |---------|-------------|
 | **Dual-Layer Learning** | Learns section structure from one reference source, voice/tone from another |
 | **Tiered Interview** | Four-phase conversational approach (Context Detection → Core Questions → Adaptive Follow-ups → Intent Confirmation) |
-| **Methods/Results Blueprint Gate** | Requires user-approved hierarchical skeleton + verification matrix before Methods or Results prose generation |
+| **Methods/Results Blueprint Gate** | Requires user-approved hierarchical skeleton + verification matrix before Methods or Results prose generation, then persists the approved Blueprint for reviewer alignment |
 | **Section-Specific Configuration** | Writing rules, review weights, and guidance tailored to each IMRAD section |
 | **Cross-Section Coherence** | Detects existing sections and enforces consistency (Methods references Results, Discussion references Introduction) |
 | **Hourglass Awareness** | Introduction→Discussion symmetry (funnel → inverted funnel) |
@@ -320,6 +320,7 @@ Phase D: Intent Confirmation (1 interaction)
 - Generate section-appropriate outline structure for Introduction/Discussion
 - Generate Methods/Results Blueprint with hierarchical skeleton + verification matrix
 - Require explicit Blueprint approval before Methods/Results prose
+- Persist approved Methods/Results Blueprint to `paper_context` and pass it to Reviewer as `approved_blueprint`
 
 **Step 3: Prose + RAG few-shot**:
 - Extract subsection keywords
@@ -528,11 +529,20 @@ Gather section-specific research materials (see Section Writer above).
 - For Methods/Results, prose is blocked until the user explicitly approves the complete Blueprint
 - Lite Mode is allowed only when the user explicitly requests "outline only", "skip blueprint", or "lite mode"
 
+**Methods/Results Blueprint contract**
+
+| Section | Matrix contract | Handoff |
+|---------|-----------------|---------|
+| Methods | `Block`, `Subsection`, `Procedure/Step`, `Data/Input`, `Tool/Version`, `Parameters`, `Output`, `Reproducibility Risk` | Persist to `paper_context.methods_blueprint`; Reviewer receives the same object as `approved_blueprint` |
+| Results | `Block`, `Subsection`, `Claim/Finding`, `Evidence Source`, `Figure/Table`, `Statistics`, `Scope Limits` | Persist to `paper_context.results_blueprint`; Reviewer receives the same object as `approved_blueprint` |
+
+Lite Mode still emits a reduced `approved_blueprint` with `approval_status: skipped_by_user`, so Reviewer can intentionally skip Blueprint Alignment instead of treating the input as missing.
+
 **Step 3: Prose + RAG Few-Shot**
 - Extract subsection keywords
 - Real-time Target Voice RAG search (2-3 exemplar paragraphs per subsection)
 - Prose generation with matched style
-- For Methods/Results, constrain prose to the approved Blueprint and return to Blueprint approval before adding new claims, method steps, figures/tables, statistics, tools, or parameters
+- For Methods/Results, constrain prose to the approved Blueprint and return to Blueprint approval before adding new claims, method steps, figures/tables, statistics, tools, parameters, data sources, outputs, figure/algorithm placements, or subsections
 - Integration pass: terminology, citations, hedging compliance
 
 **Output**: Draft section (Introduction/Methods/Results/Discussion) plus `approved_blueprint` metadata persisted to `paper_context.methods_blueprint` or `paper_context.results_blueprint` for Methods/Results
@@ -550,6 +560,8 @@ Gather section-specific research materials (see Section Writer above).
 - Pass 6: Reporting Compliance — verify format matches target journal guidelines
 - Pass 7: Reproducibility (Methods/Results) or Interpretation Rigor (Discussion)
 - Pass 8: Blueprint Alignment — verify Methods/Results prose follows the approved Blueprint
+  - Methods: checks procedure, tool/version, parameter, input/output, figure/algorithm placement, and subsection alignment
+  - Results: checks claim, figure/table, statistic, scope limit, and subsection alignment
 
 **For Discussion only**:
 - Over-interpretation Check — verify interpretations traceable to Results, hedging appropriate, alternative explanations considered
