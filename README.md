@@ -1,8 +1,21 @@
-# Academic Writer v1.0 — Write Publication-Quality IMRAD Sections
+# Academic Writer v2.0 — Write Publication-Quality IMRAD Sections
 
 Multi-agent system for writing publication-quality Introduction, Methods, Results, and Discussion sections for academic research articles. Learns writing patterns from reference papers through RAG-based dual-layer analysis, gathers research intent via tiered conversational interviews, generates outlined drafts, and improves continuously through feedback.
 
-**Version**: 1.0 | **Released**: 2026-04-01 | **Skill Invocation**: `/academic-writer`
+**Version**: 2.0 | **Released**: 2026-05-07 | **Skill Invocation**: `/academic-writer`
+
+---
+
+## What's New in v2.0
+
+| Change | Details |
+|--------|---------|
+| **Methods/Results Blueprint Gate** | Methods and Results sections now require an explicit user-approved hierarchical skeleton + verification matrix (the Blueprint) before prose generation begins. Prose is contractually constrained to the approved Blueprint. |
+| **Blueprint Persistence and Reviewer Handoff** | The approved Blueprint is persisted to `paper_context.methods_blueprint` or `paper_context.results_blueprint` and passed directly to the Section Reviewer as `approved_blueprint`, enabling a dedicated Pass 8 Blueprint Alignment review. |
+| **Lite Mode Blueprint** | When the user explicitly requests "outline only", "skip blueprint", or "lite mode", the writer emits a reduced Blueprint with `approval_status: skipped_by_user` so the Reviewer can intentionally skip Blueprint Alignment rather than treating it as a missing input. |
+| **Pass 8: Blueprint Alignment** | A new eighth review pass (weight 1.4 for both Methods and Results) verifies that every method step, tool/version, parameter, data source, output, figure/algorithm placement, claim, statistic, and subsection in the prose maps to an approved Blueprint row. |
+| **User-Specified Keyword System** | Writers can now supply Tier 1 (must-emphasize) and Tier 2 (natural-include) keywords and key sentences. The Reviewer's Pass 5 Completeness check verifies all tiers are properly placed, flagging any keyword that could not be naturally integrated. |
+| **Paper Context Blueprint Fields** | `paper_context` now tracks `methods_blueprint` and `results_blueprint` fields so Blueprint agreements persist across the writing session and are available to downstream sections. |
 
 ---
 
@@ -41,6 +54,7 @@ Multi-agent system for writing publication-quality IMRAD sections (Introduction,
 | **Dual-Layer Learning** | Learns section structure from one reference source, voice/tone from another |
 | **Tiered Interview** | Four-phase conversational approach (Context Detection → Core Questions → Adaptive Follow-ups → Intent Confirmation) |
 | **Methods/Results Blueprint Gate** | Requires user-approved hierarchical skeleton + verification matrix before Methods or Results prose generation, then persists the approved Blueprint for reviewer alignment |
+| **User-Specified Keywords** | Tier 1 (must-emphasize) and Tier 2 (natural-include) keywords and key sentences are tracked through writing and verified in review |
 | **Section-Specific Configuration** | Writing rules, review weights, and guidance tailored to each IMRAD section |
 | **Cross-Section Coherence** | Detects existing sections and enforces consistency (Methods references Results, Discussion references Introduction) |
 | **Hourglass Awareness** | Introduction→Discussion symmetry (funnel → inverted funnel) |
@@ -100,10 +114,15 @@ Phase 2: Section Writer (Tiered Interview + Prose)
 │   Phase A: Context Detection        │
 │   Phase B: Core Questions (1×1)     │
 │   Phase C: Adaptive Follow-ups      │
+│             + Keyword Detection     │
 │   Phase D: Intent Confirmation      │
 │ Step 2: Outline / Blueprint Gate    │
 │   (Methods/Results require approval)│
+│ Step 2e: Persist Blueprint to       │
+│   paper_context + Reviewer handoff  │
 │ Step 3: Prose + RAG few-shot        │
+│   (constrained by approved Blueprint│
+│    for Methods/Results)             │
 └──────────────────────┬──────────────┘
                        │
 Phase 3: Section Reviewer
@@ -111,6 +130,8 @@ Phase 3: Section Reviewer
 │ Section-weighted review             │
 │ + pedagogical WHY explanations      │
 │ + section-specific checks           │
+│ + Pass 8: Blueprint Alignment       │
+│   (Methods/Results only)            │
 └──────────┬───────────┬──────────────┘
            │           │
      Approved?    →    No ──→ Writer (revise)
@@ -266,6 +287,8 @@ Phase B: Core Interview (5 section-specific questions, one-at-a-time)
 Phase C: Adaptive Follow-ups (0-3 questions, conditional)
 ├─ Context-deepening: probe vague Phase B answers
 ├─ Context-enhancing: introduce considerations user may not have thought of
+├─ Keyword Detection: LLM identifies candidate Tier 1/Tier 2 keywords from
+│   user responses and presents them for explicit user confirmation
 └─ Can be deferred: "I have enough to start. I'll ask during outline review."
 
 Phase D: Intent Confirmation (1 interaction)
@@ -316,17 +339,61 @@ Phase D: Intent Confirmation (1 interaction)
 | Q4 | Unexpected or hard-to-explain findings? | anomaly-exploration | Shows analytical maturity |
 | Q5 | Topics explicitly to avoid in Discussion? | scope-guard | Prevents over-interpretation |
 
+**User-Specified Keywords (all sections)**:
+
+The writer accepts an optional Tier 1 / Tier 2 keyword list at Step 0 or detects candidates during Phase C:
+
+| Tier | Treatment | Placement |
+|------|-----------|-----------|
+| **Tier 1 (Emphasize)** | Linguistic emphasis markers: "notably", "importantly", "a key finding" | Topic sentences, section opening/closing, near key figures |
+| **Tier 2 (Include)** | Woven naturally, no special emphasis | Anywhere appropriate in the flow |
+
+LLM-detected keyword candidates from interview responses are presented to the user for explicit confirmation before being assigned to a tier. The Reviewer's Pass 5 Completeness check verifies all tiers are properly placed.
+
 **Step 2: Interactive Outline / Blueprint Gate**:
 - Generate section-appropriate outline structure for Introduction/Discussion
 - Generate Methods/Results Blueprint with hierarchical skeleton + verification matrix
 - Require explicit Blueprint approval before Methods/Results prose
-- Persist approved Methods/Results Blueprint to `paper_context` and pass it to Reviewer as `approved_blueprint`
+- Persist approved Methods/Results Blueprint to `paper_context` (Step 2e) and pass to Reviewer as `approved_blueprint`
+
+**Methods/Results Blueprint contract**:
+
+| Section | Matrix contract | Handoff |
+|---------|-----------------|---------|
+| Methods | `Block`, `Subsection`, `Procedure/Step`, `Data/Input`, `Tool/Version`, `Parameters`, `Output`, `Reproducibility Risk` | Persist to `paper_context.methods_blueprint`; Reviewer receives the same object as `approved_blueprint` |
+| Results | `Block`, `Subsection`, `Claim/Finding`, `Evidence Source`, `Figure/Table`, `Statistics`, `Scope Limits` | Persist to `paper_context.results_blueprint`; Reviewer receives the same object as `approved_blueprint` |
+
+Lite Mode (triggered only by explicit user request: "outline only", "skip blueprint", or "lite mode") emits a reduced `approved_blueprint` with `approval_status: skipped_by_user`, so the Reviewer can intentionally skip Blueprint Alignment instead of treating the input as missing.
 
 **Step 3: Prose + RAG few-shot**:
 - Extract subsection keywords
 - Real-time Target Voice RAG search (2-3 exemplar paragraphs per subsection)
 - Prose generation with matched style
-- Integration pass: terminology, citations, hedging, writing rules compliance
+- For Methods/Results, constrain prose to the approved Blueprint and return to Blueprint approval before adding new claims, method steps, figures/tables, statistics, tools, parameters, data sources, outputs, figure/algorithm placements, or subsections
+- Integration pass: terminology, citations, hedging, writing rules compliance, keyword placement verification
+
+**paper_context fields** (accumulated across sections):
+
+```yaml
+paper_context:
+  research_gap: "[from Introduction interview]"
+  hypotheses: "[from Introduction interview]"
+  study_design: "[from Methods interview]"
+  key_findings: "[from Results interview]"
+  methods_blueprint: "[approved Methods Blueprint object, or skipped_by_user Lite Mode object]"
+  results_blueprint: "[approved Results Blueprint object, or skipped_by_user Lite Mode object]"
+  target_journal: "[set once, used everywhere]"
+  reporting_guideline: "[set once]"
+  research_field: "[detected once]"
+  user_expertise: "[detected once]"
+  existing_sections:
+    introduction: "[file path or null]"
+    methods: "[file path or null]"
+    results: "[file path or null]"
+    discussion: "[file path or null]"
+```
+
+**Output**: Draft section plus `approved_blueprint` metadata persisted to `paper_context.methods_blueprint` or `paper_context.results_blueprint` for Methods/Results.
 
 ### 3.4 Section Reviewer
 
@@ -345,11 +412,11 @@ Multi-pass review with section-specific weights and pedagogical explanations.
 | 5. Completeness | 1.0 | 1.2 | 1.2 | 1.2 |
 | 6. Reporting Compliance | 0.5 | 1.0 | 1.0 | 0.5 |
 | 7. Reproducibility | 0.3 | **1.5** | 1.0 | 0.3 |
+| 8. Blueprint Alignment | N/A | **1.4** | **1.4** | N/A |
 
-**Discussion Additions** (extra pass):
-- Over-interpretation Check — each interpretation traceable to specific Result, hedging appropriate, alternative explanations considered, no new data introduced
-- Limitation Completeness
-- Hourglass symmetry (if Introduction exists)
+Pass 5 Completeness also verifies all user-specified Tier 1 and Tier 2 keywords are correctly placed, generating a Keyword Coverage Report.
+
+**Pass 9 (Discussion only): Over-interpretation Check** — each interpretation must be traceable to a specific Result; hedging must be appropriate; alternative explanations must be considered; causal language for correlational findings is flagged.
 
 **Revision Loop**: Major/minor revisions → Writer with `revision_diff` + pedagogical WHY and `teaching_note` explaining writing principles (max 3 iterations).
 
@@ -366,7 +433,7 @@ Learns from approved sections, with section-specific metrics.
 4. RAG effectiveness metrics
 5. Style Extractor feedback (voice accuracy per section)
 
-**Output**: Versioned style-guide.md updates + pattern-history/changelog with section attribution.
+**Output**: Versioned `data/style-guide.md` updates + `data/pattern-history/changelog.md` with section attribution.
 
 ### 3.6 Paper Preprocessor
 
@@ -520,7 +587,7 @@ Gather section-specific research materials (see Section Writer above).
 **Step 1: Tiered Conversational Interview**
 - Phase A: Context Detection (auto-scan workspace, detect coherence requirements)
 - Phase B: Core Interview (5 section-specific questions, one-at-a-time)
-- Phase C: Adaptive Follow-ups (0-3 context-deepening questions)
+- Phase C: Adaptive Follow-ups (0-3 context-deepening questions) + Keyword Detection
 - Phase D: Intent Confirmation (structured summary, user confirms)
 
 **Step 2: Interactive Outline / Blueprint Gate**
@@ -538,12 +605,15 @@ Gather section-specific research materials (see Section Writer above).
 
 Lite Mode still emits a reduced `approved_blueprint` with `approval_status: skipped_by_user`, so Reviewer can intentionally skip Blueprint Alignment instead of treating the input as missing.
 
+**Step 2e: Blueprint Persistence**
+After user approval, the writer persists the Blueprint to `paper_context.methods_blueprint` or `paper_context.results_blueprint` and sends the same object to the Reviewer as `approved_blueprint`. The persisted and handed-off objects must be identical.
+
 **Step 3: Prose + RAG Few-Shot**
 - Extract subsection keywords
 - Real-time Target Voice RAG search (2-3 exemplar paragraphs per subsection)
 - Prose generation with matched style
 - For Methods/Results, constrain prose to the approved Blueprint and return to Blueprint approval before adding new claims, method steps, figures/tables, statistics, tools, parameters, data sources, outputs, figure/algorithm placements, or subsections
-- Integration pass: terminology, citations, hedging compliance
+- Integration pass: terminology, citations, hedging compliance, keyword placement verification
 
 **Output**: Draft section (Introduction/Methods/Results/Discussion) plus `approved_blueprint` metadata persisted to `paper_context.methods_blueprint` or `paper_context.results_blueprint` for Methods/Results
 
@@ -551,22 +621,20 @@ Lite Mode still emits a reduced `approved_blueprint` with `approval_status: skip
 
 **Input**: Draft section + source research materials + `approved_blueprint` for Methods/Results
 
-- Execute section-weighted review passes
+- Execute section-weighted review passes (8 passes; Pass 9 for Discussion)
 - Pass 1: Factual Accuracy — verify all claims backed by source materials
 - Pass 2: Statistical Review — verify statistical reporting, confidence intervals, p-values
 - Pass 3: Structural Review — verify subsections follow expected architecture
 - Pass 4: Style & Clarity — verify readability, sentence structure, word choice
-- Pass 5: Completeness — verify nothing essential omitted
+- Pass 5: Completeness — verify nothing essential omitted; generate Keyword Coverage Report for all user-specified Tier 1/Tier 2 keywords
 - Pass 6: Reporting Compliance — verify format matches target journal guidelines
 - Pass 7: Reproducibility (Methods/Results) or Interpretation Rigor (Discussion)
-- Pass 8: Blueprint Alignment — verify Methods/Results prose follows the approved Blueprint
+- Pass 8: Blueprint Alignment (Methods/Results only, weight 1.4) — verify prose follows the approved Blueprint
   - Methods: checks procedure, tool/version, parameter, input/output, figure/algorithm placement, and subsection alignment
   - Results: checks claim, figure/table, statistic, scope limit, and subsection alignment
+  - If `approved_blueprint.approval_status == "skipped_by_user"`, record `blueprint_alignment: skipped_by_user` and skip checks
 
-**For Discussion only**:
-- Over-interpretation Check — verify interpretations traceable to Results, hedging appropriate, alternative explanations considered
-- Limitation Completeness — verify all major limitations acknowledged
-- Hourglass Symmetry — verify Discussion opening references Intro gap, closing returns to broad context
+**Pass 9 (Discussion only): Over-interpretation Check** — each interpretation must be traceable to a specific Result; hedging must be appropriate; alternative explanations must be considered; causal language for correlational findings is flagged.
 
 3. Generate revision report with pedagogical WHY (not just what to fix, but why it matters)
 4. Suggest revision diffs
@@ -590,7 +658,7 @@ Lite Mode still emits a reduced `approved_blueprint` with `approval_status: skip
 
 **Output**: 
 - Updated `data/style-guide.md`
-- Updated `data/pattern-history.md` (section-tagged)
+- Updated `data/pattern-history/` (versioned files + changelog.md, section-tagged)
 - Saved `paper_context.yaml` for next section
 
 ---
@@ -608,7 +676,7 @@ Full IMRAD writing with RAG collections available:
 → Phase 0: Dual-layer learning from RAG
 → Phase 1: Style merge
 → Phase 2: Interview + outline/Blueprint + draft
-→ Phase 3: section-weighted review
+→ Phase 3: section-weighted review (8 passes + Pass 9 for Discussion)
 → Phase 4: Learn + save style guide
 ```
 
@@ -706,9 +774,15 @@ academic-writer/
 │   └── paper-preprocessor.md              # PDF fallback processor
 ├── data/
 │   ├── style-guide.md                     # Merged structure + voice patterns
-│   ├── pattern-history.md                 # Changelog of learned patterns (section-tagged)
+│   ├── feedback-log.md                    # Reviewer feedback history (section-tagged)
 │   ├── section-configs.yaml               # Writing rules + review weights per section
-│   └── paper_context.yaml                 # Cross-section consistency anchors
+│   ├── paper_context.yaml                 # Cross-section consistency anchors
+│   ├── samples/                           # Example sections (by type)
+│   ├── approved-sections/                 # User-approved final outputs (by type)
+│   └── pattern-history/                   # Versioned style guide snapshots
+│       ├── style-guide-v4.0.md            # Baseline version
+│       ├── style-guide-v4.1.md            # First learned update
+│       └── changelog.md                   # Per-change log with section attribution
 ├── references/
 │   ├── introduction-patterns.md            # Intro-specific reference patterns
 │   ├── methods-patterns.md                 # Methods-specific reference patterns
@@ -754,7 +828,7 @@ The system adapts to various journal guidelines through the `section_configs` bl
 3. **Section Tagging**: Tag all patterns with SECTION_TYPE for section-specific learning
 4. **RAG Effectiveness Scoring**: Score how useful the Structure Layer and Target Voice Layer were
 5. **Style Guide Update**: Merge learned patterns back into style-guide.md (section-tagged)
-6. **Pattern History**: Record all changes in pattern-history.md with approval timestamp
+6. **Pattern History**: Record all changes in `data/pattern-history/changelog.md` with approval timestamp and version bump
 
 ### Learning Across Sections
 
@@ -798,7 +872,7 @@ style-guide.md:
       interpretation_patterns: "[patterns learned from discussion voice collection]"
       limitation_tone: "..."
 
-  version: "1.0"
+  version: "4.0"                    # data file version; incremented by Pattern Learner
   last_updated: "YYYY-MM-DD"
   learned_from_sections: "[list of approved sections that contributed to this guide]"
 ```
@@ -820,6 +894,7 @@ style-guide.md:
 - Skip interview questions: Hit Enter to accept smart default
 - Defer follow-ups: "I have enough to start"
 - Request specific revision: "Fix the statistical reporting"
+- Invoke Lite Mode: "outline only" / "skip blueprint" / "lite mode"
 
 ### Common Answers by Section
 
@@ -836,9 +911,20 @@ style-guide.md:
 | Section | Emphasis | De-emphasis |
 |---------|----------|-------------|
 | **Introduction** | Structural clarity (1.2×) | Statistical detail (0.3×) |
-| **Methods** | Reproducibility (1.5×) | Interpretation (N/A) |
-| **Results** | Factual accuracy (1.5×), statistical rigor (1.3×) | Interpretation (N/A) |
-| **Discussion** | Completeness (1.2×) | Statistical detail (0.5×) |
+| **Methods** | Reproducibility (1.5×), Blueprint Alignment (1.4×) | Statistical review (0.7×) |
+| **Results** | Factual accuracy (1.5×), Statistical rigor (1.3×), Blueprint Alignment (1.4×) | N/A |
+| **Discussion** | Completeness (1.2×) + Over-interpretation Check | Statistical detail (0.5×) |
+
+### Blueprint Quick Reference (Methods/Results)
+
+| Action | When |
+|--------|------|
+| Blueprint generated | After tiered interview, before any prose |
+| Blueprint approved by user | Required before prose begins (Step 2d) |
+| Blueprint persisted | Step 2e → `paper_context.methods_blueprint` or `.results_blueprint` |
+| Blueprint handed to Reviewer | As `approved_blueprint` alongside the draft |
+| Pass 8 skipped | Only when `approval_status: skipped_by_user` (Lite Mode) |
+| Blueprint revision required | Any time prose would add content outside the approved Blueprint |
 
 ### RAG Query Cheat Sheet
 
@@ -850,7 +936,7 @@ If user wants to customize RAG searches, these are the default query strategies:
 
 ### Learning Cycle
 
-1. Write section → Interview → Outline → Draft
+1. Write section → Interview → Outline/Blueprint → Draft
 2. Reviewer → Approved?
 3. If yes: Pattern Learner updates style-guide.md, save paper_context for next section
 4. If no: Writer revises (max 3 iterations), then Pattern Learner learns from final approved version
