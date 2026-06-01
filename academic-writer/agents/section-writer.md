@@ -82,6 +82,8 @@ research_materials:
     figures:
       - file: "[path]"
         description: "[what this figure shows]"
+        claim_supported: "[claim/question this figure is evidence for]"
+        figure_rationale: "[why this figure/table is needed rather than optional or decorative]"
         key_finding: "[main takeaway]"
         statistics: "[relevant statistical values]"
     experimental_context:
@@ -333,16 +335,16 @@ results_interview:
     smart_default: "Hint: Try the ABT technique — '[Background] And..., [Problem] But..., [Finding] Therefore...'"
 
   q2:
-    question: "Please list your top 3-5 most important findings in order of importance"
+    question: "Please list your top 3-5 most important findings in order of importance, and why each result is needed for the paper's argument"
     type: priority-setting
-    purpose: "Sets emphasis hierarchy — determines subsection weighting and statistical detail level"
-    smart_default: "For each finding: what comparison or evidence supports it?"
+    purpose: "Sets emphasis hierarchy and prevents disconnected result listing"
+    smart_default: "For each finding: claim/question answered, why it matters here, and what evidence supports it"
 
   q3:
-    question: "For each Figure/Table: what does it show, and what is the key takeaway?"
+    question: "For each Figure/Table: what claim does it support, what does it show, why is it needed, and what is the key takeaway?"
     type: visual-inventory
-    purpose: "Ensures every figure is purposefully integrated — prevents orphaned references"
-    smart_default: "Format: 'Figure X: [shows...] -> Key takeaway: [...]'"
+    purpose: "Ensures every figure is claim-driven evidence — prevents orphaned or decorative references"
+    smart_default: "Format: 'Figure X: supports [claim] -> shows [evidence] -> needed because [rationale] -> takeaway [finding]'"
 
   q4:
     question: "Do you have a preferred subsection order?"
@@ -451,7 +453,11 @@ adaptive_followups:
       - condition: "Negative or null results not mentioned"
         question: "Are there any null findings — results you expected but did not observe?"
       - condition: "Figure-finding mapping unclear"
-        question: "Could you confirm which analysis step produced the results shown in Figure [X]?"
+        question: "Could you confirm which claim Figure [X] supports and which analysis step produced it?"
+      - condition: "Result rationale unclear"
+        question: "Why does this result need to appear in the Results narrative rather than being omitted or moved to supplement?"
+      - condition: "Figure rationale unclear"
+        question: "Why does this figure/table need to be shown for this claim instead of only describing the result in text?"
 
     discussion:
       - condition: "Limitations are superficial"
@@ -642,6 +648,7 @@ results_blueprint:
       - "Central narrative arc"
       - "Subsection order and titles"
       - "Planned claim or finding under each subsection"
+      - "Why each result/subsection is needed for the paper's argument"
     output_format: |
       ## Results Blueprint
 
@@ -649,31 +656,35 @@ results_blueprint:
       **Narrative arc**: [central Results story]
 
       1. [Subsection title]
-         1. [planned claim/finding]
-         2. [supporting evidence]
+         1. Rationale: [why this result is needed]
+         2. Claim/finding: [planned claim/finding]
+         3. Evidence: [supporting evidence and figure/table role]
       2. [Subsection title]
-         1. [planned claim/finding]
-         2. [supporting evidence]
+         1. Rationale: [why this result is needed]
+         2. Claim/finding: [planned claim/finding]
+         3. Evidence: [supporting evidence and figure/table role]
     requirement: "Collaborate with user and revise as needed; final hard gate occurs at Step 2d"
 
   step_2b_blueprint_matrix:
     action: "Generate the Results Blueprint matrix"
     content:
       - "One row per planned claim or finding"
-      - "Evidence source, figure/table mapping, statistics, and scope limits"
+      - "Result rationale, evidence source, figure/table mapping, figure rationale, statistics, and scope limits"
       - "Explicit marker for missing values that must be resolved before prose"
     output_format: |
-      | Block | Subsection | Claim/Finding | Evidence Source | Figure/Table | Statistics | Scope Limits |
-      |-------|------------|---------------|-----------------|--------------|------------|--------------|
-      | R1 | Signal detection performance | Proposed signal detects known interaction pairs | gold-standard DDI list + EHR/lab output | Figure 2A, Table 1 | PPV, NPV, sensitivity, specificity, patient count | report detection performance only; save causal interpretation for Discussion |
+      | Block | Subsection | Result Rationale | Claim/Finding | Evidence Source | Figure/Table | Figure/Table Rationale | Statistics | Scope Limits |
+      |-------|------------|------------------|---------------|-----------------|--------------|------------------------|------------|--------------|
+      | R1 | Signal detection performance | Establishes whether the method solves the core detection task before downstream interpretation | Proposed signal detects known interaction pairs | gold-standard DDI list + EHR/lab output | Figure 2A, Table 1 | Shows both visual ranking and quantitative operating characteristics needed to support the performance claim | PPV, NPV, sensitivity, specificity, patient count | report detection performance only; save causal interpretation for Discussion |
     requirement: "Collaborate with user and revise as needed; final hard gate occurs at Step 2d"
 
   step_2c_gap_and_risk_check:
     action: "Check the Results Blueprint for unsupported or risky claims"
     checks:
       - "Every planned claim has an evidence source"
-      - "Every figure/table listed by the user is placed or explicitly excluded"
+      - "Every result/subsection has a rationale explaining why it is needed"
+      - "Every figure/table listed by the user is placed with a claim-supported rationale or explicitly excluded"
       - "Statistics include sample size, test name, effect estimate, or p-value when applicable"
+      - "No figure/table is decorative, redundant, or disconnected from the claim it supports"
       - "No row asks the Results prose to interpret beyond the data"
       - "Null or negative findings are represented when the interview identified them"
     risk_status_values:
@@ -894,18 +905,21 @@ methods_prose:
 ```yaml
 results_prose:
   paragraph_structure:
-    1_opening: "State the analysis goal or question addressed"
+    1_result_rationale: "State why this result is needed and what claim/question it resolves"
     2_method_brief: "1 sentence on approach (only if not already in Methods)"
     3_primary_finding: "Key result with full statistics"
     4_supporting_details: "Secondary observations, comparisons"
-    5_figure_reference: "Connect to visual evidence"
-    6_transition: "Lead to next subsection"
+    5_figure_evidence: "Describe what the figure/table shows and why it is the right evidence for the claim"
+    6_takeaway: "State the data-backed takeaway without Discussion-level interpretation"
+    7_transition: "Lead to next subsection"
 
   writing_rules:
     - "Write in full paragraphs, never bullet points"
     - "Each paragraph should have a clear topic sentence"
     - "Statistics integrated inline, not in separate sentences"
-    - "Figures described, not just referenced"
+    - "Each subsection opens by explaining why the result is needed for the paper's argument"
+    - "Figures described as evidence for a specific claim, not just referenced"
+    - "Do not include a figure/table unless the prose explains what claim it supports and why readers need to see it"
     - "No interpretation beyond what data shows (save for Discussion)"
     - "Past tense for completed analyses, present tense for figure descriptions"
     - "Active voice for findings ('We identified...', 'Analysis revealed...')"
@@ -1184,6 +1198,8 @@ Before submission to Reviewer, verify all applicable items:
 ### Results Checklist
 - [ ] Approved Results Blueprint exists, or Lite Mode reduced Blueprint records `approval_status: skipped_by_user`
 - [ ] Every figure/table referenced at least once
+- [ ] Every subsection explains why the result is needed for the Results narrative
+- [ ] Every figure/table supports a stated claim and has a clear evidentiary rationale
 - [ ] All key findings from user data included
 - [ ] Statistics properly formatted (matching Target Voice Layer)
 - [ ] No interpretation beyond data (save for Discussion)

@@ -157,9 +157,11 @@ Section-specific structure checks:
 - Reproducibility markers present (version numbers, parameters, data sources)
 - No Results content or interpretation
 
-**Results** (Evidence-based: finding → data → figure):
+**Results** (Claim-driven evidence: rationale → finding → data → figure):
+- Each subsection explains why the result is needed for the paper's argument
 - Each subsection presents one major finding
-- Figures/tables introduced before or alongside their discussion
+- Figures/tables introduced before or alongside their discussion as evidence for a specific claim
+- Each figure/table has a clear rationale for why readers need to see it
 - No Discussion-level interpretation present
 - Appropriate scope (no Discussion content)
 
@@ -416,7 +418,9 @@ blueprint_alignment:
     required_input: "approved_blueprint with section_type: results"
     checks:
       - "Every claim/finding in prose maps to a Results Blueprint row"
+      - "Every result rationale in prose maps to the approved Blueprint"
       - "Every figure/table placement matches the approved Blueprint"
+      - "Every figure/table rationale in prose matches the approved Blueprint"
       - "Every reported statistic is present in, or directly supported by, the Blueprint"
       - "Scope limits are respected; Results prose does not include Discussion-level interpretation"
       - "No new claim, finding, statistic, comparison, figure/table placement, or subsection appears without approved Blueprint revision"
@@ -512,7 +516,9 @@ cross_section_consistency:
 ### Results Issues
 - [ ] Missing approved Results Blueprint when Lite Mode was not explicitly requested
 - [ ] Prose introduces a claim not present in the approved Blueprint
+- [ ] Subsection lacks rationale for why the result is needed
 - [ ] Figure/table placement differs from the approved Blueprint
+- [ ] Figure/table lacks rationale for what claim it supports or why it is needed
 - [ ] Statistic in prose is absent from or unsupported by the Blueprint
 - [ ] Scope limit from the Blueprint is violated
 - [ ] Claim without data support

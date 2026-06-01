@@ -153,7 +153,7 @@ section_configs:
       voice: "active for findings, passive for methods-brief"
       interpretation: "not allowed — save for Discussion"
       citations: "minimal — only for method references"
-      key_constraint: "every claim backed by data; no over-interpretation"
+      key_constraint: "every claim backed by data; each subsection states why the result is needed and why the figure/table is the right evidence; no over-interpretation"
     review_weight_overrides:
       factual_accuracy: 1.5
       statistical_review: 1.3
@@ -534,8 +534,8 @@ Step 3: If Yes → Auto-extract cross-reference points
 | # | Question | Type | Smart Default |
 |---|----------|------|---------------|
 | Q1 | What is the central narrative of this Results? (What story does the data tell?) | narrative-framing | ABT hint: "And..., But..., Therefore..." |
-| Q2 | Top 3-5 most important findings in order of importance? | priority-setting | Added ranking + number constraint |
-| Q3 | For each Figure/Table: what does it show, and what is the key takeaway? | visual-inventory | Ensures purposeful figure integration |
+| Q2 | Top 3-5 most important findings in order of importance, and why is each result needed for the paper's argument? | priority-setting | For each finding: claim/question answered + evidence + rationale |
+| Q3 | For each Figure/Table: what claim does it support, what does it show, why is this figure/table needed, and what is the key takeaway? | visual-inventory | Ensures claim-driven figure integration |
 | Q4 | Preferred subsection order? | structure-preference | Default: progressive complexity |
 | Q5 | What is the most important comparison? (vs baseline, vs existing, across conditions) | comparison-framing | Anchors comparative analysis |
 
@@ -581,8 +581,8 @@ Methods/Results Lite Mode is available only when the user explicitly says "outli
 | Step | Introduction | Methods | Results | Discussion |
 |------|-------------|---------|---------|------------|
 | 2a: Skeleton | Funnel: broad -> problem -> gap -> contribution | **Blueprint skeleton**: subsection order, organization principle, method steps | **Blueprint skeleton**: subsection order, narrative arc, planned findings | Interpretive: summary -> comparison -> limitations -> future |
-| 2b: Details / Matrix | Per-paragraph key points + citations | **Blueprint matrix**: block, subsection, procedure, data/input, tool/version, parameters, output, reproducibility risk | **Blueprint matrix**: block, subsection, claim/finding, evidence source, figure/table, statistics, scope limits | Per-subsection interpretation + citations |
-| 2c: Verification | Conceptual figure placement (if any) | Gap/risk check: missing versions, parameters, input/output transitions | Gap/risk check: unsupported claims, orphan figures, missing statistics | Back-references to specific Results |
+| 2b: Details / Matrix | Per-paragraph key points + citations | **Blueprint matrix**: block, subsection, procedure, data/input, tool/version, parameters, output, reproducibility risk | **Blueprint matrix**: block, subsection, result rationale, claim/finding, evidence source, figure/table, figure rationale, statistics, scope limits | Per-subsection interpretation + citations |
+| 2c: Verification | Conceptual figure placement (if any) | Gap/risk check: missing versions, parameters, input/output transitions | Gap/risk check: missing result rationale, unsupported claims, orphan or decorative figures, missing statistics | Back-references to specific Results |
 | 2d: Approval / Connection | Transition leading into Methods/Results | **Strong HITL approval gate** before prose; emits `approved_blueprint` | **Strong HITL approval gate** before prose; emits `approved_blueprint` | Limitation <-> future direction pairing |
 
 For Methods and Results, the approved Blueprint is passed to the reviewer as `approved_blueprint`:
@@ -613,7 +613,7 @@ For Methods and Results, Step 3 is constrained by `approved_blueprint`. The writ
 |---------|---------------|-------------------|
 | Introduction | Broad context -> narrow to problem -> existing approaches -> gap statement -> contribution -> roadmap | Funnel structure; citation placeholders [Author, Year]; explicit gap; "we introduce/present/propose"; no over-promising |
 | Methods | Overview -> data description -> step-by-step procedure -> tools/versions -> evaluation | Past tense; passive preferred; every parameter stated; software versions explicit; no results or interpretation |
-| Results | Opening goal -> method-brief -> primary finding + stats -> supporting details -> figure reference -> transition | No interpretation (save for Discussion); statistics inline; figures described not just referenced |
+| Results | Result rationale -> method-brief -> primary finding + stats -> figure evidence/rationale -> takeaway -> transition | No interpretation (save for Discussion); statistics inline; figures described as evidence, not just referenced |
 | Discussion | Recap finding -> interpretation -> literature comparison -> implications -> limitations -> future | Interpretation required; compare with literature [citations]; no new data; appropriate hedging; end with broader impact |
 
 **Integration pass** (after prose, section-specific checks):
@@ -849,6 +849,8 @@ Before final approval:
 **Results-specific**:
 - [ ] Approved Results Blueprint exists, or Lite Mode reduced Blueprint records `approval_status: skipped_by_user`
 - [ ] All figures/tables referenced and described
+- [ ] Each subsection explains why the result is needed for the paper's argument
+- [ ] Each figure/table has an explicit evidentiary role for a claim, not just a descriptive placement
 - [ ] Statistics complete (values, tests, p-values, n)
 - [ ] No interpretation beyond data
 - [ ] Transitions connect subsections

@@ -23,10 +23,10 @@ Structural patterns extracted from exemplar computational biology papers.
 ├── 2.1 [Tool Name] Framework Overview
 │   └── Multi-component workflow description with Figure 1
 ├── 2.2 [Task 1] Evaluation (e.g., Batch Correction)
-│   ├── Problem statement
+│   ├── Result rationale / problem statement
 │   ├── Benchmark datasets
 │   ├── Comparison methods
-│   ├── Metrics and results (Table/Figure)
+│   ├── Metrics and results (Table/Figure as claim evidence)
 │   └── Key findings summary
 ├── 2.3 [Task 2] Evaluation (e.g., Cell Type Annotation)
 │   └── [Same substructure as 2.2]
@@ -40,13 +40,14 @@ Structural patterns extracted from exemplar computational biology papers.
 - **Task sections**: Each major capability gets dedicated subsection
 - **Consistent internal structure**: Each task section follows identical format
 - **Progressive complexity**: Tasks ordered from fundamental to advanced
-- **Visual anchoring**: Each major section references specific figure/table
+- **Claim-first rationale**: Each subsection states why the result is needed for the paper's argument before reporting data
+- **Visual anchoring**: Each major section references specific figure/table as evidence for a claim, not as decoration
 
 ### Example Opening Paragraph (Framework Overview)
 > "[ToolName] employs a multi-agent collaborative framework to address [problem domain]. As illustrated in Figure 1, the system consists of [N] specialized modules: [Module1] for [function1], [Module2] for [function2], and [Module3] for [function3]. These components interact through [mechanism], enabling [key capability]."
 
 ### Example Task Evaluation Paragraph
-> "We first evaluated [ToolName]'s performance on [task], a critical step in [domain] analysis. Using [N] benchmark datasets spanning [characteristic range] (Table 1), we compared [ToolName] against [N] established methods: [Method1], [Method2], and [Method3]. [ToolName] achieved the highest average [metric] of [value] ± [SD] across all datasets, representing a [X%] improvement over the next-best method, [Method2] ([value] ± [SD], paired t-test, p < [threshold]) (Figure 2A). Performance gains were particularly pronounced on [specific dataset type], where [ToolName] outperformed all baselines by at least [magnitude] (Figure 2B)."
+> "We first evaluated [ToolName]'s performance on [task], a critical step in [domain] analysis because [reason this capability must be established before later claims]. Using [N] benchmark datasets spanning [characteristic range] (Table 1), we compared [ToolName] against [N] established methods: [Method1], [Method2], and [Method3]. [ToolName] achieved the highest average [metric] of [value] ± [SD] across all datasets, representing a [X%] improvement over the next-best method, [Method2] ([value] ± [SD], paired t-test, p < [threshold]) (Figure 2A). Figure 2A is used here to show [specific evidence needed for the performance claim], while Figure 2B shows that gains were particularly pronounced on [specific dataset type], where [ToolName] outperformed all baselines by at least [magnitude]."
 
 ---
 
@@ -201,11 +202,11 @@ Results
 ```markdown
 ### [Task Name]
 
-[1-2 sentence problem statement explaining why this task matters]
+[1-2 sentence problem statement explaining why this result is needed for the paper's central claim]
 
 We evaluated [method] on [dataset description with size]. [Brief description of experimental setup].
 
-[Method] achieved [primary metric] of [value], compared to [baseline method] ([value]) and [other method] ([value]) (Figure/Table X). [Additional metric] showed similar trends, with [method] demonstrating [specific improvement] (p < [threshold]).
+[Method] achieved [primary metric] of [value], compared to [baseline method] ([value]) and [other method] ([value]) (Figure/Table X). Figure/Table X is necessary here because it [shows the evidence needed for the claim: comparison, distribution, spatial pattern, workflow output, or statistical support]. [Additional metric] showed similar trends, with [method] demonstrating [specific improvement] (p < [threshold]).
 
 [1 sentence highlighting most notable finding or biological relevance]
 ```
@@ -262,6 +263,14 @@ To assess the robustness of our findings, we [applied/tested] [method/signature]
 
 ## Figure Integration Patterns
 
+### Claim-Driven Figure Contract
+Every Results figure/table needs a prose contract:
+1. **Result rationale**: why this result must appear in the Results narrative.
+2. **Claim supported**: the specific claim/question the figure helps answer.
+3. **Evidence shown**: what visual/statistical evidence the figure displays.
+4. **Figure rationale / need for figure**: why readers need the figure/table rather than a text-only statement.
+5. **Takeaway**: the data-backed conclusion, without Discussion-level mechanism.
+
 ### Pattern: Figure Introduction
 - **First mention**: "(Figure 1)" or "(Figure 1A)"
 - **Detailed reference**: "As shown in Figure 1A, ..."
@@ -271,9 +280,11 @@ To assess the robustness of our findings, we [applied/tested] [method/signature]
 1. Introduce figure within 2 sentences of first data mention
 2. Describe what figure shows before stating conclusion
 3. Reference specific panels (A, B, C) when applicable
+4. State or imply why this figure/table is necessary for the claim
+5. Avoid display-only figures whose evidentiary role is unclear
 
 ### Example
-> "Dimensionality reduction revealed distinct clustering patterns (Figure 2A). UMAP visualization showed clear separation between [condition1] and [condition2] samples, with [metric] confirming cluster quality (Figure 2B, silhouette score = 0.73)."
+> "To determine whether [condition] produced a coherent transcriptional shift rather than isolated marker changes, we first visualized sample-level structure. UMAP visualization showed clear separation between [condition1] and [condition2] samples (Figure 2A), making this panel the primary evidence for global transcriptional divergence. This separation was supported quantitatively by [metric] (Figure 2B, silhouette score = 0.73)."
 
 ---
 
@@ -322,8 +333,10 @@ To assess the robustness of our findings, we [applied/tested] [method/signature]
 1. **Interpretation in Results**: Save mechanistic explanations for Discussion
 2. **Missing statistics**: Every comparison needs quantitative support
 3. **Orphan figures**: Every figure must be referenced in text
-4. **Vague comparisons**: "better" → "15% higher accuracy (p < 0.01)"
-5. **Inconsistent terminology**: Use same term for same concept throughout
-6. **Missing multiple testing correction**: Report FDR when many comparisons are made
-7. **Overclaiming**: "proves" → "suggests" or "indicates" (unless truly definitive)
-8. **Missing validation**: Key findings should be validated when possible
+4. **Missing result rationale**: Each subsection must explain why this result is needed for the paper's argument
+5. **Decorative figures**: Figure/table placement must explain the claim it supports and why readers need to see it
+6. **Vague comparisons**: "better" → "15% higher accuracy (p < 0.01)"
+7. **Inconsistent terminology**: Use same term for same concept throughout
+8. **Missing multiple testing correction**: Report FDR when many comparisons are made
+9. **Overclaiming**: "proves" → "suggests" or "indicates" (unless truly definitive)
+10. **Missing validation**: Key findings should be validated when possible
