@@ -208,7 +208,7 @@ We evaluated [method] on [dataset description with size]. [Brief description of 
 
 [Method] achieved [primary metric] of [value], compared to [baseline method] ([value]) and [other method] ([value]) (Figure/Table X). Figure/Table X is necessary here because it [shows the evidence needed for the claim: comparison, distribution, spatial pattern, workflow output, or statistical support]. [Additional metric] showed similar trends, with [method] demonstrating [specific improvement] (p < [threshold]).
 
-[1 sentence highlighting most notable finding or biological relevance]
+[1 sentence closing takeaway: what this result shows/indicates for the paper's central claim, without new data or Discussion-level mechanism]
 ```
 
 ### Template 2: Benchmark Comparison Section
@@ -221,6 +221,8 @@ To systematically evaluate [method], we assembled a benchmark comprising [N] dat
 Across all datasets, [method] achieved an average [metric] of [value ± SD], representing a [X%] improvement over the best baseline ([method name]: [value ± SD]). Performance gains were particularly pronounced in [specific condition], where [method] outperformed alternatives by [magnitude] (Figure X).
 
 Statistical analysis confirmed these improvements were significant ([test name], p < [threshold] for [N]/[total] comparisons).
+
+Together, these results show that [method/finding] [data-backed conclusion tied to the benchmark claim].
 ```
 
 ### Template 3: Case Study Section
@@ -288,6 +290,30 @@ Every Results figure/table needs a prose contract:
 
 ---
 
+## Subsection Closing Takeaway Patterns
+
+Empirical/evaluation Results subsections should usually close with one concise takeaway sentence. The closing takeaway answers: "What did we learn from this result?" or "Which paper-level claim does this result now support?"
+
+### Rules
+1. Synthesize only data already reported in the subsection.
+2. Do not introduce new statistics, methods, figures, or literature.
+3. Avoid mechanistic speculation and broad implications reserved for Discussion.
+4. Use a roadmap/purpose closing instead of a result takeaway for overview, dataset, or benchmark-construction subsections.
+5. Keep it to one sentence unless the subsection is unusually complex.
+
+### Common Forms
+- "These results show that [method/finding] [data-backed capability]."
+- "Together, these findings indicate that [observed pattern] [supports specific claim]."
+- "Thus, [method/system] [achieves demonstrated outcome] while [bounded qualifier]."
+- "Collectively, these analyses establish [validated result] as [role in the paper's argument]."
+
+### Boundary Examples
+- Good Results closing: "These results show that M EDEA improves target nomination across disease and cell type contexts."
+- Good setup closing: "This benchmark therefore tests whether methods generalize across contexts rather than optimizing for a single indication."
+- Too Discussion-like: "These findings will transform therapeutic discovery and reveal the mechanism of disease progression."
+
+---
+
 ## Statistical Reporting Conventions
 
 ### Format Standards
@@ -335,8 +361,10 @@ Every Results figure/table needs a prose contract:
 3. **Orphan figures**: Every figure must be referenced in text
 4. **Missing result rationale**: Each subsection must explain why this result is needed for the paper's argument
 5. **Decorative figures**: Figure/table placement must explain the claim it supports and why readers need to see it
-6. **Vague comparisons**: "better" → "15% higher accuracy (p < 0.01)"
-7. **Inconsistent terminology**: Use same term for same concept throughout
-8. **Missing multiple testing correction**: Report FDR when many comparisons are made
-9. **Overclaiming**: "proves" → "suggests" or "indicates" (unless truly definitive)
-10. **Missing validation**: Key findings should be validated when possible
+6. **Missing closing takeaway**: Empirical/evaluation subsections should close with what the result shows or supports
+7. **Overloaded closing takeaway**: Do not introduce new data, new figures, or Discussion-level implications in the final sentence
+8. **Vague comparisons**: "better" → "15% higher accuracy (p < 0.01)"
+9. **Inconsistent terminology**: Use same term for same concept throughout
+10. **Missing multiple testing correction**: Report FDR when many comparisons are made
+11. **Overclaiming**: "proves" → "suggests" or "indicates" (unless truly definitive)
+12. **Missing validation**: Key findings should be validated when possible

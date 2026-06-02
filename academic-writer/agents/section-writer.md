@@ -649,6 +649,7 @@ results_blueprint:
       - "Subsection order and titles"
       - "Planned claim or finding under each subsection"
       - "Why each result/subsection is needed for the paper's argument"
+      - "Planned closing takeaway for each empirical/evaluation subsection"
     output_format: |
       ## Results Blueprint
 
@@ -659,22 +660,24 @@ results_blueprint:
          1. Rationale: [why this result is needed]
          2. Claim/finding: [planned claim/finding]
          3. Evidence: [supporting evidence and figure/table role]
+         4. Closing takeaway: [one sentence: what this result shows/indicates]
       2. [Subsection title]
          1. Rationale: [why this result is needed]
          2. Claim/finding: [planned claim/finding]
          3. Evidence: [supporting evidence and figure/table role]
+         4. Closing takeaway: [one sentence: what this result shows/indicates]
     requirement: "Collaborate with user and revise as needed; final hard gate occurs at Step 2d"
 
   step_2b_blueprint_matrix:
     action: "Generate the Results Blueprint matrix"
     content:
       - "One row per planned claim or finding"
-      - "Result rationale, evidence source, figure/table mapping, figure rationale, statistics, and scope limits"
+      - "Result rationale, evidence source, figure/table mapping, figure rationale, statistics, closing takeaway, and scope limits"
       - "Explicit marker for missing values that must be resolved before prose"
     output_format: |
-      | Block | Subsection | Result Rationale | Claim/Finding | Evidence Source | Figure/Table | Figure/Table Rationale | Statistics | Scope Limits |
-      |-------|------------|------------------|---------------|-----------------|--------------|------------------------|------------|--------------|
-      | R1 | Signal detection performance | Establishes whether the method solves the core detection task before downstream interpretation | Proposed signal detects known interaction pairs | gold-standard DDI list + EHR/lab output | Figure 2A, Table 1 | Shows both visual ranking and quantitative operating characteristics needed to support the performance claim | PPV, NPV, sensitivity, specificity, patient count | report detection performance only; save causal interpretation for Discussion |
+      | Block | Subsection | Result Rationale | Claim/Finding | Evidence Source | Figure/Table | Figure/Table Rationale | Statistics | Closing Takeaway | Scope Limits |
+      |-------|------------|------------------|---------------|-----------------|--------------|------------------------|------------|------------------|--------------|
+      | R1 | Signal detection performance | Establishes whether the method solves the core detection task before downstream interpretation | Proposed signal detects known interaction pairs | gold-standard DDI list + EHR/lab output | Figure 2A, Table 1 | Shows both visual ranking and quantitative operating characteristics needed to support the performance claim | PPV, NPV, sensitivity, specificity, patient count | These results show that the proposed signal can recover known interaction pairs with stronger operating characteristics than baselines. | report detection performance only; save causal interpretation for Discussion |
     requirement: "Collaborate with user and revise as needed; final hard gate occurs at Step 2d"
 
   step_2c_gap_and_risk_check:
@@ -684,6 +687,8 @@ results_blueprint:
       - "Every result/subsection has a rationale explaining why it is needed"
       - "Every figure/table listed by the user is placed with a claim-supported rationale or explicitly excluded"
       - "Statistics include sample size, test name, effect estimate, or p-value when applicable"
+      - "Every empirical/evaluation subsection has a planned closing takeaway that restates what the data support without adding new data"
+      - "Overview or benchmark-construction subsections may close with a roadmap or evaluation purpose instead of a result takeaway"
       - "No figure/table is decorative, redundant, or disconnected from the claim it supports"
       - "No row asks the Results prose to interpret beyond the data"
       - "Null or negative findings are represented when the interview identified them"
@@ -910,7 +915,7 @@ results_prose:
     3_primary_finding: "Key result with full statistics"
     4_supporting_details: "Secondary observations, comparisons"
     5_figure_evidence: "Describe what the figure/table shows and why it is the right evidence for the claim"
-    6_takeaway: "State the data-backed takeaway without Discussion-level interpretation"
+    6_closing_takeaway: "End the subsection with one sentence stating what the data show/indicate, without new data or Discussion-level interpretation"
     7_transition: "Lead to next subsection"
 
   writing_rules:
@@ -920,6 +925,9 @@ results_prose:
     - "Each subsection opens by explaining why the result is needed for the paper's argument"
     - "Figures described as evidence for a specific claim, not just referenced"
     - "Do not include a figure/table unless the prose explains what claim it supports and why readers need to see it"
+    - "End each empirical/evaluation subsection with a concise closing takeaway (e.g., 'These results show...', 'Together, these findings indicate...', 'Thus, [method]...')"
+    - "Closing takeaways must synthesize only data already reported in that subsection; do not introduce new numbers, new claims, or mechanistic speculation"
+    - "For overview/setup subsections, close with the roadmap or evaluation purpose rather than forcing an empirical takeaway"
     - "No interpretation beyond what data shows (save for Discussion)"
     - "Past tense for completed analyses, present tense for figure descriptions"
     - "Active voice for findings ('We identified...', 'Analysis revealed...')"
@@ -1200,6 +1208,7 @@ Before submission to Reviewer, verify all applicable items:
 - [ ] Every figure/table referenced at least once
 - [ ] Every subsection explains why the result is needed for the Results narrative
 - [ ] Every figure/table supports a stated claim and has a clear evidentiary rationale
+- [ ] Every empirical/evaluation subsection ends with a concise data-backed closing takeaway
 - [ ] All key findings from user data included
 - [ ] Statistics properly formatted (matching Target Voice Layer)
 - [ ] No interpretation beyond data (save for Discussion)

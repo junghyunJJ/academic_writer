@@ -1,21 +1,20 @@
-# Academic Writer v2.0 — Write Publication-Quality IMRAD Sections
+# Academic Writer v3.0 — Write Publication-Quality IMRAD Sections
 
 Multi-agent system for writing publication-quality Introduction, Methods, Results, and Discussion sections for academic research articles. Learns writing patterns from reference papers through RAG-based dual-layer analysis, gathers research intent via tiered conversational interviews, generates outlined drafts, and improves continuously through feedback.
 
-**Version**: 2.0 | **Released**: 2026-05-07 | **Skill Invocation**: `/academic-writer`
+**Version**: 3.0 | **Released**: 2026-06-02 | **Skill Invocation**: `/academic-writer`
 
 ---
 
-## What's New in v2.0
+## What's New in v3.0
 
 | Change | Details |
 |--------|---------|
-| **Methods/Results Blueprint Gate** | Methods and Results sections now require an explicit user-approved hierarchical skeleton + verification matrix (the Blueprint) before prose generation begins. Prose is contractually constrained to the approved Blueprint. |
-| **Blueprint Persistence and Reviewer Handoff** | The approved Blueprint is persisted to `paper_context.methods_blueprint` or `paper_context.results_blueprint` and passed directly to the Section Reviewer as `approved_blueprint`, enabling a dedicated Pass 8 Blueprint Alignment review. |
-| **Lite Mode Blueprint** | When the user explicitly requests "outline only", "skip blueprint", or "lite mode", the writer emits a reduced Blueprint with `approval_status: skipped_by_user` so the Reviewer can intentionally skip Blueprint Alignment rather than treating it as a missing input. |
-| **Pass 8: Blueprint Alignment** | A new eighth review pass (weight 1.4 for both Methods and Results) verifies that every method step, tool/version, parameter, data source, output, figure/algorithm placement, claim, statistic, and subsection in the prose maps to an approved Blueprint row. |
-| **User-Specified Keyword System** | Writers can now supply Tier 1 (must-emphasize) and Tier 2 (natural-include) keywords and key sentences. The Reviewer's Pass 5 Completeness check verifies all tiers are properly placed, flagging any keyword that could not be naturally integrated. |
-| **Paper Context Blueprint Fields** | `paper_context` now tracks `methods_blueprint` and `results_blueprint` fields so Blueprint agreements persist across the writing session and are available to downstream sections. |
+| **Results Closing Takeaway Contract** | Empirical and evaluation Results subsections now end with a concise one-sentence data-backed takeaway that states what the reported data show without adding Discussion-level interpretation. |
+| **Expanded Results Blueprint Matrix** | Results Blueprints now capture result rationale, figure/table rationale, statistics, closing takeaway, and scope limits so prose has an explicit contract before drafting begins. |
+| **Reviewer Alignment for Takeaways** | Pass 8 Blueprint Alignment now checks that every empirical/evaluation subsection's closing takeaway matches the approved Blueprint and does not introduce new data or interpretation. |
+| **Setup Subsection Exception** | Overview, dataset, and benchmark-construction subsections may close with roadmap or evaluation-purpose language instead of a forced empirical takeaway. |
+| **Results Pattern Library Update** | Results reference templates now include closing takeaway forms, boundary examples, and failure modes for missing or overloaded takeaway sentences. |
 
 ---
 
@@ -54,6 +53,7 @@ Multi-agent system for writing publication-quality IMRAD sections (Introduction,
 | **Dual-Layer Learning** | Learns section structure from one reference source, voice/tone from another |
 | **Tiered Interview** | Four-phase conversational approach (Context Detection → Core Questions → Adaptive Follow-ups → Intent Confirmation) |
 | **Methods/Results Blueprint Gate** | Requires user-approved hierarchical skeleton + verification matrix before Methods or Results prose generation, then persists the approved Blueprint for reviewer alignment |
+| **Results Closing Takeaways** | Requires empirical/evaluation Results subsections to close with a concise data-backed takeaway while keeping interpretation in Discussion |
 | **User-Specified Keywords** | Tier 1 (must-emphasize) and Tier 2 (natural-include) keywords and key sentences are tracked through writing and verified in review |
 | **Section-Specific Configuration** | Writing rules, review weights, and guidance tailored to each IMRAD section |
 | **Cross-Section Coherence** | Detects existing sections and enforces consistency (Methods references Results, Discussion references Introduction) |
@@ -361,7 +361,7 @@ LLM-detected keyword candidates from interview responses are presented to the us
 | Section | Matrix contract | Handoff |
 |---------|-----------------|---------|
 | Methods | `Block`, `Subsection`, `Procedure/Step`, `Data/Input`, `Tool/Version`, `Parameters`, `Output`, `Reproducibility Risk` | Persist to `paper_context.methods_blueprint`; Reviewer receives the same object as `approved_blueprint` |
-| Results | `Block`, `Subsection`, `Claim/Finding`, `Evidence Source`, `Figure/Table`, `Statistics`, `Scope Limits` | Persist to `paper_context.results_blueprint`; Reviewer receives the same object as `approved_blueprint` |
+| Results | `Block`, `Subsection`, `Result Rationale`, `Claim/Finding`, `Evidence Source`, `Figure/Table`, `Figure/Table Rationale`, `Statistics`, `Closing Takeaway`, `Scope Limits` | Persist to `paper_context.results_blueprint`; Reviewer receives the same object as `approved_blueprint` |
 
 Lite Mode (triggered only by explicit user request: "outline only", "skip blueprint", or "lite mode") emits a reduced `approved_blueprint` with `approval_status: skipped_by_user`, so the Reviewer can intentionally skip Blueprint Alignment instead of treating the input as missing.
 
@@ -370,6 +370,7 @@ Lite Mode (triggered only by explicit user request: "outline only", "skip bluepr
 - Real-time Target Voice RAG search (2-3 exemplar paragraphs per subsection)
 - Prose generation with matched style
 - For Methods/Results, constrain prose to the approved Blueprint and return to Blueprint approval before adding new claims, method steps, figures/tables, statistics, tools, parameters, data sources, outputs, figure/algorithm placements, or subsections
+- For Results, close each empirical/evaluation subsection with a one-sentence data-backed takeaway; overview, dataset, or benchmark-construction subsections may close with roadmap or evaluation-purpose language
 - Integration pass: terminology, citations, hedging, writing rules compliance, keyword placement verification
 
 **paper_context fields** (accumulated across sections):
@@ -601,7 +602,7 @@ Gather section-specific research materials (see Section Writer above).
 | Section | Matrix contract | Handoff |
 |---------|-----------------|---------|
 | Methods | `Block`, `Subsection`, `Procedure/Step`, `Data/Input`, `Tool/Version`, `Parameters`, `Output`, `Reproducibility Risk` | Persist to `paper_context.methods_blueprint`; Reviewer receives the same object as `approved_blueprint` |
-| Results | `Block`, `Subsection`, `Claim/Finding`, `Evidence Source`, `Figure/Table`, `Statistics`, `Scope Limits` | Persist to `paper_context.results_blueprint`; Reviewer receives the same object as `approved_blueprint` |
+| Results | `Block`, `Subsection`, `Result Rationale`, `Claim/Finding`, `Evidence Source`, `Figure/Table`, `Figure/Table Rationale`, `Statistics`, `Closing Takeaway`, `Scope Limits` | Persist to `paper_context.results_blueprint`; Reviewer receives the same object as `approved_blueprint` |
 
 Lite Mode still emits a reduced `approved_blueprint` with `approval_status: skipped_by_user`, so Reviewer can intentionally skip Blueprint Alignment instead of treating the input as missing.
 
@@ -613,6 +614,7 @@ After user approval, the writer persists the Blueprint to `paper_context.methods
 - Real-time Target Voice RAG search (2-3 exemplar paragraphs per subsection)
 - Prose generation with matched style
 - For Methods/Results, constrain prose to the approved Blueprint and return to Blueprint approval before adding new claims, method steps, figures/tables, statistics, tools, parameters, data sources, outputs, figure/algorithm placements, or subsections
+- For Results, close each empirical/evaluation subsection with a one-sentence data-backed takeaway; overview, dataset, or benchmark-construction subsections may close with roadmap or evaluation-purpose language
 - Integration pass: terminology, citations, hedging compliance, keyword placement verification
 
 **Output**: Draft section (Introduction/Methods/Results/Discussion) plus `approved_blueprint` metadata persisted to `paper_context.methods_blueprint` or `paper_context.results_blueprint` for Methods/Results
@@ -631,7 +633,7 @@ After user approval, the writer persists the Blueprint to `paper_context.methods
 - Pass 7: Reproducibility (Methods/Results) or Interpretation Rigor (Discussion)
 - Pass 8: Blueprint Alignment (Methods/Results only, weight 1.4) — verify prose follows the approved Blueprint
   - Methods: checks procedure, tool/version, parameter, input/output, figure/algorithm placement, and subsection alignment
-  - Results: checks claim, figure/table, statistic, scope limit, and subsection alignment
+  - Results: checks result rationale, claim, figure/table rationale, statistic, closing takeaway, scope limit, and subsection alignment
   - If `approved_blueprint.approval_status == "skipped_by_user"`, record `blueprint_alignment: skipped_by_user` and skip checks
 
 **Pass 9 (Discussion only): Over-interpretation Check** — each interpretation must be traceable to a specific Result; hedging must be appropriate; alternative explanations must be considered; causal language for correlational findings is flagged.
@@ -923,6 +925,8 @@ style-guide.md:
 | Blueprint approved by user | Required before prose begins (Step 2d) |
 | Blueprint persisted | Step 2e → `paper_context.methods_blueprint` or `.results_blueprint` |
 | Blueprint handed to Reviewer | As `approved_blueprint` alongside the draft |
+| Results closing takeaway planned | Required for empirical/evaluation subsections in the approved Results Blueprint |
+| Results setup exception | Overview, dataset, or benchmark-construction subsections may use roadmap/evaluation-purpose closings |
 | Pass 8 skipped | Only when `approval_status: skipped_by_user` (Lite Mode) |
 | Blueprint revision required | Any time prose would add content outside the approved Blueprint |
 

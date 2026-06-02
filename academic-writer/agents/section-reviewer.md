@@ -162,6 +162,8 @@ Section-specific structure checks:
 - Each subsection presents one major finding
 - Figures/tables introduced before or alongside their discussion as evidence for a specific claim
 - Each figure/table has a clear rationale for why readers need to see it
+- Each empirical/evaluation subsection closes with a concise data-backed takeaway
+- Overview or benchmark-construction subsections may close with roadmap/evaluation purpose instead of a result takeaway
 - No Discussion-level interpretation present
 - Appropriate scope (no Discussion content)
 
@@ -421,6 +423,7 @@ blueprint_alignment:
       - "Every result rationale in prose maps to the approved Blueprint"
       - "Every figure/table placement matches the approved Blueprint"
       - "Every figure/table rationale in prose matches the approved Blueprint"
+      - "Every empirical/evaluation subsection closing takeaway matches the approved Blueprint"
       - "Every reported statistic is present in, or directly supported by, the Blueprint"
       - "Scope limits are respected; Results prose does not include Discussion-level interpretation"
       - "No new claim, finding, statistic, comparison, figure/table placement, or subsection appears without approved Blueprint revision"
@@ -519,6 +522,8 @@ cross_section_consistency:
 - [ ] Subsection lacks rationale for why the result is needed
 - [ ] Figure/table placement differs from the approved Blueprint
 - [ ] Figure/table lacks rationale for what claim it supports or why it is needed
+- [ ] Empirical/evaluation subsection lacks closing takeaway
+- [ ] Closing takeaway introduces new data or Discussion-level interpretation
 - [ ] Statistic in prose is absent from or unsupported by the Blueprint
 - [ ] Scope limit from the Blueprint is violated
 - [ ] Claim without data support
