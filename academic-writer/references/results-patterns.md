@@ -265,6 +265,8 @@ To assess the robustness of our findings, we [applied/tested] [method/signature]
 
 ## Figure Integration Patterns
 
+For figure/table legend writing, load `references/legend-patterns.md` and apply it after the Results prose when displays are available.
+
 ### Claim-Driven Figure Contract
 Every Results figure/table needs a prose contract:
 1. **Result rationale**: why this result must appear in the Results narrative.
@@ -272,6 +274,7 @@ Every Results figure/table needs a prose contract:
 3. **Evidence shown**: what visual/statistical evidence the figure displays.
 4. **Figure rationale / need for figure**: why readers need the figure/table rather than a text-only statement.
 5. **Takeaway**: the data-backed conclusion, without Discussion-level mechanism.
+6. **Legend readiness**: panel labels, visual encodings, sample sizes, statistical notation, table value semantics, and unresolved missing fields.
 
 ### Pattern: Figure Introduction
 - **First mention**: "(Figure 1)" or "(Figure 1A)"
@@ -284,6 +287,7 @@ Every Results figure/table needs a prose contract:
 3. Reference specific panels (A, B, C) when applicable
 4. State or imply why this figure/table is necessary for the claim
 5. Avoid display-only figures whose evidentiary role is unclear
+6. Draft legends for available main/supplementary displays after prose, or mark missing fields explicitly with `[needs: ...]`
 
 ### Example
 > "To determine whether [condition] produced a coherent transcriptional shift rather than isolated marker changes, we first visualized sample-level structure. UMAP visualization showed clear separation between [condition1] and [condition2] samples (Figure 2A), making this panel the primary evidence for global transcriptional divergence. This separation was supported quantitatively by [metric] (Figure 2B, silhouette score = 0.73)."
@@ -361,10 +365,12 @@ Empirical/evaluation Results subsections should usually close with one concise t
 3. **Orphan figures**: Every figure must be referenced in text
 4. **Missing result rationale**: Each subsection must explain why this result is needed for the paper's argument
 5. **Decorative figures**: Figure/table placement must explain the claim it supports and why readers need to see it
-6. **Missing closing takeaway**: Empirical/evaluation subsections should close with what the result shows or supports
-7. **Overloaded closing takeaway**: Do not introduce new data, new figures, or Discussion-level implications in the final sentence
-8. **Vague comparisons**: "better" → "15% higher accuracy (p < 0.01)"
-9. **Inconsistent terminology**: Use same term for same concept throughout
-10. **Missing multiple testing correction**: Report FDR when many comparisons are made
-11. **Overclaiming**: "proves" → "suggests" or "indicates" (unless truly definitive)
-12. **Missing validation**: Key findings should be validated when possible
+6. **Missing legends**: Available figures/tables should receive legends or an explicit `omitted_no_metadata` status
+7. **Invented legend details**: Do not invent sample sizes, p-values, tests, encodings, scale bars, abbreviations, or cohort labels
+8. **Missing closing takeaway**: Empirical/evaluation subsections should close with what the result shows or supports
+9. **Overloaded closing takeaway**: Do not introduce new data, new figures, or Discussion-level implications in the final sentence
+10. **Vague comparisons**: "better" → "15% higher accuracy (p < 0.01)"
+11. **Inconsistent terminology**: Use same term for same concept throughout
+12. **Missing multiple testing correction**: Report FDR when many comparisons are made
+13. **Overclaiming**: "proves" → "suggests" or "indicates" (unless truly definitive)
+14. **Missing validation**: Key findings should be validated when possible

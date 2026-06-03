@@ -28,6 +28,7 @@ optional_input:
     matrix: "[approved Blueprint matrix]"
     gap_risk_decisions: "[resolved or user-accepted gaps]"
     revision_history: "[summary of user-requested changes before approval]"
+  figure_table_legends: "[Results-only legend drafts and missing-fields checklist, if generated]"
 ```
 
 ## Responsibilities
@@ -36,12 +37,13 @@ optional_input:
 2. **Statistical Validity**: Check proper statistical reporting
 3. **Logical Flow**: Assess coherence and argument structure
 4. **Figure-Text Alignment**: Ensure text accurately describes figures
-5. **Journal Compliance**: Check against target journal guidelines
-6. **Clarity & Concision**: Identify verbose or unclear passages
-7. **Reporting Guideline Compliance**: Verify adherence to applicable guidelines
-8. **Reproducibility Check**: Ensure sufficient methodological detail within section scope
-9. **Cross-Section Consistency** (when cross_section_reference is active): Verify terminology, method-result alignment, intro-discussion mirroring
-10. **Blueprint Alignment** (Methods/Results only): Verify that prose follows the user-approved Blueprint and does not introduce unapproved structure, claims, procedures, statistics, tools, parameters, or figure/table placements
+5. **Figure/Table Legend Review**: For Results, verify generated legends match source data and approved Blueprint
+6. **Journal Compliance**: Check against target journal guidelines
+7. **Clarity & Concision**: Identify verbose or unclear passages
+8. **Reporting Guideline Compliance**: Verify adherence to applicable guidelines
+9. **Reproducibility Check**: Ensure sufficient methodological detail within section scope
+10. **Cross-Section Consistency** (when cross_section_reference is active): Verify terminology, method-result alignment, intro-discussion mirroring
+11. **Blueprint Alignment** (Methods/Results only): Verify that prose follows the user-approved Blueprint and does not introduce unapproved structure, claims, procedures, statistics, tools, parameters, or figure/table placements
 
 ## Review Pass Weight Overrides by Section
 
@@ -102,6 +104,7 @@ Base checks (all sections):
 - Flag unsupported statements
 - Verify quantitative values match source
 - Check figure/table reference accuracy
+- For Results legends, verify titles, panels, sample sizes, statistics, encodings, abbreviations, and table notation match source data or are marked `[needs: ...]`
 
 Section-specific additions:
 
@@ -195,6 +198,7 @@ Base checks (all sections):
 - All user's key findings represented?
 - All figures/tables referenced?
 - Required statistics included?
+- For Results, all available figures/tables have legends or explicit `omitted_no_metadata` status?
 
 **Keyword/Key Sentence Completeness** (when `user_keywords` provided):
 
@@ -384,6 +388,7 @@ reproducibility_review:
       - "Axes labeled and units specified (noted in review, checked in figures)"
       - "Color coding explained if used"
       - "Error bars defined (SD, SEM, CI)"
+      - "Legend defines scale bars, encodings, axes, units, and error bars when known"
 
   methods_extra_checks:
     - "Step-by-step procedure complete enough to replicate"
@@ -423,6 +428,8 @@ blueprint_alignment:
       - "Every result rationale in prose maps to the approved Blueprint"
       - "Every figure/table placement matches the approved Blueprint"
       - "Every figure/table rationale in prose matches the approved Blueprint"
+      - "Every generated legend maps to an approved figure/table and uses only approved or source-supported metadata"
+      - "Every partial legend preserves missing information as `[needs: ...]` instead of inventing values"
       - "Every empirical/evaluation subsection closing takeaway matches the approved Blueprint"
       - "Every reported statistic is present in, or directly supported by, the Blueprint"
       - "Scope limits are respected; Results prose does not include Discussion-level interpretation"
@@ -522,6 +529,10 @@ cross_section_consistency:
 - [ ] Subsection lacks rationale for why the result is needed
 - [ ] Figure/table placement differs from the approved Blueprint
 - [ ] Figure/table lacks rationale for what claim it supports or why it is needed
+- [ ] Available figure/table has no legend and no explicit omitted_no_metadata status
+- [ ] Legend introduces sample size, statistic, panel meaning, color encoding, scale bar, abbreviation, or cohort label not supported by source data or Blueprint
+- [ ] Partial legend omits `[needs: ...]` markers for missing required information
+- [ ] Table legend does not define row/column semantics, value meaning, or statistical notation
 - [ ] Empirical/evaluation subsection lacks closing takeaway
 - [ ] Closing takeaway introduces new data or Discussion-level interpretation
 - [ ] Statistic in prose is absent from or unsupported by the Blueprint

@@ -15,11 +15,24 @@ Multi-agent system for writing publication-quality IMRAD sections by learning fr
 ┌───────────────────────────────────────────────────────────────────┐
 │                     ORCHESTRATOR (SKILL.md)                       │
 │                                                                   │
+│  Phase -3: Deep Interview Gate                                    │
+│  ┌─────────────────────────────────────────────────────────────┐  │
+│  │  One question at a time: goal, scope, constraints, done      │  │
+│  │  → Emits academic_writer_brief for all downstream phases     │  │
+│  └──────────────────────────┬──────────────────────────────────┘  │
+│                              │                                    │
 │  Phase -2: Section Selection                                      │
 │  ┌─────────────────────────────────────────────────────────────┐  │
 │  │  "Which section would you like to write?"                    │  │
 │  │  1. Introduction  2. Methods  3. Results  4. Discussion     │  │
 │  │  → Sets SECTION_TYPE → loads references/{section}-patterns  │  │
+│  └──────────────────────────┬──────────────────────────────────┘  │
+│                              │                                    │
+│  Phase -1.5: Reference Paper Gate (mandatory)                    │
+│  ┌──────────────────────────▼──────────────────────────────────┐  │
+│  │  Ask for structure reference papers; if provided, ask        │  │
+│  │  whether voice/tone follows same papers or separate papers   │  │
+│  │  → Emits run_reference_layers                                │  │
 │  └──────────────────────────┬──────────────────────────────────┘  │
 │                              │                                    │
 │  RAG Health Check                                                 │
@@ -95,7 +108,7 @@ Multi-agent system for writing publication-quality IMRAD sections by learning fr
 |-------|------|-------|--------|
 | **Section Analyzer** | Extract structure patterns for SECTION_TYPE | RAG search results + reference patterns | Structure Layer for style guide |
 | **Style Extractor** | Extract voice/tone from Target Voice collection | RAG search results | Target Voice Layer for style guide |
-| **Section Writer** | Write section via tiered interview process | User data + merged style guide + RAG few-shot | Interview -> Outline -> Draft section |
+| **Section Writer** | Write section via tiered interview process | User data + merged style guide + RAG few-shot | Interview -> Outline -> Draft section; for Results, figure/table legends when available |
 | **Section Reviewer** | Section-weighted multi-pass review | Draft + source data | Review report + revision diffs + WHY |
 | **Pattern Learner** | Learn from feedback, section-tagged | Approved sections + feedback | Style guide updates (both layers) |
 | **Paper Preprocessor** | *Fallback*: Extract section from PDFs | Reference PDFs + SECTION_TYPE | Extracted section text + metadata |
@@ -148,12 +161,13 @@ section_configs:
 
   results:
     reference_file: "references/results-patterns.md"
+    legend_reference_file: "references/legend-patterns.md"
     writing_rules:
       tense: "past tense for analyses, present for figure descriptions"
       voice: "active for findings, passive for methods-brief"
       interpretation: "not allowed — save for Discussion"
       citations: "minimal — only for method references"
-      key_constraint: "every claim backed by data; each subsection states why the result is needed, why the figure/table is the right evidence, and closes with a data-backed takeaway; no over-interpretation"
+      key_constraint: "every claim backed by data; each subsection states why the result is needed, why the figure/table is the right evidence, closes with a data-backed takeaway, and generates figure/table legends for available displays; no over-interpretation"
     review_weight_overrides:
       factual_accuracy: 1.5
       statistical_review: 1.3
@@ -275,28 +289,134 @@ search_parameters:
 |---------|---------|---------|---------|---------|
 | Introduction | "field significance importance relevance" | "however despite gap limitation remains" | "we introduce present propose here" | *field-specific* |
 | Methods | "procedures implementation experimental design" | "we used employed applied implemented" | "parameters settings configuration threshold" | *field-specific* |
-| Results | "Results section findings statistical analysis" | "we found demonstrated showed revealed indicated" | "Figure Table panel comparison significantly" | *field-specific* |
+| Results | "Results section findings statistical analysis" | "we found demonstrated showed revealed indicated" | "Figure Table panel legend caption comparison significantly" | *field-specific* |
 | Discussion | "suggest demonstrate indicate consistent with" | "consistent with previous findings prior work" | "limitation future direction caveat" | *field-specific* |
 
 **Real-time few-shot queries** (for Section Writer, during prose):
 - Subsection topic keywords -> Target Voice collection (primary)
 - Structure reference -> Structure collection (secondary, when needed)
+- Results legend writing -> Target Voice query `"figure legend caption panel table notation"` plus `references/legend-patterns.md`
 
 ---
 
 ## Workflow
 
+### Phase -3: Deep Interview Gate (Built-in)
+
+**Purpose**: Clarify the writing task before section selection and prevent premature assumptions. This embeds the `$deep-interview` questioning style inside `$academic-writer`; it does not require activating the separate `$deep-interview` runtime.
+
+Run this gate at the start of every `$academic-writer` invocation. Ask one question at a time, using this exact shape:
+
+```md
+현재 이해: {요청을 한 문장으로 요약}
+막힌 결정: {가장 중요한 불확실성}
+추천 답안: {있으면 제시}
+질문: {한 가지 질문}
+```
+
+Question axes, in priority order:
+1. **Goal**: what output the user wants from this run.
+2. **Scope / exclusions**: which section(s), figures, tables, references, datasets, or tasks are in or out.
+3. **Constraints**: target journal, style source, RAG/PDF availability, language, length, deadline, no-assumption boundaries.
+4. **Completion criteria**: what counts as acceptable output.
+5. **Existing context and impact**: prior sections, paper context, downstream consistency needs.
+
+Rules:
+- Ask only the single highest-impact unresolved question per round.
+- Do not ask for information that can be discovered from local files, provided materials, `paper_context`, or RAG/PDF metadata.
+- If the user's opening request already resolves the axes, emit the brief and proceed without adding unnecessary questions.
+- Stop the gate when the core request is actionable; leave non-blocking uncertainties in `open_questions`.
+
+Gate output:
+
+```yaml
+academic_writer_brief:
+  target_result: "[what the user wants produced]"
+  likely_section_type: "introduction|methods|results|discussion|unknown"
+  scope_included: "[materials/sections/displays included]"
+  scope_excluded: "[explicit exclusions or none]"
+  constraints: "[journal/style/RAG/language/length/no-assumption constraints]"
+  completion_criteria: "[what done means for this run]"
+  existing_context: "[prior sections, paper_context, local files, or null]"
+  open_questions: "[non-blocking uncertainties]"
+  handoff: "Proceed to Phase -2 Section Selection"
+```
+
 ### Phase -2: Section Selection (NEW)
 
 **Purpose**: Let the user choose which IMRAD section to write. Sets SECTION_TYPE for all downstream phases.
 
-Orchestrator asks: "Which section would you like to write?" (1. Introduction / 2. Methods / 3. Results / 4. Discussion)
+Orchestrator asks: "Which section would you like to write?" (1. Introduction / 2. Methods / 3. Results / 4. Discussion). If `academic_writer_brief.likely_section_type` is already explicit, confirm it briefly or proceed directly when the user has clearly specified it.
 
-1. User selects one (or states section name directly)
+1. User selects one (or states section name directly, including via Phase -3)
 2. Set `SECTION_TYPE` = selected section
 3. Load `references/{SECTION_TYPE}-patterns.md`
 4. Activate the corresponding `section_configs` block
-5. All downstream agents receive SECTION_TYPE as a parameter
+5. Pass both `SECTION_TYPE` and `academic_writer_brief` to downstream agents
+
+### Phase -1.5: Reference Paper Gate (MANDATORY)
+
+**Purpose**: Always ask whether the user has reference paper(s) they want to use for this run, then separate structure references from voice/tone references. This gate complements RAG; it does not replace RAG unless the user asks to skip RAG.
+
+This step always runs after `SECTION_TYPE` is known and before the RAG Health Check.
+
+#### Step 1: Structure Reference Question (always ask)
+
+Ask:
+
+```md
+구조를 참고하고 싶은 reference paper가 있나요?
+있으면 PDF/Markdown/path/URL 위치를 알려주세요. 여러 개도 가능합니다.
+없으면 "없음"이라고 답해 주세요.
+```
+
+If the user provides one or more references, store them as `run_reference_layers.structure_references`.
+
+#### Step 2: Voice/Tone Reference Question (mandatory when any reference is provided)
+
+If the user provides any structure reference paper, ask:
+
+```md
+이 reference paper들의 voice/tone까지 따라할까요?
+아니면 voice/tone을 따라하고 싶은 다른 reference paper가 있나요?
+없으면 구조만 참고하고, 별도 voice/tone은 기존 style guide/RAG를 사용하겠습니다.
+```
+
+Supported answers:
+- **same_as_structure**: use the same paper(s) for structure and voice/tone.
+- **separate_voice_references**: user provides one or more separate voice/tone reference paper locations.
+- **structure_only**: use user references for structure only; keep voice/tone from existing style guide/RAG.
+
+Both `structure_references` and `voice_references` may contain one or more papers. The same paper may appear in both layers only when the user explicitly says to use it for both.
+
+#### Gate output
+
+```yaml
+run_reference_layers:
+  structure_references:
+    - source: "[path|URL|uploaded file identifier]"
+      role: "structure"
+      status: "provided|none|unreadable"
+      notes: "[user preference, target section, or page range]"
+  voice_references:
+    - source: "[path|URL|uploaded file identifier]"
+      role: "voice_tone"
+      status: "provided|none|unreadable"
+      notes: "[same_as_structure|separate_voice_reference|style notes]"
+  merge_policy:
+    structure_priority: "user_provided_structure_refs > RAG structure layer > references/{SECTION_TYPE}-patterns.md > data/style-guide.md"
+    voice_priority: "user_provided_voice_refs > RAG target voice layer > data/style-guide.md"
+    persistence: "run_specific_by_default; update data/style-guide.md only after user approval or Pattern Learner trigger"
+  open_reference_questions: "[missing paths, unreadable files, unresolved page ranges, or none]"
+```
+
+#### Processing rules
+
+1. Process `structure_references` with Paper Preprocessor -> Section Analyzer -> run-specific Structure Layer.
+2. Process `voice_references` with Paper Preprocessor -> Style Extractor -> run-specific Target Voice Layer.
+3. If a reference is unreadable, ask for a corrected location once; if still unavailable, mark `unreadable` and continue with RAG/style guide.
+4. Keep user-provided reference layers run-specific unless the user approves long-term learning.
+5. Use direct references as priority guidance for organization, outline shape, figure/table integration, and section-specific rhetorical structure; use voice references for sentence rhythm, tone, transitions, and statistical/legend wording.
 
 ### RAG Health Check (Before Phase -1)
 
@@ -314,9 +434,10 @@ rag_health_check:
     action: "Inform user and present options"
     message: |
       ⚠️ Cannot connect to the langconnect-rag MCP server.
-      Without RAG, reference paper-based style learning (Phase 0) and
+      Without RAG, RAG-based style learning (Phase 0) and
       real-time few-shot references (Step 3) will not be available.
-      Writing will proceed using only the existing style-guide.md patterns.
+      Writing will proceed using Phase -1.5 direct references if provided,
+      plus existing style-guide.md patterns.
 
     options:
       1:
@@ -330,10 +451,11 @@ rag_health_check:
 
       2:
         label: "Proceed without RAG"
-        description: "Write using only the existing style-guide.md patterns"
+        description: "Write using Phase -1.5 direct references if provided, plus existing style-guide.md patterns"
         action:
-          - "Skip Phase -1, Phase 0a, Phase 0b, Phase 1"
-          - "Proceed directly to Phase 2 (Writer) using existing style-guide.md"
+          - "Skip Phase -1 and RAG searches in Phase 0a/0b"
+          - "Process Phase -1.5 direct references if available; otherwise use existing style-guide.md"
+          - "Proceed to Phase 2 (Writer) using run_reference_layers if available and existing style-guide.md"
           - "Real-time RAG few-shot in Step 3 also disabled"
           - "Set rag_available: false for downstream agents"
 
@@ -341,7 +463,7 @@ rag_health_check:
         label: "Provide PDFs directly"
         description: "Provide PDF files directly instead of RAG to process via Paper Preprocessor"
         action:
-          - "Ask user to provide PDFs with dual-layer distinction (see below)"
+          - "Use any Phase -1.5 run_reference_layers already provided, or ask user to provide PDFs with dual-layer distinction (see below)"
           - "Activate Paper Preprocessor for each PDF"
           - "Preprocessor extracts section content → passes to appropriate agent"
           - "Proceed with Phase 0 using preprocessed content instead of RAG"
@@ -349,7 +471,8 @@ rag_health_check:
         # Dual-Layer PDF Selection (mirrors RAG collection selection)
         pdf_dual_layer:
           message: |
-            PDFs follow the same two-layer distinction as RAG collections:
+            PDFs follow the same two-layer distinction as Phase -1.5 direct references and RAG collections.
+            If Phase -1.5 already collected these references, do not ask again; reuse run_reference_layers.
 
             1️⃣ Structure Layer (for structure/pattern learning):
                → Papers whose section structure, subsection organization, or figure integration you want to emulate
@@ -391,36 +514,53 @@ rag_health_check:
 
 ### Phase 0a: Structure Pattern Learning (Parallel with 0b)
 
-**Input**: Structure Layer collection + SECTION_TYPE
+**Input**: Structure Layer collection + SECTION_TYPE + `run_reference_layers.structure_references`
 
-1. Execute 4 section-specific Structure Layer queries (see RAG Query Strategies) against selected collection
-2. Pass search results to Section Analyzer agent with SECTION_TYPE
-3. Analyzer extracts section-appropriate structural patterns, groups by source document, synthesizes cross-document patterns
-4. Optional: BioMCP enrichment for biological context
-5. Update `data/style-guide.md` Structure Layer section
-6. Update `references/{SECTION_TYPE}-patterns.md` if new templates found
+1. If `run_reference_layers.structure_references` exists, preprocess each reference and pass extracted target section/captions to Section Analyzer first.
+2. Execute 4 section-specific Structure Layer queries (see RAG Query Strategies) against selected collection when RAG is available.
+3. Pass search results and direct-reference extracts to Section Analyzer agent with SECTION_TYPE.
+4. Analyzer extracts section-appropriate structural patterns, groups by source document, synthesizes cross-document patterns, and marks direct-reference patterns as run-specific priority.
+5. Optional: BioMCP enrichment for biological context.
+6. Update the run-specific Structure Layer for this invocation. Update `data/style-guide.md` or `references/{SECTION_TYPE}-patterns.md` only after user approval or Pattern Learner trigger.
 
 ### Phase 0b: Target Voice Learning (Parallel with 0a)
 
-**Input**: Target Voice collection + SECTION_TYPE
+**Input**: Target Voice collection + SECTION_TYPE + `run_reference_layers.voice_references`
 
-1. Execute 3 section-specific + 1 field-specific voice queries against selected collection
-2. Pass search results to Style Extractor agent with SECTION_TYPE
-3. Extractor analyzes sentence patterns, transitions, statistical reporting style, logic flow, tone profile
-4. Update `data/style-guide.md` Target Voice Layer section
+1. If `run_reference_layers.voice_references` exists, preprocess each reference and pass extracted section/caption text to Style Extractor first.
+2. Execute 3 section-specific + 1 field-specific voice queries against selected collection when RAG is available.
+3. Pass search results and direct-reference extracts to Style Extractor agent with SECTION_TYPE.
+4. Extractor analyzes sentence patterns, transitions, statistical reporting style, logic flow, tone profile, and legend/caption wording where relevant.
+5. Update the run-specific Target Voice Layer for this invocation. Update `data/style-guide.md` only after user approval or Pattern Learner trigger.
 
 ### Phase 1: Style Merge
 
 **Input**: Structure Layer + Target Voice Layer from Phase 0a/0b
 
 **Priority Rules** (conflict resolution):
-- Structure -> Structure Layer
-- Voice/tone -> Target Voice Layer
-- Statistics -> Target Voice Layer
+- Structure -> user-provided Structure Layer first, then RAG/static Structure Layer
+- Voice/tone -> user-provided Target Voice Layer first, then RAG/static Target Voice Layer
+- Statistics -> Target Voice Layer unless a user-provided structure reference imposes a journal/reporting convention
 - Transitions -> Target Voice Layer
 - Figure refs -> Structure Layer (with Voice overlay)
+- Figure/table legends -> Structure Layer + `references/legend-patterns.md` (with Target Voice overlay)
 
 The merged guide is the complete `data/style-guide.md` -- no separate file needed. The writer reads the complete style guide and applies priority rules during writing.
+
+When `run_reference_layers` exists, the merged guide for that invocation is:
+
+```yaml
+merged_invocation_guide:
+  structure:
+    priority_1: "run_reference_layers.structure_references"
+    priority_2: "RAG Structure Layer"
+    priority_3: "references/{SECTION_TYPE}-patterns.md and data/style-guide.md"
+  voice_tone:
+    priority_1: "run_reference_layers.voice_references"
+    priority_2: "RAG Target Voice Layer"
+    priority_3: "data/style-guide.md"
+  persistence: "Do not write run-specific direct-reference patterns into data/style-guide.md unless the user approves learning from this output."
+```
 
 ### Phase 2: Content Creation (Section Writer)
 
@@ -432,10 +572,12 @@ The merged guide is the complete `data/style-guide.md` -- no separate file neede
 |---------|----------------|-----------------|
 | Introduction | Research topic, research gap, contribution, key references | Background notes (.md), related work notes, target journal |
 | Methods | Pipeline description, tools/versions, datasets, parameters | Pseudocode, code repo URL, pipeline figure, reporting guideline |
-| Results | CSV data + descriptions, figures + findings + stats, experimental context | Tables, results context (.md), target journal, reporting guideline |
+| Results | CSV data + descriptions, figures/tables + findings + stats + legend-ready display metadata, experimental context | Results context (.md), target journal, reporting guideline |
 | Discussion | Key findings summary, Results section text, limitations | Related work comparison, future directions, broader impact, target journal |
 
 Full input specification with Korean prompts: see `agents/section-writer.md` Step 0.
+
+For Results, a figure/table is "available" for legend drafting when either an actual file exists or the user provides sufficient description, panel, table, and statistical metadata for a partial or complete legend.
 
 #### Step 1: Tiered Conversational Interview (MAJOR UPGRADE)
 
@@ -535,7 +677,7 @@ Step 3: If Yes → Auto-extract cross-reference points
 |---|----------|------|---------------|
 | Q1 | What is the central narrative of this Results? (What story does the data tell?) | narrative-framing | ABT hint: "And..., But..., Therefore..." |
 | Q2 | Top 3-5 most important findings in order of importance, and why is each result needed for the paper's argument? | priority-setting | For each finding: claim/question answered + evidence + rationale |
-| Q3 | For each Figure/Table: what claim does it support, what does it show, why is this figure/table needed, and what is the key takeaway? | visual-inventory | Ensures claim-driven figure integration |
+| Q3 | For each Figure/Table: what claim does it support, what does it show, why is this figure/table needed, what is the key takeaway, and what legend details are available? | visual-inventory + legend-inventory | Ensures claim-driven figure integration and legend readiness |
 | Q4 | Preferred subsection order? | structure-preference | Default: progressive complexity |
 | Q5 | What is the most important comparison? (vs baseline, vs existing, across conditions) | comparison-framing | Anchors comparative analysis |
 
@@ -581,8 +723,8 @@ Methods/Results Lite Mode is available only when the user explicitly says "outli
 | Step | Introduction | Methods | Results | Discussion |
 |------|-------------|---------|---------|------------|
 | 2a: Skeleton | Funnel: broad -> problem -> gap -> contribution | **Blueprint skeleton**: subsection order, organization principle, method steps | **Blueprint skeleton**: subsection order, narrative arc, planned findings | Interpretive: summary -> comparison -> limitations -> future |
-| 2b: Details / Matrix | Per-paragraph key points + citations | **Blueprint matrix**: block, subsection, procedure, data/input, tool/version, parameters, output, reproducibility risk | **Blueprint matrix**: block, subsection, result rationale, claim/finding, evidence source, figure/table, figure rationale, statistics, closing takeaway, scope limits | Per-subsection interpretation + citations |
-| 2c: Verification | Conceptual figure placement (if any) | Gap/risk check: missing versions, parameters, input/output transitions | Gap/risk check: missing result rationale, unsupported claims, orphan or decorative figures, missing statistics, missing closing takeaway | Back-references to specific Results |
+| 2b: Details / Matrix | Per-paragraph key points + citations | **Blueprint matrix**: block, subsection, procedure, data/input, tool/version, parameters, output, reproducibility risk | **Blueprint matrix**: block, subsection, result rationale, claim/finding, evidence source, figure/table, figure rationale, statistics, closing takeaway, scope limits, legend status/missing fields | Per-subsection interpretation + citations |
+| 2c: Verification | Conceptual figure placement (if any) | Gap/risk check: missing versions, parameters, input/output transitions | Gap/risk check: missing result rationale, unsupported claims, orphan or decorative figures, missing statistics, missing closing takeaway, missing legend fields | Back-references to specific Results |
 | 2d: Approval / Connection | Transition leading into Methods/Results | **Strong HITL approval gate** before prose; emits `approved_blueprint` | **Strong HITL approval gate** before prose; emits `approved_blueprint` | Limitation <-> future direction pairing |
 
 For Methods and Results, the approved Blueprint is passed to the reviewer as `approved_blueprint`:
@@ -613,13 +755,13 @@ For Methods and Results, Step 3 is constrained by `approved_blueprint`. The writ
 |---------|---------------|-------------------|
 | Introduction | Broad context -> narrow to problem -> existing approaches -> gap statement -> contribution -> roadmap | Funnel structure; citation placeholders [Author, Year]; explicit gap; "we introduce/present/propose"; no over-promising |
 | Methods | Overview -> data description -> step-by-step procedure -> tools/versions -> evaluation | Past tense; passive preferred; every parameter stated; software versions explicit; no results or interpretation |
-| Results | Result rationale -> method-brief -> primary finding + stats -> figure evidence/rationale -> closing takeaway -> transition | No interpretation (save for Discussion); statistics inline; figures described as evidence, not just referenced; empirical subsections close with one data-backed takeaway |
+| Results | Result rationale -> method-brief -> primary finding + stats -> figure evidence/rationale -> closing takeaway -> transition -> figure/table legends for available displays | No interpretation (save for Discussion); statistics inline; figures described as evidence, not just referenced; empirical subsections close with one data-backed takeaway; legends use `references/legend-patterns.md` |
 | Discussion | Recap finding -> interpretation -> literature comparison -> implications -> limitations -> future | Interpretation required; compare with literature [citations]; no new data; appropriate hedging; end with broader impact |
 
 **Integration pass** (after prose, section-specific checks):
 - **Introduction**: citation placeholder completeness, gap statement presence, contribution clarity
 - **Methods**: reproducibility detail check, parameter completeness, version numbers
-- **Results**: terminology consistency, figure refs, statistics, flow, word count, voice
+- **Results**: terminology consistency, figure refs, statistics, flow, word count, voice, figure/table legend completeness
 - **Discussion**: no-new-data check, limitation presence, over-interpretation scan
 
 Full prose protocols with paragraph templates: see `agents/section-writer.md` Step 3.
@@ -719,7 +861,10 @@ data/
 ```
 /academic-writer
 
+Phase -3: Deep Interview Gate
+          → Clarify target result, scope, constraints, completion criteria
 Phase -2: Select section type (Introduction / Methods / Results / Discussion)
+Phase -1.5: Ask for structure reference papers; if provided, ask separate voice/tone reference question
 Phase -1: Select RAG collections
           → Choose Structure Layer collection (default: agentpaper)
           → Choose Target Voice collection (default: mypaper)
@@ -744,7 +889,9 @@ Phase 5:  (Automatic) Patterns learned for future use (section-tagged)
 When you already have a style guide or want to write without reference paper analysis:
 
 ```
+Phase -3: Deep Interview Gate (always required)
 Phase -2: Section selection (always required)
+Phase -1.5: Reference Paper Gate (always required; direct references optional)
 Phase -1: Collection selection (preserved for real-time RAG in Phase 2)
 Phase 2:  Writer (uses existing style-guide.md + real-time RAG few-shot)
 Phase 3:  Reviewer (section-weighted review)
@@ -758,7 +905,9 @@ Phase 4:  Pattern Learner (section-tagged)
 ### Style Learning Only
 
 ```
+Phase -3: Deep Interview Gate (determine learning goal and scope)
 Phase -2: Section selection (determines which patterns to learn)
+Phase -1.5: Reference Paper Gate (collect structure and/or voice/tone references)
 Phase -1: Collection selection
 Phase 0a: RAG search + Section Analyzer → Structure Layer
 Phase 0b: RAG search + Style Extractor → Target Voice Layer
@@ -775,7 +924,9 @@ Provide your research materials (section-specific):
 • Results: CSV data, figures, experimental context
 • Discussion: key findings summary, Results text, limitations
 
+Phase -3: Deep Interview Gate (clarify writing target and constraints before selection)
 Phase -2: Section selection
+Phase -1.5: Reference Paper Gate (ask for structure refs, then voice/tone refs if provided)
 Phase -1: Collection selection (for real-time RAG)
 Phase 2:  Tiered Interview → Interactive Outline / Blueprint Gate → Prose + RAG
 Phase 3:  Section Reviewer checks quality (section-weighted review)
@@ -800,9 +951,12 @@ Effects:
 ## Output Format
 
 Word-ready markdown:
+- `academic_writer_brief` summary from Phase -3 before section-specific output
+- `run_reference_layers` summary from Phase -1.5 when direct references are provided or explicitly declined
 - `##` for main section heading
 - `###` for subsections
 - Figure references: `(Figure X)`, `(Table Y)`
+- For Results with available displays: separate `## Figure Legends` output with `Main Figures`, `Main Tables`, `Supplementary Figures`, and `Supplementary Tables` subsections as applicable
 - Statistics inline: `(p < 0.05)`, `(n = 100)`
 - Citation placeholders: `[Author, Year]`
 - Professional academic tone matching Target Voice Layer
@@ -816,7 +970,10 @@ Word-ready markdown:
 Before final approval:
 
 **All Sections**:
+- [ ] Deep Interview Gate completed and `academic_writer_brief` emitted; if the opening request was already complete, no extra question was asked
 - [ ] Section type selected (Phase -2)
+- [ ] Reference Paper Gate completed (Phase -1.5): structure reference question asked; if any reference was provided, voice/tone reference question asked
+- [ ] Direct structure and voice/tone references stored separately in `run_reference_layers`, with one or more references allowed per layer
 - [ ] Collection selection completed (Phase -1)
 - [ ] Structure Layer populated from reference papers
 - [ ] Target Voice Layer populated from target voice papers
@@ -851,6 +1008,8 @@ Before final approval:
 - [ ] All figures/tables referenced and described
 - [ ] Each subsection explains why the result is needed for the paper's argument
 - [ ] Each figure/table has an explicit evidentiary role for a claim, not just a descriptive placement
+- [ ] Available main and supplementary figure/table legends drafted, or explicitly omitted because no display metadata exists
+- [ ] Partial legends preserve known information and mark missing values as `[needs: ...]` without inventing statistics, sample sizes, encodings, or scale bars
 - [ ] Each empirical/evaluation subsection ends with a one-sentence data-backed closing takeaway
 - [ ] Statistics complete (values, tests, p-values, n)
 - [ ] No interpretation beyond data
@@ -897,6 +1056,7 @@ Check improvement metrics in `data/feedback-log.md`.
 - `references/introduction-patterns.md` -- Introduction structure patterns (funnel, gap, contribution)
 - `references/methods-patterns.md` -- Methods structure patterns (procedural, reproducibility)
 - `references/results-patterns.md` -- Results structure patterns (evidence-based, figure integration)
+- `references/legend-patterns.md` -- Figure/table legend patterns learned from DeepMAST reference papers
 - `references/discussion-patterns.md` -- Discussion structure patterns (interpretation, limitations)
 - `data/style-guide.md` -- Living style guide (Dual-Layer: Structure + Target Voice + Priority Rules)
 - `data/feedback-log.md` -- Feedback history (section-tagged)

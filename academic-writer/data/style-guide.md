@@ -320,6 +320,7 @@ Results
 - Reference within 2 sentences of relevant finding
 - Describe figure content before stating conclusion
 - Use panel letters (A, B, C) for multi-panel figures
+- Draft legends for available figures/tables after Results prose when display metadata is provided
 
 **Discussion**:
 - Summary/model figures rare; use only if they add synthesis value
@@ -329,6 +330,13 @@ Results
 - `"...(Figure 1A)."`
 - `"As shown in Figure 2, ..."`
 - `"Figure 3 illustrates the comparison between..."`
+
+#### Figure/Table Legend Rules (Results)
+- Use `references/legend-patterns.md` when available displays need legends.
+- Separate output into Main Figures, Main Tables, Supplementary Figures, and Supplementary Tables.
+- Figure legends follow: identifier + concise title -> whole-display scope -> panel-by-panel descriptions -> visual encodings/statistical notes/abbreviations.
+- Table legends follow: identifier + descriptive title -> row/column scope -> value semantics -> statistical notation and special-value definitions.
+- Partial legends are allowed only with explicit `[needs: ...]` markers; do not invent sample sizes, p-values, tests, scale bars, color encodings, cohort labels, or abbreviations.
 
 ---
 
@@ -493,12 +501,12 @@ When Structure Layer and Target Voice Layer provide conflicting guidance, use th
 ```yaml
 priority_rules:
   structure:
-    source: "Structure Layer"
-    rationale: "Section organization follows field conventions"
+    source: "Phase -1.5 direct structure references > Structure Layer"
+    rationale: "User-provided structure references are the highest-priority organization guide for the current run"
 
   voice_and_tone:
-    source: "Target Voice Layer"
-    rationale: "Writing voice should match target author/style"
+    source: "Phase -1.5 direct voice/tone references > Target Voice Layer"
+    rationale: "User-provided voice/tone references are the highest-priority style guide for the current run"
 
   statistics:
     source: "Target Voice Layer"
@@ -512,6 +520,11 @@ priority_rules:
     source: "Structure Layer"
     overlay: "Target Voice Layer"
     rationale: "Figure placement follows structure; reference style follows voice"
+
+  figure_table_legends:
+    source: "Structure Layer + references/legend-patterns.md"
+    overlay: "Target Voice Layer"
+    rationale: "Legend completeness and panel/table contracts follow structure; title wording and sentence rhythm follow target voice"
 
   terminology:
     source: "Target Voice Layer"
@@ -586,6 +599,7 @@ results_rules:
   citations:
     density: "Minimal — cite methods used only if not described in Methods"
   key_constraint: "Every claim must be backed by data shown; no interpretation"
+  legend_constraint: "Available figures/tables receive complete legends or partial legends with explicit `[needs: ...]` markers"
 ```
 
 ### Discussion

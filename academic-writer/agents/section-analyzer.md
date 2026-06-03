@@ -22,10 +22,11 @@ derived_from_SECTION_TYPE:
 1. **Structure Extraction**: Identify section/subsection hierarchy and organization patterns for the given section type
 2. **Flow Analysis**: Map the logical progression specific to the section's rhetorical purpose
 3. **Figure Integration**: Document how figures/tables are introduced and referenced (most relevant for Results)
-4. **Statistical Patterns**: Identify how statistics are reported (format, placement, detail level)
-5. **Transition Mapping**: Catalog transition phrases and section connectors
-6. **Tone Analysis**: Characterize voice, tense usage, and formality level
-7. **Cross-Paper Synthesis**: Identify common patterns across multiple reference papers
+4. **Legend/Caption Patterns**: For Results, document figure/table legend structure, panel notation, table notation, and missing-information conventions
+5. **Statistical Patterns**: Identify how statistics are reported (format, placement, detail level)
+6. **Transition Mapping**: Catalog transition phrases and section connectors
+7. **Tone Analysis**: Characterize voice, tense usage, and formality level
+8. **Cross-Paper Synthesis**: Identify common patterns across multiple reference papers
 
 ## Analysis Process
 
@@ -45,13 +46,14 @@ expected_input:
       unique_documents: "[N]"
     SECTION_TYPE: "[introduction|methods|results|discussion]"
 
-  alternative_sources:
-    - "User-pasted section text"
-    - "Pre-existing Markdown text"
-    - "Paper Preprocessor output (fallback when RAG unavailable)"
+	  alternative_sources:
+	    - "User-pasted section text"
+	    - "Pre-existing Markdown text"
+	    - "Paper Preprocessor output (fallback when RAG unavailable)"
+	    - "Phase -1.5 direct structure reference extracts from Paper Preprocessor"
 ```
 
-**Important**: This agent primarily receives content from RAG search results. If RAG is unavailable or returns insufficient results, the Paper Preprocessor serves as a fallback for direct PDF processing. If a user provides a raw PDF, redirect to the preprocessor first.
+**Important**: This agent primarily receives content from RAG search results and Phase -1.5 direct structure references. If RAG is unavailable or returns insufficient results, the Paper Preprocessor serves as a fallback for direct PDF processing. If a user provides a raw reference paper path, URL, or PDF, redirect to the preprocessor first.
 
 ### Step 2: Metadata Enrichment (Optional)
 
@@ -110,6 +112,11 @@ output_format:
     introduction_style: "parenthetical|sentence-leading|descriptive"
     density: "[figures per subsection, approximate]"
     panel_referencing: "yes|no"
+    legend_style:
+      figure_title_pattern: "[e.g., claim-oriented title after Figure X]"
+      panel_description_pattern: "[how panels are grouped and described]"
+      table_legend_pattern: "[how row/column/value/statistical notation is explained]"
+      missing_detail_handling: "[how unavailable or special values are marked]"
 
   section_specific:
     # Populated by SECTION_TYPE — see below
@@ -168,6 +175,11 @@ section_specific:
     figures_per_subsection: "[N, approximate]"
     panel_level_referencing: "yes|no"
     figure_lead_sentences: "[typical phrasing pattern]"
+  legend_patterns:
+    figure_legend_length: "concise|standard|comprehensive"
+    panel_grouping: "single panels|panel ranges|mixed"
+    table_legend_notation: "[how table values, p-values, bolding, NA, and directionality are defined]"
+    standalone_readability: "low|medium|high"
   abt_narrative:
     and_setup: "[what is established as background within Results]"
     but_complication: "[the key contrast or unexpected finding]"
@@ -251,14 +263,14 @@ Generate structured YAML output for the section-specific area of the "Structure 
 style_guide_update:
   date: "[analysis date]"
   section_type: "[introduction|methods|results|discussion]"
-  source: "RAG search from [collection name]"
+	  source: "RAG search from [collection name] and/or Phase -1.5 direct structure references"
   chunks_analyzed: "[N]"
   documents_covered: "[N]"
-  update_type: "new_analysis|incremental"
-  target_location: "Structure Layer > [SECTION_TYPE] section"
+	  update_type: "new_analysis|incremental|run_specific_direct_reference"
+	  target_location: "Run-specific Structure Layer > [SECTION_TYPE] section OR persistent Structure Layer after user approval"
 
   new_patterns:
-    - category: "structure|statistics|transitions|voice|figures|section_specific"
+    - category: "structure|statistics|transitions|voice|figures|legends|section_specific"
       pattern: "[description]"
       confidence: "high|medium|low"
       source: "[document(s) it was derived from]"
