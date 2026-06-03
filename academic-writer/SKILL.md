@@ -30,8 +30,8 @@ Multi-agent system for writing publication-quality IMRAD sections by learning fr
 │                              │                                    │
 │  Phase -1.5: Reference Paper Gate (mandatory)                    │
 │  ┌──────────────────────────▼──────────────────────────────────┐  │
-│  │  Ask for structure reference papers; if provided, ask        │  │
-│  │  whether voice/tone follows same papers or separate papers   │  │
+│  │  Ask for structure reference papers, then always ask         │  │
+│  │  separate voice/tone reference question                      │  │
 │  │  → Emits run_reference_layers                                │  │
 │  └──────────────────────────┬──────────────────────────────────┘  │
 │                              │                                    │
@@ -370,9 +370,9 @@ Ask:
 없으면 "없음"이라고 답해 주세요.
 ```
 
-If the user provides one or more references, store them as `run_reference_layers.structure_references`.
+If the user provides one or more structure references, store them as `run_reference_layers.structure_references`.
 
-#### Step 2: Voice/Tone Reference Question (mandatory when any reference is provided)
+#### Step 2: Voice/Tone Reference Question (always ask)
 
 If the user provides any structure reference paper, ask:
 
@@ -382,10 +382,20 @@ If the user provides any structure reference paper, ask:
 없으면 구조만 참고하고, 별도 voice/tone은 기존 style guide/RAG를 사용하겠습니다.
 ```
 
+If the user provides no structure reference paper, still ask:
+
+```md
+voice/tone을 따라하고 싶은 reference paper가 있나요?
+있으면 PDF/Markdown/path/URL 위치를 알려주세요. 여러 개도 가능합니다.
+없으면 별도 voice/tone reference 없이 기존 style guide/RAG를 사용하겠습니다.
+```
+
 Supported answers:
 - **same_as_structure**: use the same paper(s) for structure and voice/tone.
 - **separate_voice_references**: user provides one or more separate voice/tone reference paper locations.
+- **voice_only**: user provides one or more voice/tone reference paper locations but no structure reference.
 - **structure_only**: use user references for structure only; keep voice/tone from existing style guide/RAG.
+- **no_direct_references**: use existing RAG/style guide only.
 
 Both `structure_references` and `voice_references` may contain one or more papers. The same paper may appear in both layers only when the user explicitly says to use it for both.
 
@@ -402,7 +412,7 @@ run_reference_layers:
     - source: "[path|URL|uploaded file identifier]"
       role: "voice_tone"
       status: "provided|none|unreadable"
-      notes: "[same_as_structure|separate_voice_reference|style notes]"
+      notes: "[same_as_structure|separate_voice_reference|voice_only|no_direct_references|style notes]"
   merge_policy:
     structure_priority: "user_provided_structure_refs > RAG structure layer > references/{SECTION_TYPE}-patterns.md > data/style-guide.md"
     voice_priority: "user_provided_voice_refs > RAG target voice layer > data/style-guide.md"
@@ -414,9 +424,10 @@ run_reference_layers:
 
 1. Process `structure_references` with Paper Preprocessor -> Section Analyzer -> run-specific Structure Layer.
 2. Process `voice_references` with Paper Preprocessor -> Style Extractor -> run-specific Target Voice Layer.
-3. If a reference is unreadable, ask for a corrected location once; if still unavailable, mark `unreadable` and continue with RAG/style guide.
-4. Keep user-provided reference layers run-specific unless the user approves long-term learning.
-5. Use direct references as priority guidance for organization, outline shape, figure/table integration, and section-specific rhetorical structure; use voice references for sentence rhythm, tone, transitions, and statistical/legend wording.
+3. Do not require structure references in order to use voice/tone references; the two layers are independent except when `same_as_structure` is explicitly selected.
+4. If a reference is unreadable, ask for a corrected location once; if still unavailable, mark `unreadable` and continue with RAG/style guide.
+5. Keep user-provided reference layers run-specific unless the user approves long-term learning.
+6. Use direct references as priority guidance for organization, outline shape, figure/table integration, and section-specific rhetorical structure; use voice references for sentence rhythm, tone, transitions, and statistical/legend wording.
 
 ### RAG Health Check (Before Phase -1)
 
@@ -503,7 +514,7 @@ rag_health_check:
 
 ### Phase -1: Collection Selection
 
-**Purpose**: Let the user choose which RAG collections to use for structure learning and voice extraction. (Skipped if user chose "Proceed without RAG" in Health Check.)
+**Purpose**: Let the user choose which RAG collections to use for structure learning and voice extraction after the mandatory direct-reference gate. (Skipped if user chose "Proceed without RAG" in Health Check.)
 
 1. Call `mcp__langconnect-rag__list_collections` to get available collections
 2. Present collection list with names, document counts, and descriptions
@@ -864,7 +875,7 @@ data/
 Phase -3: Deep Interview Gate
           → Clarify target result, scope, constraints, completion criteria
 Phase -2: Select section type (Introduction / Methods / Results / Discussion)
-Phase -1.5: Ask for structure reference papers; if provided, ask separate voice/tone reference question
+Phase -1.5: Ask for structure reference papers, then always ask separate voice/tone reference question
 Phase -1: Select RAG collections
           → Choose Structure Layer collection (default: agentpaper)
           → Choose Target Voice collection (default: mypaper)
@@ -926,7 +937,7 @@ Provide your research materials (section-specific):
 
 Phase -3: Deep Interview Gate (clarify writing target and constraints before selection)
 Phase -2: Section selection
-Phase -1.5: Reference Paper Gate (ask for structure refs, then voice/tone refs if provided)
+Phase -1.5: Reference Paper Gate (ask for structure refs, then always ask voice/tone refs)
 Phase -1: Collection selection (for real-time RAG)
 Phase 2:  Tiered Interview → Interactive Outline / Blueprint Gate → Prose + RAG
 Phase 3:  Section Reviewer checks quality (section-weighted review)
@@ -972,8 +983,8 @@ Before final approval:
 **All Sections**:
 - [ ] Deep Interview Gate completed and `academic_writer_brief` emitted; if the opening request was already complete, no extra question was asked
 - [ ] Section type selected (Phase -2)
-- [ ] Reference Paper Gate completed (Phase -1.5): structure reference question asked; if any reference was provided, voice/tone reference question asked
-- [ ] Direct structure and voice/tone references stored separately in `run_reference_layers`, with one or more references allowed per layer
+- [ ] Reference Paper Gate completed (Phase -1.5): structure reference question asked and voice/tone reference question asked
+- [ ] Direct structure and voice/tone references stored separately in `run_reference_layers`, with one or more references allowed per layer and same-paper reuse allowed only when explicit
 - [ ] Collection selection completed (Phase -1)
 - [ ] Structure Layer populated from reference papers
 - [ ] Target Voice Layer populated from target voice papers

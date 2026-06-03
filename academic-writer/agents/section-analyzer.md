@@ -46,11 +46,11 @@ expected_input:
       unique_documents: "[N]"
     SECTION_TYPE: "[introduction|methods|results|discussion]"
 
-	  alternative_sources:
-	    - "User-pasted section text"
-	    - "Pre-existing Markdown text"
-	    - "Paper Preprocessor output (fallback when RAG unavailable)"
-	    - "Phase -1.5 direct structure reference extracts from Paper Preprocessor"
+  alternative_sources:
+    - "User-pasted section text"
+    - "Pre-existing Markdown text"
+    - "Paper Preprocessor output (fallback when RAG unavailable)"
+    - "Phase -1.5 direct structure reference extracts from Paper Preprocessor"
 ```
 
 **Important**: This agent primarily receives content from RAG search results and Phase -1.5 direct structure references. If RAG is unavailable or returns insufficient results, the Paper Preprocessor serves as a fallback for direct PDF processing. If a user provides a raw reference paper path, URL, or PDF, redirect to the preprocessor first.
@@ -263,11 +263,11 @@ Generate structured YAML output for the section-specific area of the "Structure 
 style_guide_update:
   date: "[analysis date]"
   section_type: "[introduction|methods|results|discussion]"
-	  source: "RAG search from [collection name] and/or Phase -1.5 direct structure references"
+  source: "RAG search from [collection name] and/or Phase -1.5 direct structure references"
   chunks_analyzed: "[N]"
   documents_covered: "[N]"
-	  update_type: "new_analysis|incremental|run_specific_direct_reference"
-	  target_location: "Run-specific Structure Layer > [SECTION_TYPE] section OR persistent Structure Layer after user approval"
+  update_type: "new_analysis|incremental|run_specific_direct_reference"
+  target_location: "Run-specific Structure Layer > [SECTION_TYPE] section OR persistent Structure Layer after user approval"
 
   new_patterns:
     - category: "structure|statistics|transitions|voice|figures|legends|section_specific"

@@ -12,14 +12,14 @@ You are a document preprocessing specialist that extracts target sections from a
 fallback_triggers:
   - "RAG collection is empty or not configured"
   - "RAG search returns fewer than 3 relevant chunks"
-	  - "User explicitly provides PDF files instead of using RAG"
-	  - "User provides direct structure reference papers in Phase -1.5"
-	  - "User provides direct voice/tone reference papers in Phase -1.5"
-	  - "RAG MCP server is unavailable (connection error)"
-	  - "User requests direct PDF processing"
+  - "User explicitly provides PDF files instead of using RAG"
+  - "User provides direct structure reference papers in Phase -1.5"
+  - "User provides direct voice/tone reference papers in Phase -1.5"
+  - "RAG MCP server is unavailable (connection error)"
+  - "User requests direct PDF processing"
 
-	primary_pipeline: "RAG search via mcp__langconnect-rag__search_documents"
-	this_agent: "Fallback when RAG is unavailable or insufficient; direct processor for Phase -1.5 references"
+primary_pipeline: "RAG search via mcp__langconnect-rag__search_documents"
+this_agent: "Fallback when RAG is unavailable or insufficient; direct processor for Phase -1.5 references"
 ```
 
 ## Responsibilities
@@ -180,17 +180,17 @@ token_estimation:
 
 ```yaml
 output_format:
-	  paper_metadata:
-	    source_file: "[path or identifier]"
-	    paper_title: "[extracted title]"
+  paper_metadata:
+    source_file: "[path or identifier]"
+    paper_title: "[extracted title]"
     journal: "[journal name if identifiable]"
     total_pages: "[N]"
     paper_type: "methods|analysis|framework|review|unknown"
 
-	  extraction_result:
-	    section_type: "[SECTION_TYPE]"
-	    reference_role: "structure|voice_tone|same_as_structure|fallback"
-	    status: "success|partial|fallback|failed"
+  extraction_result:
+    section_type: "[SECTION_TYPE]"
+    reference_role: "structure|voice_tone|same_as_structure|fallback"
+    status: "success|partial|fallback|failed"
     target_pages: "[start-end page range]"
     sections_found: []
     estimated_tokens: "[N]"
@@ -205,8 +205,8 @@ output_format:
     figure_captions: |
       [Extracted figure/table captions referenced in section; for Results, pass to Section Analyzer and Style Extractor as legend/caption pattern evidence]
 
-	    context_notes: |
-	      [Any relevant contextual information for the analyzer or style extractor]
+    context_notes: |
+      [Any relevant contextual information for the analyzer or style extractor]
 ```
 
 ## Fallback Strategies
