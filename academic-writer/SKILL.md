@@ -108,7 +108,7 @@ Multi-agent system for writing publication-quality IMRAD sections by learning fr
 |-------|------|-------|--------|
 | **Section Analyzer** | Extract structure patterns for SECTION_TYPE | RAG search results + reference patterns | Structure Layer for style guide |
 | **Style Extractor** | Extract voice/tone from Target Voice collection | RAG search results | Target Voice Layer for style guide |
-| **Section Writer** | Write section via tiered interview process | User data + merged style guide + RAG few-shot | Interview -> Outline -> Draft section; for Results, figure/table legends when available |
+| **Section Writer** | Write section via tiered interview process | User data + merged style guide + RAG few-shot | Interview -> Outline -> Draft section; Markdown figure embeds/captions for all sections; full Results figure/table legends when available |
 | **Section Reviewer** | Section-weighted multi-pass review | Draft + source data | Review report + revision diffs + WHY |
 | **Pattern Learner** | Learn from feedback, section-tagged | Approved sections + feedback | Style guide updates (both layers) |
 | **Paper Preprocessor** | *Fallback*: Extract section from PDFs | Reference PDFs + SECTION_TYPE | Extracted section text + metadata |
@@ -581,14 +581,14 @@ merged_invocation_guide:
 
 | Section | Required Inputs | Optional Inputs |
 |---------|----------------|-----------------|
-| Introduction | Research topic, research gap, contribution, key references | Background notes (.md), related work notes, target journal |
-| Methods | Pipeline description, tools/versions, datasets, parameters | Pseudocode, code repo URL, pipeline figure, reporting guideline |
+| Introduction | Research topic, research gap, contribution, key references | Background notes (.md), related work notes, conceptual overview figure, target journal |
+| Methods | Pipeline description, tools/versions, datasets, parameters | Pseudocode, code repo URL, pipeline/architecture figure, reporting guideline |
 | Results | CSV data + descriptions, figures/tables + findings + stats + legend-ready display metadata, experimental context | Results context (.md), target journal, reporting guideline |
-| Discussion | Key findings summary, Results section text, limitations | Related work comparison, future directions, broader impact, target journal |
+| Discussion | Key findings summary, Results section text, limitations | Related work comparison, future directions, broader impact, synthesis/model figure, target journal |
 
 Full input specification with Korean prompts: see `agents/section-writer.md` Step 0.
 
-For Results, a figure/table is "available" for legend drafting when either an actual file exists or the user provides sufficient description, panel, table, and statistical metadata for a partial or complete legend.
+For every section, a user-provided figure with an actual file path should be embedded in the saved Markdown using `![Figure X](path/to/file.png)` near its first substantive reference. Description-only figures are referenced and captioned without inventing an image path. For Results, a figure/table is "available" for legend drafting when either an actual file exists or the user provides sufficient description, panel, table, and statistical metadata for a partial or complete legend.
 
 #### Step 1: Tiered Conversational Interview (MAJOR UPGRADE)
 
@@ -764,16 +764,16 @@ For Methods and Results, Step 3 is constrained by `approved_blueprint`. The writ
 
 | Section | Paragraph Flow | Key Writing Rules |
 |---------|---------------|-------------------|
-| Introduction | Broad context -> narrow to problem -> existing approaches -> gap statement -> contribution -> roadmap | Funnel structure; citation placeholders [Author, Year]; explicit gap; "we introduce/present/propose"; no over-promising |
-| Methods | Overview -> data description -> step-by-step procedure -> tools/versions -> evaluation | Past tense; passive preferred; every parameter stated; software versions explicit; no results or interpretation |
+| Introduction | Broad context -> narrow to problem -> existing approaches -> gap statement -> contribution -> roadmap | Funnel structure; citation placeholders [Author, Year]; explicit gap; "we introduce/present/propose"; no over-promising; optional conceptual figures embedded and captioned when provided |
+| Methods | Overview -> data description -> step-by-step procedure -> tools/versions -> evaluation | Past tense; passive preferred; every parameter stated; software versions explicit; no results or interpretation; optional workflow/pipeline figures embedded and captioned with reproducibility-relevant context |
 | Results | Result rationale -> method-brief -> primary finding + stats -> figure evidence/rationale -> closing takeaway -> transition -> figure/table legends for available displays | No interpretation (save for Discussion); statistics inline; figures described as evidence, not just referenced; empirical subsections close with one data-backed takeaway; legends use `references/legend-patterns.md` |
-| Discussion | Recap finding -> interpretation -> literature comparison -> implications -> limitations -> future | Interpretation required; compare with literature [citations]; no new data; appropriate hedging; end with broader impact |
+| Discussion | Recap finding -> interpretation -> literature comparison -> implications -> limitations -> future | Interpretation required; compare with literature [citations]; no new data; appropriate hedging; end with broader impact; optional synthesis/model figures embedded and captioned without introducing new data |
 
 **Integration pass** (after prose, section-specific checks):
-- **Introduction**: citation placeholder completeness, gap statement presence, contribution clarity
-- **Methods**: reproducibility detail check, parameter completeness, version numbers
-- **Results**: terminology consistency, figure refs, statistics, flow, word count, voice, figure/table legend completeness
-- **Discussion**: no-new-data check, limitation presence, over-interpretation scan
+- **Introduction**: citation placeholder completeness, gap statement presence, contribution clarity, conceptual figure embed/caption check when provided
+- **Methods**: reproducibility detail check, parameter completeness, version numbers, workflow/pipeline figure embed/caption check when provided
+- **Results**: terminology consistency, Markdown figure embeds, figure refs, statistics, flow, word count, voice, figure/table legend completeness
+- **Discussion**: no-new-data check, limitation presence, over-interpretation scan, synthesis/model figure embed/caption check when provided
 
 Full prose protocols with paragraph templates: see `agents/section-writer.md` Step 3.
 
@@ -961,18 +961,21 @@ Effects:
 
 ## Output Format
 
-Word-ready markdown:
+Markdown-first, Word-ready output:
 - `academic_writer_brief` summary from Phase -3 before section-specific output
 - `run_reference_layers` summary from Phase -1.5 when direct references are provided or explicitly declined
 - `##` for main section heading
 - `###` for subsections
 - Figure references: `(Figure X)`, `(Table Y)`
+- File-backed figures in any section: embed with Markdown image syntax, e.g. `![Figure 1](figures/figure1.png)`, placed near the first substantive reference or immediately before the relevant caption/legend. Use the user-provided path unless the user asks for path normalization.
 - For Results with available displays: separate `## Figure Legends` output with `Main Figures`, `Main Tables`, `Supplementary Figures`, and `Supplementary Tables` subsections as applicable
+- For Introduction, Methods, and Discussion figures: provide section-appropriate captions or short legends adjacent to the embed; do not force Results-style full legends unless the user requests them.
 - Statistics inline: `(p < 0.05)`, `(n = 100)`
 - Citation placeholders: `[Author, Year]`
 - Professional academic tone matching Target Voice Layer
 - Section-appropriate tense, voice, and hedging per `section_configs`
 - For Methods/Results: `approved_blueprint` metadata passed to Reviewer; Lite Mode uses `approval_status: skipped_by_user`
+- Default saved artifact: Markdown file (`.md`). Save or convert to DOCX, PDF, HTML, or other formats only when the user explicitly requests that format or a downstream converter is invoked.
 
 ---
 
@@ -1026,6 +1029,12 @@ Before final approval:
 - [ ] No interpretation beyond data
 - [ ] Transitions connect subsections
 - [ ] Narrative arc maintains progressive complexity
+
+**Figure handling across all sections**:
+- [ ] Every user-provided figure with an actual file path is embedded in Markdown as `![Figure X](path/to/file.png)`
+- [ ] Every embedded figure is also referenced in prose with `(Figure X)` or an equivalent target-journal style
+- [ ] Description-only figures are not given invented image paths
+- [ ] Introduction/Methods/Discussion figure captions fit the section purpose; Results figures receive full legends when display metadata is available
 
 **Discussion-specific**:
 - [ ] Key findings summarized (no new data)

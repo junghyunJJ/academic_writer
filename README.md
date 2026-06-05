@@ -15,6 +15,8 @@ Multi-agent system for writing publication-quality Introduction, Methods, Result
 | **Results Figure/Table Legends** | Results writing now drafts main and supplementary figure/table legends when display metadata is available. |
 | **No-Invention Legend Policy** | Partial legends preserve known information and mark unresolved fields as `[needs: ...]` instead of inventing sample sizes, statistics, encodings, scale bars, cohort labels, or abbreviations. |
 | **Legend-Aware Analysis and Review** | Section Analyzer, Style Extractor, Section Writer, Section Reviewer, style guide, and Results references now include legend/caption extraction, writing, and validation contracts. |
+| **Section-Wide Markdown Figure Embeds** | User-provided figure file paths are embedded in `.md` outputs as `![Figure X](path/to/file.png)` across Introduction, Methods, Results, and Discussion. |
+| **Markdown-First Saving** | Final approved sections are saved as `.md` by default unless the user explicitly requests DOCX, PDF, HTML, or another format. |
 
 ---
 
@@ -57,6 +59,8 @@ Multi-agent system for writing publication-quality IMRAD sections (Introduction,
 | **Methods/Results Blueprint Gate** | Requires user-approved hierarchical skeleton + verification matrix before Methods or Results prose generation, then persists the approved Blueprint for reviewer alignment |
 | **Results Closing Takeaways** | Requires empirical/evaluation Results subsections to close with a concise data-backed takeaway while keeping interpretation in Discussion |
 | **Results Figure/Table Legends** | Drafts legends for available main and supplementary figures/tables and marks missing legend fields explicitly |
+| **Section-Wide Figure Embeds** | Embeds file-backed figures in Markdown for any section and writes section-appropriate captions outside Results |
+| **Markdown-First Saving** | Saves final approved section artifacts as `.md` by default, while preserving Word-ready Markdown formatting |
 | **User-Specified Keywords** | Tier 1 (must-emphasize) and Tier 2 (natural-include) keywords and key sentences are tracked through writing and verified in review |
 | **Section-Specific Configuration** | Writing rules, review weights, and guidance tailored to each IMRAD section |
 | **Cross-Section Coherence** | Detects existing sections and enforces consistency (Methods references Results, Discussion references Introduction) |
@@ -270,12 +274,22 @@ research_materials:
     background_sources: "[key papers, review articles]"
     research_gap_context: "[what's missing or unexplored]"
     preliminary_findings: "[optional: early data motivating this work]"
+    figures:
+      - file: "[path or null if description-only]"
+        id: "Figure 1|Conceptual Figure 1"
+        description: "[conceptual overview, motivation, or study design]"
+        caption_notes: "[known caption wording, abbreviations, caveats]"
 
   methods:
     study_type: "[computational, experimental, mixed, etc.]"
     data_sources: "[where data came from]"
     analysis_pipeline: "[tool names, versions, order of steps]"
     custom_scripts: "[any user-written code or modifications]"
+    figures:
+      - file: "[path or null if description-only]"
+        id: "Figure 1|Supplementary Figure 1"
+        description: "[pipeline, architecture, workflow, or algorithm schematic]"
+        caption_notes: "[inputs, outputs, steps, abbreviations, caveats]"
 
   results:
     data_files: "[CSV, matrices, statistical output]"
@@ -301,6 +315,11 @@ research_materials:
     literature_for_comparison: "[papers to position against]"
     limitations_draft: "[preliminary limitations identified]"
     implications: "[applications, broader significance]"
+    figures:
+      - file: "[path or null if description-only]"
+        id: "Figure X|Summary Figure X|Graphical Model X"
+        description: "[synthesis, conceptual model, or future-direction schematic]"
+        caption_notes: "[interpretive scope, source Results, caveats]"
 ```
 
 **Step 1: Tiered Conversational Interview**:
@@ -686,11 +705,14 @@ After user approval, the writer persists the Blueprint to `paper_context.methods
 - Real-time Target Voice RAG search (2-3 exemplar paragraphs per subsection)
 - Prose generation with matched style
 - For Methods/Results, constrain prose to the approved Blueprint and return to Blueprint approval before adding new claims, method steps, figures/tables, statistics, tools, parameters, data sources, outputs, figure/algorithm placements, or subsections
+- For any section, embed user-provided figure file paths in Markdown as `![Figure X](path/to/file.png)` near the relevant prose reference
+- For Introduction, Methods, and Discussion figures, write section-appropriate captions or short legends adjacent to the embed
 - For Results, close each empirical/evaluation subsection with a one-sentence data-backed takeaway; overview, dataset, or benchmark-construction subsections may close with roadmap or evaluation-purpose language
 - For Results with available displays, generate figure/table legends after prose using `references/legend-patterns.md`
 - Integration pass: terminology, citations, hedging compliance, keyword placement verification, and Results legend completeness
+- Save final approved section artifacts as Markdown files (`.md`) by default; other formats require an explicit user request.
 
-**Output**: Draft section (Introduction/Methods/Results/Discussion), `academic_writer_brief` summary, optional `run_reference_layers` summary, plus `approved_blueprint` metadata persisted to `paper_context.methods_blueprint` or `paper_context.results_blueprint` for Methods/Results. Results outputs include `## Figure Legends` when available displays exist.
+**Output**: Draft section (Introduction/Methods/Results/Discussion), `academic_writer_brief` summary, optional `run_reference_layers` summary, plus `approved_blueprint` metadata persisted to `paper_context.methods_blueprint` or `paper_context.results_blueprint` for Methods/Results. File-backed figures are embedded with Markdown image syntax in any section. Results outputs include `## Figure Legends` when available displays exist. Saved final section artifacts default to `.md`.
 
 ### Phase 3: Section Reviewer
 
@@ -1024,6 +1046,16 @@ style-guide.md:
 | Never invent | Sample sizes, p-values, tests, encodings, scale bars, cohort labels, abbreviations |
 | Reference file | `references/legend-patterns.md` |
 
+### Markdown Figure Quick Reference
+
+| Item | Rule |
+|------|------|
+| File-backed figure | Embed as `![Figure X](path/to/file.png)` |
+| Placement | Near first substantive prose reference or immediately before the caption/legend |
+| Description-only figure | Reference and caption it, but do not invent an image path |
+| Introduction/Methods/Discussion | Use section-appropriate captions or short legends |
+| Results | Use Markdown image embeds plus full `## Figure Legends` when display metadata is available |
+
 ### RAG Query Cheat Sheet
 
 If user wants to customize RAG searches, these are the default query strategies:
@@ -1037,7 +1069,7 @@ If user wants to customize RAG searches, these are the default query strategies:
 
 1. Write section → Interview → Outline/Blueprint → Draft
 2. Reviewer → Approved?
-3. If yes: Pattern Learner updates style-guide.md, save paper_context for next section
+3. If yes: Pattern Learner updates style-guide.md, save the approved section as `.md` by default, and save paper_context for next section
 4. If no: Writer revises (max 3 iterations), then Pattern Learner learns from final approved version
 
 ---
