@@ -104,6 +104,13 @@ Base checks (all sections):
 - Flag unsupported statements
 - Verify quantitative values match source
 - Check figure/table reference accuracy
+- Check numeric citation order, starting at `[1]` and following first-use order
+- Verify every numeric citation has a matching `## References` entry when source metadata is available
+- Verify `## References` entries use identifier-first format: `[n] DOI: ... "Full title."`, `[n] arXiv: ... "Full title."`, or `[n] URL: ... "Full title."`
+- Verify reference identifier priority is `DOI > arXiv > URL`; flag paper entries that use arXiv or URL when a DOI is available
+- Verify every reference title is wrapped in double quotes immediately after the identifier sentence
+- Flag cited sources with missing metadata unless marked `[needs: reference metadata]`
+- Confirm structure-only and voice/tone-only reference papers were not added to `## References` unless explicitly cited as evidence
 - For Results legends, verify titles, panels, sample sizes, statistics, encodings, abbreviations, and table notation match source data or are marked `[needs: ...]`
 
 Section-specific additions:
@@ -500,6 +507,11 @@ cross_section_consistency:
 - [ ] Funnel structure inverted or disrupted
 - [ ] Over-broad opening (starts too general without narrowing)
 - [ ] Missing citations for factual claims about field state
+- [ ] Numeric citations out of first-use order
+- [ ] Cited source missing from `## References`
+- [ ] `## References` entry lacks DOI despite known DOI metadata
+- [ ] `## References` title is not wrapped in double quotes
+- [ ] `## References` includes structure-only or voice/tone-only papers that were not cited as evidence
 - [ ] Contribution promises not matched by actual results
 - [ ] Discussion-level interpretation present
 - [ ] Scope too narrow (non-specialist reader will be lost)
@@ -517,6 +529,7 @@ cross_section_consistency:
 - [ ] Software version numbers missing
 - [ ] "Default settings" used without specifying values
 - [ ] Data source not cited or accession number absent
+- [ ] Cited tool, method, dataset, or URL lacks a matching `## References` entry
 - [ ] Pipeline order does not match Results subsection order
 - [ ] Statistical test mentioned without justification
 - [ ] Preprocessing steps described incompletely

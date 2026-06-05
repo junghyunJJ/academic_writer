@@ -287,6 +287,7 @@ context_detection:
       - "Do not merge structure and voice/tone references unless the user explicitly requested same_as_structure"
       - "If direct structure references exist, treat their organization patterns as the highest-priority structure guide for this run"
       - "If direct voice references exist, treat their tone and wording patterns as the highest-priority Target Voice guide for this run"
+      - "Do not automatically add structure or voice/tone reference papers to the manuscript ## References list unless they are explicitly cited as evidence"
 
   step_1_auto_scan:
     action: "Scan workspace for existing IMRAD sections"
@@ -636,7 +637,7 @@ introduction_outline:
   step_2b:
     action: "Detail per-paragraph key points and citations"
     content:
-      - "Each paragraph: topic sentence + key claims + citation placeholders [Author, Year]"
+      - "Each paragraph: topic sentence + key claims + numeric citations [1] or [needs: citation]"
       - "Background knowledge claims with references"
       - "Prior work descriptions with positioning"
     requirement: "USER APPROVAL REQUIRED before proceeding"
@@ -836,7 +837,7 @@ discussion_outline:
     content:
       - "Each subsection: which findings to interpret, key comparison papers"
       - "Interpretation claims with supporting evidence from Results"
-      - "Citation placeholders for comparison literature [Author, Year]"
+      - "Numeric citations for comparison literature [1] or [needs: citation]"
     requirement: "USER APPROVAL REQUIRED before proceeding"
 
   step_2c:
@@ -970,14 +971,14 @@ introduction_prose:
   paragraph_structure:
     1_broad_context: "Establish field importance and relevance (2-3 sentences)"
     2_narrow_to_problem: "Specific problem or question being addressed"
-    3_existing_approaches: "What has been done, with citations [Author, Year]"
+    3_existing_approaches: "What has been done, with numeric citations [1]"
     4_gap_statement: "What is missing / what limitation exists — explicit and specific"
     5_contribution: "'In this study, we...' or 'Here, we present...' — core contribution"
     6_paper_roadmap: "Brief preview of what follows (optional, journal-dependent)"
 
   writing_rules:
     - "Funnel from broad to specific — each paragraph narrows focus progressively"
-    - "Every claim about existing work needs citation placeholder [Author, Year]"
+    - "Every claim about existing work needs a numeric citation [1] or [needs: citation]"
     - "Gap statement must be explicit, specific, and logically follow from the review"
     - "Contribution statement uses 'we introduce/present/propose' — active voice"
     - "Do NOT over-promise; match claims precisely to actual Results"
@@ -1005,7 +1006,7 @@ methods_prose:
     - "Software versions must be explicit (e.g., 'STAR v2.7.10a')"
     - "No results or interpretation in Methods — only what was done, not what was found"
     - "Cross-reference to Results section where appropriate ('see Results, Section X')"
-    - "Moderate citations for established tools [Author, Year]"
+    - "Moderate numeric citations for established tools [1]"
 ```
 
 #### Results Prose Protocol
@@ -1047,7 +1048,7 @@ discussion_prose:
   paragraph_structure:
     1_summary: "Recap key finding from Results (1-2 sentences, NO new data)"
     2_interpretation: "What this finding means in the broader context"
-    3_comparison: "How this compares to prior work (with citations [Author, Year])"
+    3_comparison: "How this compares to prior work (with numeric citations [1])"
     4_implications: "Broader significance — practical, clinical, or theoretical"
     5_limitations: "Honest acknowledgment of caveats — specific, not generic"
     6_future: "What comes next — paired with limitations where possible"
@@ -1055,7 +1056,7 @@ discussion_prose:
   writing_rules:
     - "Begin with brief summary of main findings — anchor the Discussion"
     - "Interpret results — this is WHERE interpretation belongs"
-    - "Compare extensively with existing literature [Author, Year] citations"
+    - "Compare extensively with existing literature using numeric citations [1]"
     - "Acknowledge limitations explicitly and specifically — not vague disclaimers"
     - "Do NOT introduce new data not present in Results"
     - "Appropriate hedging: 'suggests', 'may indicate', 'is consistent with'"
@@ -1196,8 +1197,8 @@ integration_checks:
 
   # Section-specific checks
   introduction_specific:
-    citation_placeholders:
-      - "Every claim about existing work has [Author, Year] placeholder"
+    numeric_citations:
+      - "Every claim about existing work has a numeric citation [1] or [needs: citation]"
       - "No unsupported assertions about the field"
     gap_statement:
       - "Gap is explicitly stated, not merely implied"
@@ -1390,7 +1391,13 @@ Generate section-type-appropriate outputs at each stage:
   - Supplementary Data represented as linked existing or generated files with value semantics and `[needs: ...]` markers for missing fields
   - Missing legend fields checklist when any partial legend uses `[needs: ...]`
   - Complete statistical reporting (where applicable)
-  - Citation placeholders `[Author, Year]` for all referenced works
+  - Numeric citation policy: first-use ordered citations in prose (`[1]`, `[2]`, `[1,2]`, `[1-3]`)
+  - Final `## References` section when cited papers, tools, datasets, or links have source metadata
+  - Reference entries ordered by first citation and formatted as `[1] DOI: 10.xxxx/yyyy. "Full title."`, `[2] arXiv: 2603.22455. "Full title."`, or `[3] URL: https://example.org/page. "Full title." Optional source note.`
+  - Identifier priority is `DOI > arXiv > URL`: for papers, use DOI whenever known; if DOI is unavailable, use arXiv when available; otherwise use URL
+  - Full titles must be wrapped in double quotes immediately after the identifier sentence; never invent missing title or identifier metadata
+  - `[needs: citation]` for unsupported claims and `[needs: reference metadata]` for incomplete reference entries
+  - Structure-only and voice/tone-only papers from `run_reference_layers` excluded from `## References` unless explicitly cited as evidence
   - `approved_blueprint` passed to Reviewer for Methods/Results; Lite Mode uses `approval_status: skipped_by_user`
   - Updated `paper_context` for downstream sections
 - **Saved artifact default**: When the user asks to save or persist the final section, save it as a Markdown file (`.md`) by default. Use DOCX, PDF, HTML, or another output format only when explicitly requested.
@@ -1405,11 +1412,15 @@ Before submission to Reviewer, verify all applicable items:
 - [ ] `academic_writer_brief` consumed; settled Phase -3 decisions were not re-asked unless user changed them
 - [ ] `run_reference_layers` consumed; structure and voice/tone references kept separate unless user chose same_as_structure
 - [ ] Direct reference-derived structure and voice/tone guidance applied before RAG/static defaults
+- [ ] Structure-only and voice/tone-only reference papers were not added to `## References` unless explicitly cited as evidence
 - [ ] Tiered conversational interview completed (Phases A-D)
 - [ ] Outline approved by user (Introduction/Discussion) or Blueprint approved by user (Methods/Results)
 - [ ] Logical flow maintained across subsections
 - [ ] Consistent terminology throughout
 - [ ] Voice matches Target Voice Layer profile
+- [ ] Numeric citations are ordered by first use and all cited works with metadata appear in `## References`
+- [ ] `## References` entries use DOI > arXiv > URL priority and double-quoted titles
+- [ ] Missing support is marked `[needs: citation]`; incomplete reference metadata is marked `[needs: reference metadata]`
 - [ ] Reporting guideline items addressed (if applicable)
 - [ ] Word count within journal limits (if specified)
 - [ ] RAG few-shot references used appropriately (style only, no content copying)
@@ -1423,7 +1434,7 @@ Before submission to Reviewer, verify all applicable items:
 
 ### Introduction Checklist
 - [ ] Funnel structure: broad context narrows to specific gap
-- [ ] Every field claim has citation placeholder [Author, Year]
+- [ ] Every field claim has a numeric citation or `[needs: citation]`
 - [ ] Gap statement is explicit and specific
 - [ ] Contribution statement matches actual Results
 - [ ] Paper roadmap included (if journal expects it)
@@ -1456,7 +1467,7 @@ Before submission to Reviewer, verify all applicable items:
 ### Discussion Checklist
 - [ ] Opens with summary of main findings
 - [ ] Interpretation is substantive and well-supported
-- [ ] Literature comparison with citations [Author, Year]
+- [ ] Literature comparison uses numeric citations and corresponding `## References` entries
 - [ ] Limitations are specific, not token disclaimers
 - [ ] No new data introduced
 - [ ] Synthesis/model figures, if provided, are embedded/captioned without introducing new data

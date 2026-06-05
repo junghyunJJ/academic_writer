@@ -730,10 +730,13 @@ After user approval, the writer persists the Blueprint to `paper_context.methods
 - For Results, close each empirical/evaluation subsection with a one-sentence data-backed takeaway; overview, dataset, or benchmark-construction subsections may close with roadmap or evaluation-purpose language
 - For Results with available displays, generate figure/table legends after prose using `references/legend-patterns.md`
 - For Results with supplementary files, add `## Supplementary Materials` after `## Figure Legends`; large Supplementary Tables use linked CSV/TSV artifacts and Supplementary Data is always linked as files
+- Use numeric citations in generated Markdown (`[1]`, `[2]`, `[1,2]`, `[1-3]`) and append `## References` when cited papers, tools, datasets, or links have metadata
+- Format references as `[1] DOI: 10.xxxx/yyyy. "Full title."`, `[2] arXiv: 2603.22455. "Full title."`, or `[3] URL: https://example.org/page. "Full title." Optional source note.`
+- For papers, use identifier priority `DOI > arXiv > URL`; keep structure and voice/tone reference papers out of `## References` unless they are explicitly cited as evidence; mark unresolved support as `[needs: citation]` and incomplete entries as `[needs: reference metadata]`
 - Integration pass: terminology, citations, hedging compliance, keyword placement verification, and Results legend completeness
 - Save final approved section artifacts as Markdown files (`.md`) by default; other formats require an explicit user request.
 
-**Output**: Draft section (Introduction/Methods/Results/Discussion), `academic_writer_brief` summary, optional `run_reference_layers` summary, plus `approved_blueprint` metadata persisted to `paper_context.methods_blueprint` or `paper_context.results_blueprint` for Methods/Results. File-backed figures are embedded with Markdown image syntax in any section. Results outputs include `## Figure Legends` when available displays exist and `## Supplementary Materials` when supplementary files exist. Saved final section artifacts default to `.md`.
+**Output**: Draft section (Introduction/Methods/Results/Discussion), `academic_writer_brief` summary, optional `run_reference_layers` summary, plus `approved_blueprint` metadata persisted to `paper_context.methods_blueprint` or `paper_context.results_blueprint` for Methods/Results. File-backed figures are embedded with Markdown image syntax in any section. Results outputs include `## Figure Legends` when available displays exist and `## Supplementary Materials` when supplementary files exist. Generated Markdown uses numeric citations and includes `## References` when cited source metadata is available. Saved final section artifacts default to `.md`.
 
 ### Phase 3: Section Reviewer
 
@@ -1019,6 +1022,7 @@ style-guide.md:
 
 - Type section name directly: "Write Results" instead of "Option 3"
 - Answer "없음" when no direct reference paper is available for the current run
+- Generated Markdown uses numeric citations (`[1]`) and a final `## References` section when cited source metadata is available
 - Skip interview questions: Hit Enter to accept smart default
 - Defer follow-ups: "I have enough to start"
 - Request specific revision: "Fix the statistical reporting"

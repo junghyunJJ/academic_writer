@@ -428,6 +428,7 @@ run_reference_layers:
 4. If a reference is unreadable, ask for a corrected location once; if still unavailable, mark `unreadable` and continue with RAG/style guide.
 5. Keep user-provided reference layers run-specific unless the user approves long-term learning.
 6. Use direct references as priority guidance for organization, outline shape, figure/table integration, and section-specific rhetorical structure; use voice references for sentence rhythm, tone, transitions, and statistical/legend wording.
+7. For manuscript bibliography, do not automatically add structure or voice/tone reference papers to the manuscript `## References` section unless that paper is explicitly cited as evidence for a claim, method, dataset, tool, or prior-work comparison.
 
 ### RAG Health Check (Before Phase -1)
 
@@ -785,13 +786,13 @@ For Methods and Results, Step 3 is constrained by `approved_blueprint`. The writ
 
 | Section | Paragraph Flow | Key Writing Rules |
 |---------|---------------|-------------------|
-| Introduction | Broad context -> narrow to problem -> existing approaches -> gap statement -> contribution -> roadmap | Funnel structure; citation placeholders [Author, Year]; explicit gap; "we introduce/present/propose"; no over-promising; optional conceptual figures embedded and captioned when provided |
+| Introduction | Broad context -> narrow to problem -> existing approaches -> gap statement -> contribution -> roadmap | Funnel structure; numeric citations `[1]`; explicit gap; "we introduce/present/propose"; no over-promising; optional conceptual figures embedded and captioned when provided |
 | Methods | Overview -> data description -> step-by-step procedure -> tools/versions -> evaluation | Past tense; passive preferred; every parameter stated; software versions explicit; no results or interpretation; optional workflow/pipeline figures embedded and captioned with reproducibility-relevant context |
 | Results | Result rationale -> method-brief -> primary finding + stats -> figure evidence/rationale -> closing takeaway -> transition -> figure/table legends for available displays -> Supplementary Materials links when files exist | No interpretation (save for Discussion); statistics inline; figures described as evidence, not just referenced; empirical subsections close with one data-backed takeaway; legends use `references/legend-patterns.md`; large supplementary tables/data are linked as artifacts |
-| Discussion | Recap finding -> interpretation -> literature comparison -> implications -> limitations -> future | Interpretation required; compare with literature [citations]; no new data; appropriate hedging; end with broader impact; optional synthesis/model figures embedded and captioned without introducing new data |
+| Discussion | Recap finding -> interpretation -> literature comparison -> implications -> limitations -> future | Interpretation required; compare with literature using numeric citations; no new data; appropriate hedging; end with broader impact; optional synthesis/model figures embedded and captioned without introducing new data |
 
 **Integration pass** (after prose, section-specific checks):
-- **Introduction**: citation placeholder completeness, gap statement presence, contribution clarity, conceptual figure embed/caption check when provided
+- **Introduction**: numeric citation completeness, gap statement presence, contribution clarity, conceptual figure embed/caption check when provided
 - **Methods**: reproducibility detail check, parameter completeness, version numbers, workflow/pipeline figure embed/caption check when provided
 - **Results**: terminology consistency, Markdown figure embeds, figure refs, statistics, flow, word count, voice, figure/table legend completeness, supplementary artifact links
 - **Discussion**: no-new-data check, limitation presence, over-interpretation scan, synthesis/model figure embed/caption check when provided
@@ -995,7 +996,14 @@ Markdown-first, Word-ready output:
 - Supplementary Data is always linked as separate files or existing artifacts with a short Markdown description and value semantics
 - For Introduction, Methods, and Discussion figures: provide section-appropriate captions or short legends adjacent to the embed; do not force Results-style full legends unless the user requests them.
 - Statistics inline: `(p < 0.05)`, `(n = 100)`
-- Citation placeholders: `[Author, Year]`
+- Numeric citation policy: use first-use ordered numeric citations in prose, e.g. `[1]`, `[2]`; use `[1,2]` for multiple non-consecutive citations and `[1-3]` for consecutive ranges.
+- Add a final `## References` section to each generated Markdown section when at least one cited paper, dataset, tool, or link has source metadata.
+- Reference entries use the same numeric order as first citation and this identifier-first format: `[1] DOI: 10.xxxx/yyyy. "Full title."`, `[2] arXiv: 2603.22455. "Full title."`, or `[3] URL: https://example.org/page. "Full title." Optional source note.`
+- Reference identifier priority is `DOI > arXiv > URL`: for papers, use DOI whenever known; if DOI is unavailable, use arXiv when available; otherwise use URL.
+- Put the full title in double quotes immediately after the identifier sentence. Keep the period inside the closing quote when the title is complete.
+- Use `[needs: citation]` for claims that need support but do not yet have a source, and `[needs: reference metadata]` when a cited source lacks enough metadata for the `## References` entry.
+- Never invent authors, titles, years, DOIs, or URLs. If metadata is unavailable, preserve the citation marker and flag the missing field.
+- For manuscript bibliography, do not automatically add structure or voice/tone reference papers from `run_reference_layers` to `## References` unless they are explicitly cited as evidence for a manuscript claim, method, dataset, tool, or prior-work comparison.
 - Professional academic tone matching Target Voice Layer
 - Section-appropriate tense, voice, and hedging per `section_configs`
 - For Methods/Results: `approved_blueprint` metadata passed to Reviewer; Lite Mode uses `approval_status: skipped_by_user`
@@ -1019,6 +1027,10 @@ Before final approval:
 - [ ] Outline approved by user (Introduction/Discussion) or Blueprint approved by user (Methods/Results)
 - [ ] Structure matches learned patterns
 - [ ] Voice matches Target Voice Layer profile
+- [ ] Numeric citations are ordered by first use and each cited source with available metadata appears in `## References`
+- [ ] `## References` entries use identifier-first format with DOI > arXiv > URL priority and double-quoted titles
+- [ ] `## References` excludes structure-only and voice/tone-only reference papers unless they are explicitly cited as evidence
+- [ ] Unsupported claims are marked `[needs: citation]`; incomplete reference entries are marked `[needs: reference metadata]`
 - [ ] Consistent terminology throughout
 - [ ] Appropriate voice and tense per section_configs
 - [ ] Reporting guideline items addressed (if applicable)
@@ -1029,7 +1041,7 @@ Before final approval:
 - [ ] Funnel structure (broad -> specific) maintained
 - [ ] Gap statement explicit and positioned correctly
 - [ ] Contribution statement present and matched to actual Results
-- [ ] All existing work claims have citation placeholders
+- [ ] All existing work claims have numeric citations or `[needs: citation]`
 - [ ] Background scope appropriate for target audience
 
 **Methods-specific**:
@@ -1066,7 +1078,7 @@ Before final approval:
 **Discussion-specific**:
 - [ ] Key findings summarized (no new data)
 - [ ] Interpretations traceable to specific Results
-- [ ] Literature comparison with citations
+- [ ] Literature comparison uses numeric citations and corresponding `## References` entries
 - [ ] Limitations explicitly acknowledged
 - [ ] Future directions mentioned
 - [ ] Appropriate hedging language used

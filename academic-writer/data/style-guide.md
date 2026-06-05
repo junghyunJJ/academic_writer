@@ -355,7 +355,7 @@ Discussion
 │       Each interpretation traceable to a specific Result
 ├── Comparison with Prior Work (1-2 paragraphs)
 │   └── How findings extend, confirm, or contradict existing literature
-│       "Consistent with [Author, Year]..." / "In contrast to [Author, Year]..."
+│       "Consistent with prior reports [1]..." / "In contrast to previous work [2]..."
 │       New citations acceptable here
 ├── Limitations (1 paragraph)
 │   └── Explicit, specific, and honest
@@ -542,6 +542,10 @@ priority_rules:
 
 Reference table for tense, voice, interpretation, and citation rules per IMRAD section.
 
+### Numeric citation policy
+
+Generated Markdown sections use first-use ordered numeric citations in prose (`[1]`, `[2]`, `[1,2]`, `[1-3]`) and include a final `## References` section when cited papers, tools, datasets, or links have source metadata, and do not automatically add structure or voice/tone reference papers to `## References`; include them only when they are explicitly cited as evidence for a claim, method, dataset, tool, or prior-work comparison. Format entries as `[1] DOI: 10.xxxx/yyyy. "Full title."`, `[2] arXiv: 2603.22455. "Full title."`, or `[3] URL: https://example.org/page. "Full title." Optional source note.` Use `DOI > arXiv > URL` priority for papers, wrap titles in double quotes, use `[needs: citation]` for unsupported claims, use `[needs: reference metadata]` for incomplete reference entries, and do not invent missing authors, titles, years, DOIs, arXiv IDs, or URLs.
+
 ### Introduction
 
 ```yaml
@@ -558,7 +562,7 @@ introduction_rules:
     constraint: "Do not pre-interpret your own Results in Introduction"
   citations:
     density: "Heavy — every factual claim about prior work needs citation"
-    placement: "Inline parenthetical: '(Author et al., Year)'"
+    placement: "Numeric citation after supported claim: '[1]'"
   key_constraint: "Gap must be stated explicitly; contribution must match actual Results"
 ```
 
@@ -578,7 +582,7 @@ methods_rules:
     constraint: "Evaluation metrics may be defined but not discussed here"
   citations:
     density: "Moderate — cite tools and methods, not concepts"
-    placement: "After tool name: 'Seurat (v5.0.2; Stuart et al., 2019)'"
+    placement: "After tool name/version: 'Seurat (v5.0.2)[1]'"
   key_constraint: "Sufficient detail for reproduction; every parameter stated"
 ```
 
@@ -706,8 +710,8 @@ discussion_rules:
 
 **Comparison to literature**:
 - "These findings are consistent with previous reports showing..."
-- "In contrast to [Author, Year], who found..."
-- "Our results extend the work of [Author, Year] by..."
+- "In contrast to prior reports [1], ..."
+- "Our results extend previous work [1] by..."
 - "This is in line with the emerging consensus that..."
 
 **Limitation acknowledgment**:
