@@ -733,6 +733,7 @@ After user approval, the writer persists the Blueprint to `paper_context.methods
 - Use numeric citations in generated Markdown (`[1]`, `[2]`, `[1,2]`, `[1-3]`) and append `## References` when cited papers, tools, datasets, or links have metadata
 - Format references as `[1] DOI: 10.xxxx/yyyy. "Full title."`, `[2] arXiv: 2603.22455. "Full title."`, or `[3] URL: https://example.org/page. "Full title." Optional source note.`
 - For papers, use identifier priority `DOI > arXiv > URL`; keep structure and voice/tone reference papers out of `## References` unless they are explicitly cited as evidence; mark unresolved support as `[needs: citation]` and incomplete entries as `[needs: reference metadata]`
+- Only external citable sources belong in `## References`; local files, relative paths, absolute paths, repository artifacts, generated outputs, and local Markdown artifacts should be mentioned inline as code paths or listed under artifact/supplementary sections instead
 - Integration pass: terminology, citations, hedging compliance, keyword placement verification, and Results legend completeness
 - Save final approved section artifacts as Markdown files (`.md`) by default; other formats require an explicit user request.
 

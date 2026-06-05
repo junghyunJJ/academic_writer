@@ -288,6 +288,7 @@ context_detection:
       - "If direct structure references exist, treat their organization patterns as the highest-priority structure guide for this run"
       - "If direct voice references exist, treat their tone and wording patterns as the highest-priority Target Voice guide for this run"
       - "Do not automatically add structure or voice/tone reference papers to the manuscript ## References list unless they are explicitly cited as evidence"
+      - "Do not add local files, relative paths, absolute paths, repository artifacts, generated outputs, code files, figures, CSV/TSV/JSON/JSONL files, or local Markdown artifacts to ## References"
 
   step_1_auto_scan:
     action: "Scan workspace for existing IMRAD sections"
@@ -1395,6 +1396,10 @@ Generate section-type-appropriate outputs at each stage:
   - Final `## References` section when cited papers, tools, datasets, or links have source metadata
   - Reference entries ordered by first citation and formatted as `[1] DOI: 10.xxxx/yyyy. "Full title."`, `[2] arXiv: 2603.22455. "Full title."`, or `[3] URL: https://example.org/page. "Full title." Optional source note.`
   - Identifier priority is `DOI > arXiv > URL`: for papers, use DOI whenever known; if DOI is unavailable, use arXiv when available; otherwise use URL
+  - Only external citable sources belong in `## References`: DOI, arXiv ID, or a public URL
+  - Public URL means an `http://` or `https://` URL that readers can resolve outside the local repository
+  - Do not use `URL:` for local files, relative paths, absolute paths, repository artifacts, generated outputs, code files, figures, CSV/TSV/JSON/JSONL files, or local Markdown artifacts
+  - Mention local artifacts inline as code paths or list them under `## Source Artifacts`, `## Reproducibility Artifacts`, or `## Supplementary Materials` when useful
   - Full titles must be wrapped in double quotes immediately after the identifier sentence; never invent missing title or identifier metadata
   - `[needs: citation]` for unsupported claims and `[needs: reference metadata]` for incomplete reference entries
   - Structure-only and voice/tone-only papers from `run_reference_layers` excluded from `## References` unless explicitly cited as evidence
@@ -1413,6 +1418,7 @@ Before submission to Reviewer, verify all applicable items:
 - [ ] `run_reference_layers` consumed; structure and voice/tone references kept separate unless user chose same_as_structure
 - [ ] Direct reference-derived structure and voice/tone guidance applied before RAG/static defaults
 - [ ] Structure-only and voice/tone-only reference papers were not added to `## References` unless explicitly cited as evidence
+- [ ] Local files, relative paths, absolute paths, repository artifacts, generated outputs, and local Markdown artifacts were not added to `## References`
 - [ ] Tiered conversational interview completed (Phases A-D)
 - [ ] Outline approved by user (Introduction/Discussion) or Blueprint approved by user (Methods/Results)
 - [ ] Logical flow maintained across subsections
@@ -1420,6 +1426,7 @@ Before submission to Reviewer, verify all applicable items:
 - [ ] Voice matches Target Voice Layer profile
 - [ ] Numeric citations are ordered by first use and all cited works with metadata appear in `## References`
 - [ ] `## References` entries use DOI > arXiv > URL priority and double-quoted titles
+- [ ] Any `URL:` entry uses a public `http://` or `https://` URL, not a local or repository path
 - [ ] Missing support is marked `[needs: citation]`; incomplete reference metadata is marked `[needs: reference metadata]`
 - [ ] Reporting guideline items addressed (if applicable)
 - [ ] Word count within journal limits (if specified)

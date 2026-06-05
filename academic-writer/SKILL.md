@@ -429,6 +429,7 @@ run_reference_layers:
 5. Keep user-provided reference layers run-specific unless the user approves long-term learning.
 6. Use direct references as priority guidance for organization, outline shape, figure/table integration, and section-specific rhetorical structure; use voice references for sentence rhythm, tone, transitions, and statistical/legend wording.
 7. For manuscript bibliography, do not automatically add structure or voice/tone reference papers to the manuscript `## References` section unless that paper is explicitly cited as evidence for a claim, method, dataset, tool, or prior-work comparison.
+8. For manuscript bibliography, do not add local files, relative paths, absolute paths, repository artifacts, generated outputs, code files, figures, CSV/TSV/JSON/JSONL files, or local Markdown artifacts to `## References`.
 
 ### RAG Health Check (Before Phase -1)
 
@@ -1000,6 +1001,10 @@ Markdown-first, Word-ready output:
 - Add a final `## References` section to each generated Markdown section when at least one cited paper, dataset, tool, or link has source metadata.
 - Reference entries use the same numeric order as first citation and this identifier-first format: `[1] DOI: 10.xxxx/yyyy. "Full title."`, `[2] arXiv: 2603.22455. "Full title."`, or `[3] URL: https://example.org/page. "Full title." Optional source note.`
 - Reference identifier priority is `DOI > arXiv > URL`: for papers, use DOI whenever known; if DOI is unavailable, use arXiv when available; otherwise use URL.
+- Only external citable sources belong in `## References`: DOI, arXiv ID, or a public URL.
+- Public URL means an `http://` or `https://` URL that readers can resolve outside the local repository.
+- Do not use `URL:` for local files, relative paths, absolute paths, repository artifacts, generated outputs, code files, figures, CSV/TSV/JSON/JSONL files, or local Markdown artifacts.
+- Mention local artifacts inline as code paths or list them under `## Source Artifacts`, `## Reproducibility Artifacts`, or `## Supplementary Materials` when they are useful for reproducibility.
 - Put the full title in double quotes immediately after the identifier sentence. Keep the period inside the closing quote when the title is complete.
 - Use `[needs: citation]` for claims that need support but do not yet have a source, and `[needs: reference metadata]` when a cited source lacks enough metadata for the `## References` entry.
 - Never invent authors, titles, years, DOIs, or URLs. If metadata is unavailable, preserve the citation marker and flag the missing field.
@@ -1030,6 +1035,7 @@ Before final approval:
 - [ ] Numeric citations are ordered by first use and each cited source with available metadata appears in `## References`
 - [ ] `## References` entries use identifier-first format with DOI > arXiv > URL priority and double-quoted titles
 - [ ] `## References` excludes structure-only and voice/tone-only reference papers unless they are explicitly cited as evidence
+- [ ] `## References` excludes local files, relative paths, absolute paths, repository artifacts, generated outputs, and local Markdown artifacts
 - [ ] Unsupported claims are marked `[needs: citation]`; incomplete reference entries are marked `[needs: reference metadata]`
 - [ ] Consistent terminology throughout
 - [ ] Appropriate voice and tense per section_configs
