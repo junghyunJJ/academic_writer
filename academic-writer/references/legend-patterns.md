@@ -52,6 +52,14 @@ Table legends are shorter than figure legends and usually provide:
 ### Supplementary Table Legends
 - Can be concise, but must define value meaning and notation.
 - For pairwise statistical tables, state the test, what the sign means, what parentheses contain, and how significance is marked.
+- Distinguish legend text from table contents. The legend describes what the Supplementary Table contains; large table values live in a linked CSV/TSV artifact rather than in the legend block.
+- A Supplementary Table is large when it has `>20 rows` or more than `8 columns`. Large tables default to `supplementary/supplementary_table_X.csv`; use TSV only when the user provides TSV or explicitly requests TSV.
+- If the generated artifact path, row/column semantics, units, or value meanings are incomplete, keep known legend text and mark unresolved fields as `[needs: ...]`.
+
+### Supplementary Data Descriptions
+- Supplementary Data is not a legend body. Represent Supplementary Data as a linked existing or generated data file plus a short Markdown description.
+- Include identifier, file link, value semantics, and missing-field markers when needed.
+- Do not invent Supplementary Data values, schemas, units, file names, or row/column meanings.
 
 ## Missing Information Policy
 
@@ -89,7 +97,15 @@ Table 1: ...
 Supplementary Figure 1: ...
 
 ### Supplementary Tables
-Supplementary Table 1: ...
+Supplementary Table 1: [descriptive title]. Rows show [row semantics], columns show [column semantics], and values report [value semantics]. Full table: [supplementary/supplementary_table_X.csv](supplementary/supplementary_table_X.csv). [needs: unresolved units]
+
+## Supplementary Materials
+
+### Supplementary Table 1
+[supplementary/supplementary_table_X.csv](supplementary/supplementary_table_X.csv). [Short description]. Values represent [value semantics]. [needs: missing column units]
+
+### Supplementary Data 1
+[path/to/supplementary_data_1.csv](path/to/supplementary_data_1.csv). [Short description]. Records represent [value semantics]. [needs: schema description]
 ```
 
 Omit empty subsections. If all available items are incomplete, still provide partial drafts plus a consolidated missing-fields checklist.

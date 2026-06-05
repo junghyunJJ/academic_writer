@@ -108,7 +108,7 @@ Multi-agent system for writing publication-quality IMRAD sections by learning fr
 |-------|------|-------|--------|
 | **Section Analyzer** | Extract structure patterns for SECTION_TYPE | RAG search results + reference patterns | Structure Layer for style guide |
 | **Style Extractor** | Extract voice/tone from Target Voice collection | RAG search results | Target Voice Layer for style guide |
-| **Section Writer** | Write section via tiered interview process | User data + merged style guide + RAG few-shot | Interview -> Outline -> Draft section; Markdown figure embeds/captions for all sections; full Results figure/table legends when available |
+| **Section Writer** | Write section via tiered interview process | User data + merged style guide + RAG few-shot | Interview -> Outline -> Draft section; Markdown figure embeds/captions for all sections; full Results figure/table legends when available; hybrid supplementary materials Markdown plus linked CSV/TSV artifacts |
 | **Section Reviewer** | Section-weighted multi-pass review | Draft + source data | Review report + revision diffs + WHY |
 | **Pattern Learner** | Learn from feedback, section-tagged | Approved sections + feedback | Style guide updates (both layers) |
 | **Paper Preprocessor** | *Fallback*: Extract section from PDFs | Reference PDFs + SECTION_TYPE | Extracted section text + metadata |
@@ -167,7 +167,7 @@ section_configs:
       voice: "active for findings, passive for methods-brief"
       interpretation: "not allowed — save for Discussion"
       citations: "minimal — only for method references"
-      key_constraint: "every claim backed by data; each subsection states why the result is needed, why the figure/table is the right evidence, closes with a data-backed takeaway, and generates figure/table legends for available displays; no over-interpretation"
+      key_constraint: "every claim backed by data; each subsection states why the result is needed, why the figure/table is the right evidence, closes with a data-backed takeaway, generates figure/table legends for available displays, and uses hybrid supplementary materials handling for large supplementary tables/data; no over-interpretation"
     review_weight_overrides:
       factual_accuracy: 1.5
       statistical_review: 1.3
@@ -583,12 +583,33 @@ merged_invocation_guide:
 |---------|----------------|-----------------|
 | Introduction | Research topic, research gap, contribution, key references | Background notes (.md), related work notes, conceptual overview figure, target journal |
 | Methods | Pipeline description, tools/versions, datasets, parameters | Pseudocode, code repo URL, pipeline/architecture figure, reporting guideline |
-| Results | CSV data + descriptions, figures/tables + findings + stats + legend-ready display metadata, experimental context | Results context (.md), target journal, reporting guideline |
+| Results | CSV data + descriptions, figures/tables + findings + stats + legend-ready display metadata, experimental context | Results context (.md), supplementary materials/data, target journal, reporting guideline |
 | Discussion | Key findings summary, Results section text, limitations | Related work comparison, future directions, broader impact, synthesis/model figure, target journal |
 
 Full input specification with Korean prompts: see `agents/section-writer.md` Step 0.
 
 For every section, a user-provided figure with an actual file path should be embedded in the saved Markdown using `![Figure X](path/to/file.png)` near its first substantive reference. Description-only figures are referenced and captioned without inventing an image path. For Results, a figure/table is "available" for legend drafting when either an actual file exists or the user provides sufficient description, panel, table, and statistical metadata for a partial or complete legend.
+
+#### Supplementary Materials Contract
+
+Supplementary outputs use a hybrid policy:
+- **Supplementary Figures**: embed file-backed figures with `![Supplementary Figure X](path)` and write legends/captions. Description-only supplementary figures receive legend text without invented paths.
+- **Supplementary Tables**: write a legend in `## Figure Legends` under `### Supplementary Tables`. Small tables may be rendered inline in Markdown when readable. Large tables are not inlined.
+- **Supplementary Data**: always represent as separate data files or linked existing files, with a short Markdown description. Never paste full supplementary data payloads into the section body.
+
+Large supplementary table threshold:
+- A supplementary table is large if it has `>20 rows` or more than `8 columns`.
+- Large supplementary tables are written or linked as separate CSV/TSV artifacts instead of full Markdown tables.
+- Default generated target: `supplementary/supplementary_table_X.csv`.
+- Use TSV only when the user provides TSV or explicitly requests TSV; otherwise generate CSV.
+- Never invent supplementary table or supplementary data values. Missing values, columns, units, row labels, or source paths must be marked as `[needs: ...]`.
+
+When supplementary files exist, add a `## Supplementary Materials` block after Results `## Figure Legends`. Each item must include:
+- Identifier (`Supplementary Figure X`, `Supplementary Table X`, `Supplementary Data X`)
+- File link or generated target path
+- Short description
+- Value semantics (what rows, columns, or values mean)
+- Missing-field markers such as `[needs: column units]` when required
 
 #### Step 1: Tiered Conversational Interview (MAJOR UPGRADE)
 
@@ -766,13 +787,13 @@ For Methods and Results, Step 3 is constrained by `approved_blueprint`. The writ
 |---------|---------------|-------------------|
 | Introduction | Broad context -> narrow to problem -> existing approaches -> gap statement -> contribution -> roadmap | Funnel structure; citation placeholders [Author, Year]; explicit gap; "we introduce/present/propose"; no over-promising; optional conceptual figures embedded and captioned when provided |
 | Methods | Overview -> data description -> step-by-step procedure -> tools/versions -> evaluation | Past tense; passive preferred; every parameter stated; software versions explicit; no results or interpretation; optional workflow/pipeline figures embedded and captioned with reproducibility-relevant context |
-| Results | Result rationale -> method-brief -> primary finding + stats -> figure evidence/rationale -> closing takeaway -> transition -> figure/table legends for available displays | No interpretation (save for Discussion); statistics inline; figures described as evidence, not just referenced; empirical subsections close with one data-backed takeaway; legends use `references/legend-patterns.md` |
+| Results | Result rationale -> method-brief -> primary finding + stats -> figure evidence/rationale -> closing takeaway -> transition -> figure/table legends for available displays -> Supplementary Materials links when files exist | No interpretation (save for Discussion); statistics inline; figures described as evidence, not just referenced; empirical subsections close with one data-backed takeaway; legends use `references/legend-patterns.md`; large supplementary tables/data are linked as artifacts |
 | Discussion | Recap finding -> interpretation -> literature comparison -> implications -> limitations -> future | Interpretation required; compare with literature [citations]; no new data; appropriate hedging; end with broader impact; optional synthesis/model figures embedded and captioned without introducing new data |
 
 **Integration pass** (after prose, section-specific checks):
 - **Introduction**: citation placeholder completeness, gap statement presence, contribution clarity, conceptual figure embed/caption check when provided
 - **Methods**: reproducibility detail check, parameter completeness, version numbers, workflow/pipeline figure embed/caption check when provided
-- **Results**: terminology consistency, Markdown figure embeds, figure refs, statistics, flow, word count, voice, figure/table legend completeness
+- **Results**: terminology consistency, Markdown figure embeds, figure refs, statistics, flow, word count, voice, figure/table legend completeness, supplementary artifact links
 - **Discussion**: no-new-data check, limitation presence, over-interpretation scan, synthesis/model figure embed/caption check when provided
 
 Full prose protocols with paragraph templates: see `agents/section-writer.md` Step 3.
@@ -969,6 +990,9 @@ Markdown-first, Word-ready output:
 - Figure references: `(Figure X)`, `(Table Y)`
 - File-backed figures in any section: embed with Markdown image syntax, e.g. `![Figure 1](figures/figure1.png)`, placed near the first substantive reference or immediately before the relevant caption/legend. Use the user-provided path unless the user asks for path normalization.
 - For Results with available displays: separate `## Figure Legends` output with `Main Figures`, `Main Tables`, `Supplementary Figures`, and `Supplementary Tables` subsections as applicable
+- For Results with supplementary files: after `## Figure Legends`, include `## Supplementary Materials` with one entry per supplementary figure, supplementary table artifact, and Supplementary Data file
+- Large supplementary tables (`>20 rows` or more than `8 columns`) are linked as `supplementary/supplementary_table_X.csv` by default; use `.tsv` only for user-provided TSV or explicit TSV requests
+- Supplementary Data is always linked as separate files or existing artifacts with a short Markdown description and value semantics
 - For Introduction, Methods, and Discussion figures: provide section-appropriate captions or short legends adjacent to the embed; do not force Results-style full legends unless the user requests them.
 - Statistics inline: `(p < 0.05)`, `(n = 100)`
 - Citation placeholders: `[Author, Year]`
@@ -1024,6 +1048,9 @@ Before final approval:
 - [ ] Each figure/table has an explicit evidentiary role for a claim, not just a descriptive placement
 - [ ] Available main and supplementary figure/table legends drafted, or explicitly omitted because no display metadata exists
 - [ ] Partial legends preserve known information and mark missing values as `[needs: ...]` without inventing statistics, sample sizes, encodings, or scale bars
+- [ ] Large supplementary tables (`>20 rows` or more than `8 columns`) are saved or linked as CSV/TSV artifacts rather than inlined in Markdown
+- [ ] Supplementary Data files are linked with short descriptions, value semantics, and `[needs: ...]` markers for unresolved fields
+- [ ] When supplementary files exist, `## Supplementary Materials` appears after Results `## Figure Legends`
 - [ ] Each empirical/evaluation subsection ends with a one-sentence data-backed closing takeaway
 - [ ] Statistics complete (values, tests, p-values, n)
 - [ ] No interpretation beyond data

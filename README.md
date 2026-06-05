@@ -13,6 +13,7 @@ Multi-agent system for writing publication-quality Introduction, Methods, Result
 | **Deep Interview Gate** | Every invocation now starts by clarifying target result, scope, constraints, completion criteria, and existing context before section selection. |
 | **Reference Paper Gate** | After section selection, the workflow always asks separately for run-specific structure references and voice/tone references. |
 | **Results Figure/Table Legends** | Results writing now drafts main and supplementary figure/table legends when display metadata is available. |
+| **Hybrid Supplementary Materials** | Supplementary descriptions stay in Markdown, while large supplementary tables and Supplementary Data are linked as CSV/TSV/data artifacts. |
 | **No-Invention Legend Policy** | Partial legends preserve known information and mark unresolved fields as `[needs: ...]` instead of inventing sample sizes, statistics, encodings, scale bars, cohort labels, or abbreviations. |
 | **Legend-Aware Analysis and Review** | Section Analyzer, Style Extractor, Section Writer, Section Reviewer, style guide, and Results references now include legend/caption extraction, writing, and validation contracts. |
 | **Section-Wide Markdown Figure Embeds** | User-provided figure file paths are embedded in `.md` outputs as `![Figure X](path/to/file.png)` across Introduction, Methods, Results, and Discussion. |
@@ -59,6 +60,7 @@ Multi-agent system for writing publication-quality IMRAD sections (Introduction,
 | **Methods/Results Blueprint Gate** | Requires user-approved hierarchical skeleton + verification matrix before Methods or Results prose generation, then persists the approved Blueprint for reviewer alignment |
 | **Results Closing Takeaways** | Requires empirical/evaluation Results subsections to close with a concise data-backed takeaway while keeping interpretation in Discussion |
 | **Results Figure/Table Legends** | Drafts legends for available main and supplementary figures/tables and marks missing legend fields explicitly |
+| **Supplementary Materials** | Embeds Supplementary Figures, links large Supplementary Tables as CSV/TSV artifacts, and links Supplementary Data files with Markdown descriptions |
 | **Section-Wide Figure Embeds** | Embeds file-backed figures in Markdown for any section and writes section-appropriate captions outside Results |
 | **Markdown-First Saving** | Saves final approved section artifacts as `.md` by default, while preserving Word-ready Markdown formatting |
 | **User-Specified Keywords** | Tier 1 (must-emphasize) and Tier 2 (natural-include) keywords and key sentences are tracked through writing and verified in review |
@@ -305,9 +307,26 @@ research_materials:
       - file: "[path or null if description-only]"
         id: "Table 1|Supplementary Table 1"
         description: "[what this table contains]"
+        row_count: "[integer or unknown]"
+        column_count: "[integer or unknown]"
         row_column_semantics: "[what rows/columns mean]"
         value_semantics: "[counts, percentages, coefficients, p-values, etc.]"
         notation: "[bolding, asterisks, thresholds, NA/dash meaning]"
+        generated_file_target: "[large Supplementary Tables default to supplementary/supplementary_table_X.csv]"
+    supplementary_materials:
+      tables:
+        - id: "Supplementary Table 1"
+          description: "[short Markdown description]"
+          row_count: "[integer or unknown]"
+          column_count: "[integer or unknown]"
+          value_semantics: "[what values mean]"
+          generated_file_target: "supplementary/supplementary_table_X.csv"
+          rule: "Inline only if small; external CSV/TSV if >20 rows or more than 8 columns"
+    supplementary_data:
+      - id: "Supplementary Data 1"
+        file: "[existing path or generated target]"
+        description: "[short Markdown description]"
+        value_semantics: "[what records/columns/values mean]"
     analysis_summary: "[.md file with context]"
 
   discussion:
@@ -427,6 +446,7 @@ Lite Mode (triggered only by explicit user request: "outline only", "skip bluepr
 - For Methods/Results, constrain prose to the approved Blueprint and return to Blueprint approval before adding new claims, method steps, figures/tables, statistics, tools, parameters, data sources, outputs, figure/algorithm placements, or subsections
 - For Results, close each empirical/evaluation subsection with a one-sentence data-backed takeaway; overview, dataset, or benchmark-construction subsections may close with roadmap or evaluation-purpose language
 - For Results with available displays, output `## Figure Legends` after prose, separated into Main Figures, Main Tables, Supplementary Figures, and Supplementary Tables as applicable
+- After Results legends, output `## Supplementary Materials` when supplementary files exist; link large Supplementary Tables and Supplementary Data files instead of inlining them
 - Mark unresolved legend-only fields as `[needs: ...]`; never invent sample sizes, p-values, tests, encodings, scale bars, cohort labels, or abbreviations
 - Integration pass: terminology, citations, hedging, writing rules compliance, keyword placement verification
 
@@ -709,10 +729,11 @@ After user approval, the writer persists the Blueprint to `paper_context.methods
 - For Introduction, Methods, and Discussion figures, write section-appropriate captions or short legends adjacent to the embed
 - For Results, close each empirical/evaluation subsection with a one-sentence data-backed takeaway; overview, dataset, or benchmark-construction subsections may close with roadmap or evaluation-purpose language
 - For Results with available displays, generate figure/table legends after prose using `references/legend-patterns.md`
+- For Results with supplementary files, add `## Supplementary Materials` after `## Figure Legends`; large Supplementary Tables use linked CSV/TSV artifacts and Supplementary Data is always linked as files
 - Integration pass: terminology, citations, hedging compliance, keyword placement verification, and Results legend completeness
 - Save final approved section artifacts as Markdown files (`.md`) by default; other formats require an explicit user request.
 
-**Output**: Draft section (Introduction/Methods/Results/Discussion), `academic_writer_brief` summary, optional `run_reference_layers` summary, plus `approved_blueprint` metadata persisted to `paper_context.methods_blueprint` or `paper_context.results_blueprint` for Methods/Results. File-backed figures are embedded with Markdown image syntax in any section. Results outputs include `## Figure Legends` when available displays exist. Saved final section artifacts default to `.md`.
+**Output**: Draft section (Introduction/Methods/Results/Discussion), `academic_writer_brief` summary, optional `run_reference_layers` summary, plus `approved_blueprint` metadata persisted to `paper_context.methods_blueprint` or `paper_context.results_blueprint` for Methods/Results. File-backed figures are embedded with Markdown image syntax in any section. Results outputs include `## Figure Legends` when available displays exist and `## Supplementary Materials` when supplementary files exist. Saved final section artifacts default to `.md`.
 
 ### Phase 3: Section Reviewer
 
@@ -1045,6 +1066,19 @@ style-guide.md:
 | Partial legends | Allowed only with inline `[needs: ...]` markers |
 | Never invent | Sample sizes, p-values, tests, encodings, scale bars, cohort labels, abbreviations |
 | Reference file | `references/legend-patterns.md` |
+
+### Supplementary Materials Quick Reference
+
+| Item | Rule |
+|------|------|
+| Output block | `## Supplementary Materials` after Results `## Figure Legends` when supplementary files exist |
+| Supplementary Figures | Embed file-backed figures as `![Supplementary Figure X](path)` and write captions/legends |
+| Small Supplementary Tables | May be inline if readable and not large |
+| Large Supplementary Tables | If `>20 rows` or more than `8 columns`, link CSV/TSV instead of inlining |
+| Default generated table | `supplementary/supplementary_table_X.csv` |
+| TSV use | Only when the user provides TSV or explicitly requests TSV |
+| Supplementary Data | Always link existing/generated files with a short description and value semantics |
+| Missing fields | Use `[needs: ...]`; never invent supplementary values |
 
 ### Markdown Figure Quick Reference
 
