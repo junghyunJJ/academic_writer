@@ -137,23 +137,21 @@ Introduction
 
 ```
 Methods
-├── Algorithm/System Overview (1 paragraph + optional figure ref)
-│   └── High-level description; reference to pipeline figure
+├── Framework / System Overview (1 paragraph + optional figure ref)
+│   └── High-level description of framework, major modules, and information flow
 │       "Our pipeline consists of four main stages: ..."
-├── Data & Preprocessing
+├── Data Processing
 │   ├── Data sources and versions (with URLs/accession numbers)
 │   ├── Filtering and QC criteria (explicit thresholds)
 │   └── Normalization approach and rationale
-├── Core Analysis Steps (one subsection per major step)
-│   ├── Step A: [Name] — algorithm description + key parameters
-│   ├── Step B: [Name] — algorithm description + key parameters
-│   └── Step N: [Name] — algorithm description + key parameters
-├── Evaluation Strategy
-│   ├── Benchmark datasets (source, size, selection rationale)
-│   ├── Baseline methods (names, versions, parameter settings)
-│   └── Evaluation metrics (definition, computation)
-└── Implementation & Availability
-    └── Software, language, version, hardware, runtime, repository URL
+├── Analysis Modules
+│   ├── Module A: [Name] — package/algorithm description + key parameters
+│   ├── Module B: [Name] — package/algorithm description + key parameters
+│   └── Module N: [Name] — package/algorithm description + key parameters
+├── Statistical Analysis
+│   └── Tests, correction methods, thresholds, effect summaries, validation
+└── Software and Code Availability
+    └── Software, language, version, hardware/runtime if relevant, public repository/DOI
 ```
 
 **Key Characteristics**:
@@ -161,6 +159,7 @@ Methods
 - Every parameter either stated explicitly or cited (not "default settings")
 - Subsection order matches Results presentation order
 - Software versions are mandatory: "Python 3.11.4", "Seurat v5.0.2"
+- Main Methods prose stays at publication level: keep package/algorithm/database names, versions, key parameters, thresholds, random seeds, and formulas; omit local paths, repository-internal script/module names, helper function names, variable/object slot names, generated plot/table filenames, and intermediate output artifact filenames unless public API or essential reproducibility detail
 
 #### Benchmark/Evaluation Papers
 
@@ -584,6 +583,10 @@ methods_rules:
     density: "Moderate — cite tools and methods, not concepts"
     placement: "After tool name/version: 'Seurat (v5.0.2)[1]'"
   key_constraint: "Sufficient detail for reproduction; every parameter stated"
+  detail_boundary:
+    keep_in_main_methods: "framework/module descriptions; package, algorithm, database, model, and platform names; versions; key thresholds; random seeds; statistical formulas; public data/code access"
+    move_out_of_main_methods: "local paths; repository-internal filenames; helper function names; variable/object slot names; generated plot/table filenames; intermediate output filenames; long artifact inventories"
+    rationale: "Methods should read like reference papers: reproducible enough for reviewers, but not as a repository walkthrough or implementation log"
 ```
 
 ### Results

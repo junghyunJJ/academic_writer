@@ -164,8 +164,9 @@ Section-specific structure checks:
 - No premature Methods or Results content
 
 **Methods** (Procedural flow: sequential, logical):
-- Subsections follow pipeline or chronological order
+- Subsections follow a reference-paper flow when applicable: framework/overview, data processing, analysis modules, statistics, software/code availability
 - Reproducibility markers present (version numbers, parameters, data sources)
+- Package/algorithm names and key parameters are retained, while local paths, repository-internal file names, internal function names, variable/object slot names, generated plot/table filenames, and output artifact filenames are absent from main prose unless they are public APIs or essential reproducibility details
 - No Results content or interpretation
 
 **Results** (Claim-driven evidence: rationale → finding → data → figure):
@@ -251,6 +252,7 @@ Section-specific completeness checks:
 - All parameters specified (not just "default settings")
 - Data sources and accession numbers described
 - Code/data availability mentioned if applicable
+- Main Methods prose has publication-level abstraction rather than repository-internal implementation detail
 
 **Results**: Nothing over-interpreted
 
@@ -404,6 +406,8 @@ reproducibility_review:
     - "Parameter values stated, not just 'default settings'"
     - "Data preprocessing fully described including QC thresholds"
     - "Code/data availability statement present"
+    - "Main prose follows the reference-paper flow: framework/overview, data processing, analysis modules, statistics, software/code availability"
+    - "Local paths, repository-internal file names, internal function names, variable/object slot names, generated plot/table filenames, and output artifact filenames are excluded from main Methods prose unless they are public APIs or essential reproducibility details"
 ```
 
 ### Pass 8: Blueprint Alignment (Methods/Results only)
@@ -422,6 +426,7 @@ blueprint_alignment:
       - "Every parameter required by the Blueprint appears in prose"
       - "Every data/input and output transition in the Blueprint is represented"
       - "Every figure/algorithm placement in prose maps to a Methods Blueprint row"
+      - "Implementation artifact notes in the Blueprint are not promoted into main Methods prose unless justified as public API or essential reproducibility detail"
       - "No new tool, parameter, data source, output, method step, figure/algorithm placement, or subsection appears without approved Blueprint revision"
     severity:
       missing_approved_blueprint: "major"
@@ -533,6 +538,8 @@ cross_section_consistency:
 - [ ] Data source not cited or accession number absent
 - [ ] Cited tool, method, dataset, or URL lacks a matching `## References` entry
 - [ ] Local analysis scripts, generated result files, or repository artifacts are cited as `## References` entries instead of being described as artifact paths
+- [ ] Main Methods prose includes unnecessary local paths, repository-internal file names, internal function names, variable/object slot names, generated plot/table filenames, or output artifact filenames
+- [ ] Methods structure reads like an implementation log rather than a reference-paper flow (framework, data processing, analysis modules, statistics, software/code availability)
 - [ ] Pipeline order does not match Results subsection order
 - [ ] Statistical test mentioned without justification
 - [ ] Preprocessing steps described incompletely

@@ -148,7 +148,7 @@ section_configs:
       voice: "passive preferred for procedures, active for decisions"
       interpretation: "not allowed — describe, don't interpret"
       citations: "moderate — cite tools, databases, algorithms"
-      key_constraint: "must be reproducible; sufficient detail for replication"
+      key_constraint: "must be reproducible at manuscript level: use a reference-paper flow (framework, data processing, analysis modules, statistics, software/code availability), retain package/algorithm names and key parameters, and keep internal file paths, function names, variable names, generated plot/table filenames, and repository-local artifacts out of the main Methods prose unless they are public APIs or essential reproducibility details"
     review_weight_overrides:
       factual_accuracy: 1.0
       statistical_review: 0.7
@@ -788,13 +788,13 @@ For Methods and Results, Step 3 is constrained by `approved_blueprint`. The writ
 | Section | Paragraph Flow | Key Writing Rules |
 |---------|---------------|-------------------|
 | Introduction | Broad context -> narrow to problem -> existing approaches -> gap statement -> contribution -> roadmap | Funnel structure; numeric citations `[1]`; explicit gap; "we introduce/present/propose"; no over-promising; optional conceptual figures embedded and captioned when provided |
-| Methods | Overview -> data description -> step-by-step procedure -> tools/versions -> evaluation | Past tense; passive preferred; every parameter stated; software versions explicit; no results or interpretation; optional workflow/pipeline figures embedded and captioned with reproducibility-relevant context |
+| Methods | Framework/overview -> data processing -> analysis modules -> statistics -> software/code availability | Past tense; passive preferred; report package/algorithm names, versions, key parameters, thresholds, random seeds, and public data/code access; keep local paths, internal functions, variable/object slot names, generated plot/table filenames, and repository artifacts out of the main prose unless they are public APIs or essential reproducibility details; optional workflow/pipeline figures embedded and captioned with reproducibility-relevant context |
 | Results | Result rationale -> method-brief -> primary finding + stats -> figure evidence/rationale -> closing takeaway -> transition -> figure/table legends for available displays -> Supplementary Materials links when files exist | No interpretation (save for Discussion); statistics inline; figures described as evidence, not just referenced; empirical subsections close with one data-backed takeaway; legends use `references/legend-patterns.md`; large supplementary tables/data are linked as artifacts |
 | Discussion | Recap finding -> interpretation -> literature comparison -> implications -> limitations -> future | Interpretation required; compare with literature using numeric citations; no new data; appropriate hedging; end with broader impact; optional synthesis/model figures embedded and captioned without introducing new data |
 
 **Integration pass** (after prose, section-specific checks):
 - **Introduction**: numeric citation completeness, gap statement presence, contribution clarity, conceptual figure embed/caption check when provided
-- **Methods**: reproducibility detail check, parameter completeness, version numbers, workflow/pipeline figure embed/caption check when provided
+- **Methods**: reproducibility detail check, parameter completeness, version numbers, reference-paper flow check, internal-implementation detail filter, workflow/pipeline figure embed/caption check when provided
 - **Results**: terminology consistency, Markdown figure embeds, figure refs, statistics, flow, word count, voice, figure/table legend completeness, supplementary artifact links
 - **Discussion**: no-new-data check, limitation presence, over-interpretation scan, synthesis/model figure embed/caption check when provided
 
@@ -1004,7 +1004,7 @@ Markdown-first, Word-ready output:
 - Only external citable sources belong in `## References`: DOI, arXiv ID, or a public URL.
 - Public URL means an `http://` or `https://` URL that readers can resolve outside the local repository.
 - Do not use `URL:` for local files, relative paths, absolute paths, repository artifacts, generated outputs, code files, figures, CSV/TSV/JSON/JSONL files, or local Markdown artifacts.
-- Mention local artifacts inline as code paths or list them under `## Source Artifacts`, `## Reproducibility Artifacts`, or `## Supplementary Materials` when they are useful for reproducibility.
+- For Methods, keep local artifacts out of the main prose. If local or repository artifacts are useful for reproducibility, list them separately under `## Source Artifacts`, `## Reproducibility Artifacts`, or `## Supplementary Materials`, or refer to a public repository/DOI in Code availability.
 - Put the full title in double quotes immediately after the identifier sentence. Keep the period inside the closing quote when the title is complete.
 - Use `[needs: citation]` for claims that need support but do not yet have a source, and `[needs: reference metadata]` when a cited source lacks enough metadata for the `## References` entry.
 - Never invent authors, titles, years, DOIs, or URLs. If metadata is unavailable, preserve the citation marker and flag the missing field.
@@ -1054,6 +1054,8 @@ Before final approval:
 - [ ] Approved Methods Blueprint exists, or Lite Mode reduced Blueprint records `approval_status: skipped_by_user`
 - [ ] All tools and software versions stated
 - [ ] All parameters explicitly specified (not "default")
+- [ ] Section follows a publication-style flow appropriate to reference papers: framework/overview, data processing, analysis modules, statistics, and software/code availability when applicable
+- [ ] Main Methods prose retains package/algorithm names and key parameters but excludes local paths, repository-internal file names, internal function names, variable/object slot names, generated plot/table filenames, and output artifact filenames unless they are public APIs or essential reproducibility details
 - [ ] Sufficient detail for replication
 - [ ] No results or interpretation present
 - [ ] Data sources and access described

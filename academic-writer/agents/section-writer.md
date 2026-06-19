@@ -73,6 +73,7 @@ research_materials:
   optional:
     algorithm_pseudocode: "Algorithm pseudocode"
     code_repository: "Code repository URL"
+    implementation_artifacts: "Optional internal scripts, function names, generated files, local paths, or repository artifacts; use for verification and code availability only, not as main Methods prose unless public API or essential reproducibility detail"
     figures:
       - file: "[path or null if description-only]"
         id: "Figure 1|Supplementary Figure 1"
@@ -406,10 +407,10 @@ methods_interview:
     smart_default: "Encourage numbered steps; start from the end and walk backwards if stuck"
 
   q4:
-    question: "What software/tools and versions were used? Are there custom scripts or special parameters?"
+    question: "What software/tools, versions, and key parameters were used? Are there public code artifacts or internal scripts that should be captured for availability or supplementary material?"
     type: reproducibility
-    purpose: "Ensures every tool is documented with version — reviewers check this"
-    smart_default: "Extract from tools_and_versions input; follow-up on custom parameters"
+    purpose: "Ensures tools and parameters are reproducible while keeping internal implementation artifacts out of the main Methods prose"
+    smart_default: "Extract package/algorithm names and key parameters for Methods; record custom scripts, local paths, generated filenames, and repository-internal identifiers as implementation_artifacts for code availability or supplementary notes"
 
   q5:
     question: "Do you have a preferred subsection order for Methods?"
@@ -669,14 +670,14 @@ methods_blueprint:
     action: "Propose the Methods section skeleton"
     content:
       - "Target length or journal word budget, if known"
-      - "Organization principle: chronological, pipeline, modular, or hierarchical"
+      - "Organization principle: reference-paper flow by default: framework/overview → data processing → analysis modules → statistics → software/code availability"
       - "Subsection order and titles"
       - "Major procedure/method step under each subsection"
     output_format: |
       ## Methods Blueprint
 
       **Target length**: [word budget if known]
-      **Organization principle**: [chronological / pipeline / modular / hierarchical]
+      **Organization principle**: [framework-first / data-processing-first / pipeline / modular / chronological / hierarchical]
 
       1. [Subsection title]
          1. [procedure or method step]
@@ -690,12 +691,13 @@ methods_blueprint:
     action: "Generate the Methods Blueprint matrix"
     content:
       - "One row per method block or procedure step"
-      - "Inputs, tools, versions, parameters, outputs, and reproducibility risks"
+      - "Inputs, tools, versions, parameters, conceptual outputs, implementation artifact notes, and reproducibility risks"
+      - "Separate manuscript-facing details from internal implementation artifacts before prose generation"
       - "Explicit marker for missing values that must be resolved before prose"
     output_format: |
-      | Block | Subsection | Procedure/Step | Data/Input | Tool/Version | Parameters | Output | Reproducibility Risk |
-      |-------|------------|----------------|------------|--------------|------------|--------|----------------------|
-      | M1 | Cohort construction | Select eligible patient records | EHR medication and laboratory tables | SQL query + Python 3.11 | inclusion window, exclusion criteria | analysis-ready cohort table | needs_user_input: unresolved exclusion criteria |
+      | Block | Subsection | Procedure/Step | Data/Input | Tool/Version | Parameters | Manuscript-facing Output | Artifact/Supplement Note | Reproducibility Risk |
+      |-------|------------|----------------|------------|--------------|------------|--------------------------|--------------------------|----------------------|
+      | M1 | Cohort construction | Select eligible patient records | EHR medication and laboratory tables | SQL + Python 3.11 | inclusion window, exclusion criteria | analysis-ready cohort | internal query filename omitted from main prose; repository link in Code availability | needs_user_input: unresolved exclusion criteria |
     requirement: "Collaborate with user and revise as needed; final hard gate occurs at Step 2d"
 
   step_2c_gap_and_risk_check:
@@ -705,7 +707,8 @@ methods_blueprint:
       - "Every software/tool has a version or is flagged for user resolution"
       - "Every key parameter has a value or is flagged for user resolution"
       - "Intermediate data transformations are represented"
-      - "Custom scripts, special thresholds, or non-default settings are visible"
+      - "Special thresholds, random seeds, non-default settings, and public package/algorithm names are visible"
+      - "Local file paths, repository-internal file names, internal function names, variable/object slot names, generated plot/table filenames, and output artifact filenames are routed to Artifact/Supplement Note, Source Artifacts, or Code/Data Availability instead of main Methods prose"
     risk_status_values:
       - "resolved"
       - "accepted_by_user"
@@ -729,7 +732,9 @@ methods_blueprint:
     contract_rule: |
       After approval, prose generation must not introduce new subsections, method steps,
       tools, parameters, data sources, outputs, or figure/algorithm placements unless the
-      user first approves a Blueprint revision.
+      user first approves a Blueprint revision. Implementation artifact notes in the Blueprint
+      are not automatically promoted into main Methods prose; use them only for verification,
+      Source/Reproducibility Artifacts, Supplementary material, or Code/Data Availability.
 ```
 
 ### Results Blueprint (Strong HITL Gate)
@@ -993,11 +998,11 @@ introduction_prose:
 ```yaml
 methods_prose:
   paragraph_structure:
-    1_overview: "Brief overview of the complete pipeline/approach (1-2 sentences)"
-    2_data: "Dataset description (source, size, format, preprocessing, QC)"
-    3_procedure: "Step-by-step analytical procedure with sufficient detail for reproduction"
-    4_tools: "Software names, versions, key parameters, and settings"
-    5_evaluation: "Evaluation strategy, metrics, validation approach"
+    1_framework: "Brief framework/system overview and major modules (1-2 paragraphs)"
+    2_data_processing: "Dataset description, input requirements, preprocessing, and QC"
+    3_analysis_modules: "Major analysis modules or procedure blocks with package/algorithm names and key parameters"
+    4_statistics: "Statistical tests, thresholds, correction methods, uncertainty handling, and validation strategy"
+    5_software_code_availability: "Software versions, public code/data availability, and reproducibility environment"
 
   writing_rules:
     - "Past tense for procedures performed ('reads were aligned', 'clusters were identified')"
@@ -1005,6 +1010,8 @@ methods_prose:
     - "Active voice acceptable for design decisions ('We chose X because...')"
     - "Sufficient detail for reproduction — every parameter value stated"
     - "Software versions must be explicit (e.g., 'STAR v2.7.10a')"
+    - "Use publication-level abstraction: keep package names, algorithm names, model names, databases, key thresholds, seeds, and statistical formulas; omit local paths, repository-internal files, internal functions, variable/object slot names, generated plot/table filenames, and output artifact filenames from main Methods prose unless they are public APIs or essential reproducibility details"
+    - "Do not narrate cleanup choices such as 'internal names were removed'; simply write the Methods at the correct abstraction level from the start"
     - "No results or interpretation in Methods — only what was done, not what was found"
     - "Cross-reference to Results section where appropriate ('see Results, Section X')"
     - "Moderate numeric citations for established tools [1]"
@@ -1216,6 +1223,8 @@ integration_checks:
       - "Every software tool has a version number"
       - "Every key parameter has its value stated"
       - "Data sources are specifically identified with access information"
+      - "Manuscript-facing prose follows the reference-paper flow: framework, data processing, analysis modules, statistics, software/code availability"
+      - "Internal implementation artifacts remain outside main prose unless public API or essential reproducibility detail"
     parameter_completeness:
       - "All analysis steps have associated parameters"
       - "Default vs. custom parameters distinguished"
@@ -1336,7 +1345,7 @@ style_rules:
     voice: "Passive voice preferred for standard procedures; active for design decisions"
     interpretation: "Not allowed — only describe what was done"
     citations: "Moderate — cite established tools and methods"
-    key_constraint: "Sufficient detail for reproducibility"
+    key_constraint: "Sufficient detail for manuscript-level reproducibility without leaking repository-internal implementation identifiers into main prose"
 
   results:
     tense: "Past tense for completed analyses; present tense for figure descriptions"
@@ -1399,7 +1408,7 @@ Generate section-type-appropriate outputs at each stage:
   - Only external citable sources belong in `## References`: DOI, arXiv ID, or a public URL
   - Public URL means an `http://` or `https://` URL that readers can resolve outside the local repository
   - Do not use `URL:` for local files, relative paths, absolute paths, repository artifacts, generated outputs, code files, figures, CSV/TSV/JSON/JSONL files, or local Markdown artifacts
-  - Mention local artifacts inline as code paths or list them under `## Source Artifacts`, `## Reproducibility Artifacts`, or `## Supplementary Materials` when useful
+  - For Methods, do not place local artifacts in the main prose. If useful for reproducibility, list them separately under `## Source Artifacts`, `## Reproducibility Artifacts`, or `## Supplementary Materials`, or refer to a public repository/DOI in Code availability
   - Full titles must be wrapped in double quotes immediately after the identifier sentence; never invent missing title or identifier metadata
   - `[needs: citation]` for unsupported claims and `[needs: reference metadata]` for incomplete reference entries
   - Structure-only and voice/tone-only papers from `run_reference_layers` excluded from `## References` unless explicitly cited as evidence
@@ -1452,6 +1461,8 @@ Before submission to Reviewer, verify all applicable items:
 - [ ] Every software tool has version number
 - [ ] Every key parameter has its value stated
 - [ ] Pipeline steps are complete and ordered
+- [ ] Main Methods follows the reference-paper flow: framework/overview, data processing, analysis modules, statistics, software/code availability
+- [ ] Main prose excludes local paths, repository-internal file names, internal function names, variable/object slot names, generated plot/table filenames, and output artifact filenames unless they are public APIs or essential reproducibility details
 - [ ] No results or interpretation leaked in
 - [ ] Reproducibility detail is sufficient
 - [ ] Workflow or architecture figures, if provided, are embedded/captioned with reproducibility-relevant inputs, outputs, and steps

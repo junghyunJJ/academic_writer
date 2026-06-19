@@ -1,7 +1,7 @@
 # Methods Section Patterns for Bioinformatics Papers
 
 Structural patterns extracted from exemplar computational biology papers.
-Methods sections require maximum reproducibility: every parameter, version, and decision must be documented.
+Methods sections require maximum reproducibility at manuscript level: every scientifically relevant parameter, version, and decision must be documented, while repository-internal implementation identifiers are kept out of the main prose unless they are public APIs or essential reproducibility details.
 
 ## Table of Contents
 1. [Pattern A: Computational Pipeline Methods](#pattern-a-computational-pipeline-methods)
@@ -24,35 +24,24 @@ Methods sections require maximum reproducibility: every parameter, version, and 
 ### Structure
 ```
 Methods
-├── System/Algorithm Overview
-│   ├── High-level description of the pipeline
-│   ├── Reference to Algorithm 1 / pseudocode
+├── Framework / System Overview
+│   ├── High-level description of the framework, pipeline, or agentic workflow
+│   ├── Major modules and how information flows between them
 │   └── Design rationale for key architectural decisions
-├── Preprocessing
-│   ├── Input data format and requirements
-│   ├── Data summarization / context extraction
-│   └── Environment initialization (packages, kernel, dependencies)
-├── Core Pipeline Steps (ordered)
-│   ├── Step 1: Planning / Blueprint Generation
-│   │   └── Prompt design, hypothesis generation, analysis plan
-│   ├── Step 2: Self-Critique / Reflection
-│   │   └── Plan validation, weakness identification, revision
-│   ├── Step 3: Code Generation & Execution
-│   │   └── Code synthesis, iterative error fixing (max F attempts)
-│   ├── Step 4: Output Interpretation
-│   │   └── Vision model for figures, text interpretation, result summarization
-│   └── Step 5: Replanning / Iteration
-│       └── Plan update based on results, next hypothesis selection
-├── Evaluation Strategy
-│   ├── Benchmark dataset description (e.g., CellBench: 76 papers, 659 analyses)
-│   ├── Evaluation metrics and judging criteria
-│   ├── Baseline methods for comparison
-│   └── Statistical tests for significance
-└── Implementation Details
-    ├── Software versions (Python, packages)
-    ├── Model checkpoints and API parameters
-    ├── Hardware / runtime estimates
-    └── Code and data availability
+├── Data Processing
+│   ├── Input data types, sources, accessions, and eligibility requirements
+│   ├── Preprocessing, filtering, normalization, and QC thresholds
+│   └── Multi-sample or platform-specific handling, if applicable
+├── Analysis Modules
+│   ├── Module A: algorithm/package description + key parameters
+│   ├── Module B: algorithm/package description + key parameters
+│   └── Module N: algorithm/package description + key parameters
+├── Statistical Analysis
+│   ├── Tests, correction methods, thresholds, effect summaries, and random seeds
+│   └── Validation or evaluation strategy
+└── Software and Code Availability
+    ├── Software versions, model checkpoints, package ecosystem, and hardware if relevant
+    └── Public repository, DOI, accession, container, or supplementary protocol
 ```
 
 ### Key Characteristics
@@ -62,6 +51,7 @@ Methods
 - **Modular description**: each pipeline component described as self-contained unit
 - **Passive voice preferred**: "Data were preprocessed..." / "The agent was configured..."
 - **Past tense throughout**: "We used..." / "The model was trained..."
+- **Publication-level abstraction**: retain package names, algorithm names, databases, model checkpoints, key thresholds, random seeds, and formulas; omit local file paths, repository-internal filenames, internal function names, variable/object slot names, generated plot/table filenames, and output artifact filenames from main prose unless they are public APIs or essential reproducibility details
 
 ### Example System Overview Paragraph
 > "An overview of the implementation of [ToolName] is highlighted in Algorithm 1 and Figure 1. In the following sections, we go into more detail on each step of [ToolName]'s procedure and showcase the prompts used for those steps. Implementation of [ToolName] used Python (version [X.Y.Z]) and the following packages: [package1] (version [X.Y.Z]), [package2] (version [X.Y.Z]), and [package3] (version [X.Y.Z]). For the LLMs, we used checkpoint models [model1] and [model2]."
@@ -236,7 +226,7 @@ Methods
 
 [ToolName] [performs/executes/implements] [step description] by [mechanism].
 [Input description]. [Processing description with parameters].
-[Output description and how it feeds into next step].
+[Conceptual output description and how it feeds into the next step; avoid generated filenames unless the file itself is a public artifact].
 
 [Optional: reference to supplementary prompt/figure/algorithm line numbers]
 ```
@@ -333,6 +323,25 @@ Require: [input 1] [description], [input 2] [description], [parameter] [descript
 
 ## Parameter Reporting Conventions
 
+### Publication-level Detail Boundary
+
+Main Methods prose should read like a manuscript, not a repository walkthrough. Use this boundary before drafting:
+
+**Keep in main Methods**:
+- Package, algorithm, database, model, and platform names
+- Software versions and model checkpoint versions
+- Key thresholds, hyperparameters, random seeds, statistical tests, correction methods, and formulas
+- Public accessions, public repository URLs, DOIs, containers, and supplementary protocols
+- Conceptual outputs that feed downstream analyses
+
+**Move out of main Methods unless essential**:
+- Local file paths and relative paths
+- Repository-internal module or script filenames
+- Internal function names, helper names, and command wrappers
+- Variable names, object slot names, and data-frame column names that are not public schema
+- Generated plot/table filenames and intermediate output artifact filenames
+- Long lists of output files that belong in a Source Artifacts, Reproducibility Artifacts, Supplementary Materials, or Code availability note
+
 ### Required Parameters by Category
 
 **Machine Learning / LLM**:
@@ -384,8 +393,9 @@ Require: [input 1] [description], [input 2] [description], [parameter] [descript
 - "the [ecosystem] ecosystem: [Package1][ref], [Package2][ref], and [Package3][ref]"
 
 ### Custom Code
-- "Custom [language] scripts were developed for [purpose] and are available at [URL]."
-- "Analysis code is available in the accompanying GitHub repository ([URL])."
+- "Custom [language] code was developed for [purpose] and is available in the accompanying repository ([URL/DOI])."
+- "Analysis code and reproducibility artifacts are available in the accompanying GitHub/Zenodo repository ([URL/DOI])."
+- Avoid naming repository-internal scripts or generated result filenames in main Methods; provide those details in supplementary protocols or repository documentation when needed.
 
 ### Example (from CellVoyager)
 > "Implementation of CellVoyager used Python (version 3.9.22) and the following Python packages: reportlab (version 4.4.0), nbformat (version 5.10.4), and openai (version 1.77.0). CellVoyager's own analyses used the following packages: scanpy (version 1.10.3), scvi-tools (version 1.1.6), celltypist (version 1.6.3), anndata (version 0.10.8), matplotlib (version 3.9.4), numpy (version 1.26.4), seaborn (version 0.13.2), pandas (version 2.2.3), and scipy (version 1.13.1)."
@@ -400,6 +410,7 @@ Require: [input 1] [description], [input 2] [description], [parameter] [descript
 - [ ] **Data availability**: Accession numbers, URLs, or repository links
 - [ ] **Code availability**: GitHub/Zenodo repository with DOI
 - [ ] **Parameters**: All non-default parameters explicitly stated
+- [ ] **Abstraction boundary**: Main Methods keeps package/algorithm names and key parameters but excludes local paths, internal function names, variable/object slot names, generated plot/table filenames, and output artifact filenames unless essential
 - [ ] **Reference genome/database**: Version and source
 - [ ] **Statistical tests**: Named with justification for choice
 - [ ] **Thresholds**: All cutoffs with rationale
@@ -451,3 +462,4 @@ respective publications. The [benchmark/evaluation] dataset is available from
 6. **No statistical test justification**: State why a particular test was chosen
 7. **Missing sample size tracking**: Report n at each analysis stage, not just initial
 8. **No error handling description**: For iterative pipelines, describe failure modes and fallbacks
+9. **Implementation-log prose**: Do not turn Methods into a list of internal scripts, function calls, generated figures, or CSV/H5AD filenames; keep those in repository documentation, Source Artifacts, Reproducibility Artifacts, Supplementary Materials, or Code availability
