@@ -1014,10 +1014,11 @@ methods_prose:
     - "Sufficient detail for reproduction — every parameter value stated"
     - "Software versions must be explicit (e.g., 'STAR v2.7.10a')"
     - "Use publication-level abstraction: keep package names, algorithm names, model names, databases, key thresholds, seeds, and statistical formulas; omit local paths, repository-internal files, internal functions, variable/object slot names, generated plot/table filenames, and output artifact filenames from main Methods prose unless they are public APIs or essential reproducibility details"
+    - "For Methods, attach citations for citable tools, databases, APIs, packages, models, and algorithms directly after the cited name on first mention: `STAligner [37]`, `Tangram [38]`, `CellChat [39]`, `Scanpy [40] and Squidpy [41]`, or `CELLxGENE [33]`; do not move these citations to the sentence end when that makes the anchor ambiguous"
     - "Do not narrate cleanup choices such as 'internal names were removed'; simply write the Methods at the correct abstraction level from the start"
     - "No results or interpretation in Methods — only what was done, not what was found"
     - "Cross-reference to Results section where appropriate ('see Results, Section X')"
-    - "Moderate numeric citations for established tools [1]"
+    - "Moderate numeric citations for established tools, anchored to the tool name at first mention"
 ```
 
 #### Results Prose Protocol
@@ -1228,6 +1229,7 @@ integration_checks:
       - "Data sources are specifically identified with access information"
       - "Manuscript-facing prose follows the reference-paper flow: framework, data processing, analysis modules, statistics, software/code availability"
       - "Internal implementation artifacts remain outside main prose unless public API or essential reproducibility detail"
+      - "Citations for named tools, databases, APIs, packages, models, and algorithms appear immediately after the cited name on first mention"
     parameter_completeness:
       - "All analysis steps have associated parameters"
       - "Default vs. custom parameters distinguished"
@@ -1347,7 +1349,7 @@ style_rules:
     tense: "Past tense for procedures performed; present tense only for reusable system/algorithm behavior, structures, functions, or definitions"
     voice: "Passive/object-centered preferred; avoid first-person 'we' unless the user or target journal explicitly requests it"
     interpretation: "Not allowed — only describe what was done"
-    citations: "Moderate — cite established tools and methods"
+    citations: "Moderate - cite established tools and methods with the citation marker attached directly to the cited name on first mention"
     key_constraint: "Each method block opens with purpose, then gives reproducible detail without leaking repository-internal implementation identifiers into main prose"
 
   results:
@@ -1405,6 +1407,7 @@ Generate section-type-appropriate outputs at each stage:
   - Missing legend fields checklist when any partial legend uses `[needs: ...]`
   - Complete statistical reporting (where applicable)
   - Numeric citation policy: first-use ordered citations in prose (`[1]`, `[2]`, `[1,2]`, `[1-3]`)
+  - Methods citation anchor policy: cite named tools, databases, APIs, packages, models, and algorithms immediately after the cited name on first mention (`STAligner [37]`, `CELLxGENE [33]`, `Scanpy [40] and Squidpy [41]`), not with an ambiguous sentence-final marker
   - Final `## References` section when cited papers, tools, datasets, or links have source metadata
   - Reference entries ordered by first citation and formatted as `[1] DOI: 10.xxxx/yyyy. "Full title."`, `[2] arXiv: 2603.22455. "Full title."`, or `[3] URL: https://example.org/page. "Full title." Optional source note.`
   - Identifier priority is `DOI > arXiv > URL`: for papers, use DOI whenever known; if DOI is unavailable, use arXiv when available; otherwise use URL
@@ -1437,6 +1440,7 @@ Before submission to Reviewer, verify all applicable items:
 - [ ] Consistent terminology throughout
 - [ ] Voice matches Target Voice Layer profile
 - [ ] Numeric citations are ordered by first use and all cited works with metadata appear in `## References`
+- [ ] In Methods, citations for named tools, databases, APIs, packages, models, and algorithms are anchored immediately after the cited name on first mention
 - [ ] `## References` entries use DOI > arXiv > URL priority and double-quoted titles
 - [ ] Any `URL:` entry uses a public `http://` or `https://` URL, not a local or repository path
 - [ ] Missing support is marked `[needs: citation]`; incomplete reference metadata is marked `[needs: reference metadata]`
@@ -1462,6 +1466,7 @@ Before submission to Reviewer, verify all applicable items:
 ### Methods Checklist
 - [ ] Approved Methods Blueprint exists, or Lite Mode reduced Blueprint records `approval_status: skipped_by_user`
 - [ ] Every software tool has version number
+- [ ] Every cited software tool, database, API, package, model, or algorithm has its first citation attached directly to the cited name
 - [ ] Every key parameter has its value stated
 - [ ] Pipeline steps are complete and ordered
 - [ ] Main Methods follows the reference-paper flow: framework/overview, data processing, analysis modules, statistics, software/code availability

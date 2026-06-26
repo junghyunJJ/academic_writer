@@ -123,6 +123,7 @@ Section-specific additions:
 **Methods**: Tool names, versions, parameters correct?
 - Version numbers match what was actually used
 - Parameter values are stated explicitly
+- Citations for named tools, databases, APIs, packages, models, and algorithms are attached directly to the cited name on first mention, not deferred to an ambiguous sentence-final marker
 
 **Discussion**: No new data introduced?
 - Result recaps match the actual Results section (cross-check against paper_context.key_findings)
@@ -166,6 +167,7 @@ Section-specific structure checks:
 **Methods** (Procedural flow: sequential, logical):
 - Subsections follow a reference-paper flow when applicable: framework/overview, data processing, analysis modules, statistics, software/code availability
 - Reproducibility markers present (version numbers, parameters, data sources)
+- First mentions of cited tools, databases, APIs, packages, models, and algorithms use name-attached citations
 - Package/algorithm names and key parameters are retained, while local paths, repository-internal file names, internal function names, variable/object slot names, generated plot/table filenames, and output artifact filenames are absent from main prose unless they are public APIs or essential reproducibility details
 - No Results content or interpretation
 
@@ -249,6 +251,7 @@ Section-specific completeness checks:
 
 **Methods**:
 - All tools and software mentioned with version numbers
+- First mentions of cited tools, databases, APIs, packages, models, and algorithms use citation markers immediately after the cited name
 - All parameters specified (not just "default settings")
 - Data sources and accession numbers described
 - Code/data availability mentioned if applicable
@@ -403,6 +406,7 @@ reproducibility_review:
   methods_extra_checks:
     - "Step-by-step procedure complete enough to replicate"
     - "Software versions explicit (e.g., 'Seurat v4.1.0', not 'Seurat')"
+    - "Citations for named tools, databases, APIs, packages, models, and algorithms are anchored immediately after the cited name on first mention"
     - "Parameter values stated, not just 'default settings'"
     - "Data preprocessing fully described including QC thresholds"
     - "Code/data availability statement present"
@@ -527,6 +531,7 @@ cross_section_consistency:
 - [ ] Missing approved Methods Blueprint when Lite Mode was not explicitly requested
 - [ ] Prose introduces a method step not present in the approved Blueprint
 - [ ] Tool/version listed in the Blueprint is missing from prose
+- [ ] Citation for a named tool, database, API, package, model, or algorithm is delayed to the sentence end instead of attached to the cited name
 - [ ] Parameter listed in the Blueprint is missing from prose
 - [ ] Blueprint input/output transition is not represented in prose
 - [ ] Data source appears in prose but not in the approved Blueprint

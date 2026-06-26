@@ -55,6 +55,7 @@ Methods
 - **Tense discipline**: past tense for completed procedures; present tense only for stable framework or algorithm behavior
 - **Avoid author-centered `we` by default**: use `DeepMAST`, `the framework`, `the module`, `the pipeline`, `the dataset`, or `the analysis` as subjects unless the user or target journal explicitly requests first person
 - **Publication-level abstraction**: retain package names, algorithm names, databases, model checkpoints, key thresholds, random seeds, and formulas; omit local file paths, repository-internal filenames, internal function names, variable/object slot names, generated plot/table filenames, and output artifact filenames from main prose unless they are public APIs or essential reproducibility details
+- **Name-attached citations for tools/resources**: when first naming a citable tool, database, API, package, model, or algorithm, attach the citation marker directly to that name rather than the sentence end
 
 ### Example System Overview Paragraph
 > "The implementation of [ToolName] is summarized in Algorithm 1 and Figure 1. Each step of [ToolName]'s procedure and the prompts used for those steps are described below. [ToolName] was implemented in Python (version [X.Y.Z]) with [package1] (version [X.Y.Z]), [package2] (version [X.Y.Z]), and [package3] (version [X.Y.Z]). Checkpoint models [model1] and [model2] were used for LLM-based components."
@@ -407,23 +408,28 @@ Main Methods prose should read like a manuscript, not a repository walkthrough. 
 - Minimum cells per gene
 
 ### Reporting Format
-> "[Analysis] was performed using [package] (version [X.Y.Z])[ref] with [key parameter 1] = [value], [key parameter 2] = [value], and default settings for all other parameters."
+> "[Analysis] was performed using [package][ref] (version [X.Y.Z]) with [key parameter 1] = [value], [key parameter 2] = [value], and default settings for all other parameters."
 
 ---
 
 ## Tool Citation Patterns
 
+Citation placement in Methods should make the cited object explicit. When the citation supports a named tool, database, API, package, model, or algorithm, put the marker immediately after the name on first mention. Sentence-final citations are fine for whole-sentence factual claims, but avoid them for dense tool/database lists because they obscure which source supports which resource.
+
 ### First Mention (full citation)
-- "[Tool name] (version [X.Y.Z])[ref]"
 - "[Tool name][ref] (version [X.Y.Z]; [URL])"
+- "[Tool name][ref] (version [X.Y.Z])"
 - "the [tool name] package[ref] (version [X.Y.Z]) in [language]"
+- "[Database/API name][ref] was accessed through [API/package/interface] on [date]"
 
 ### Subsequent Mentions
 - "[Tool name]" (no version or reference needed after first mention)
 
 ### Package Ecosystems
-- "[Package1] (version [X.Y.Z]), [Package2] (version [X.Y.Z]), and [Package3] (version [X.Y.Z])"
+- "[Package1][ref] (version [X.Y.Z]), [Package2][ref] (version [X.Y.Z]), and [Package3][ref] (version [X.Y.Z])"
 - "the [ecosystem] ecosystem: [Package1][ref], [Package2][ref], and [Package3][ref]"
+- "specialized bioinformatics libraries, including [Package1][ref] and [Package2][ref]"
+- "reference resources included [Database1][ref], [Database2][ref], and [Database3][ref]"
 
 ### Custom Code
 - "Custom [language] code was developed for [purpose] and is available in the accompanying repository ([URL/DOI])."
@@ -432,6 +438,12 @@ Main Methods prose should read like a manuscript, not a repository walkthrough. 
 
 ### Example (from CellVoyager)
 > "Implementation of CellVoyager used Python (version 3.9.22) and the following Python packages: reportlab (version 4.4.0), nbformat (version 5.10.4), and openai (version 1.77.0). CellVoyager's own analyses used the following packages: scanpy (version 1.10.3), scvi-tools (version 1.1.6), celltypist (version 1.6.3), anndata (version 0.10.8), matplotlib (version 3.9.4), numpy (version 1.26.4), seaborn (version 0.13.2), pandas (version 2.2.3), and scipy (version 1.13.1)."
+
+### Name-attached examples (from Methods-style tool/resource prose)
+- "To characterize spatial domains, STAligner [37] was applied to integrate spatial and gene expression data across tissue slices."
+- "Whole-transcriptome spatial imputation was performed using Tangram [38], and intercellular signaling was profiled with CellChat [39]."
+- "Specialized spatial analysis libraries included Scanpy [40] and Squidpy [41]."
+- "Reference resources included the EMBL-EBI API [38], OpenTargets GraphQL API [39], Reactome 2024 [40], CELLxGENE [121], and scanpy [147]."
 
 ---
 

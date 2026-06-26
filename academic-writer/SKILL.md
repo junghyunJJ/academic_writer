@@ -147,8 +147,8 @@ section_configs:
       tense: "past tense for completed study procedures; present tense only for reusable system behavior, algorithm behavior, structures, functions, or definitions"
       voice: "passive/object-centered preferred; avoid first-person 'we' in Methods unless the user or target journal explicitly requests it"
       interpretation: "not allowed — describe, don't interpret"
-      citations: "moderate — cite tools, databases, algorithms"
-      key_constraint: "must be reproducible at manuscript level: use a reference-paper flow (framework, data processing, analysis modules, statistics, software/code availability), open each major method block with a short purpose sentence before implementation details, write with framework/module/pipeline/data as grammatical subjects rather than author-centered 'we', retain package/algorithm names and key parameters, and keep internal file paths, function names, variable names, generated plot/table filenames, and repository-local artifacts out of the main Methods prose unless they are public APIs or essential reproducibility details"
+      citations: "moderate - cite tools, databases, APIs, packages, and algorithms at first mention with the citation marker attached directly to the cited name"
+      key_constraint: "must be reproducible at manuscript level: use a reference-paper flow (framework, data processing, analysis modules, statistics, software/code availability), open each major method block with a short purpose sentence before implementation details, write with framework/module/pipeline/data as grammatical subjects rather than author-centered 'we', retain package/algorithm names and key parameters, attach Methods citations directly to the tool/database/API/package/algorithm name they support, and keep internal file paths, function names, variable names, generated plot/table filenames, and repository-local artifacts out of the main Methods prose unless they are public APIs or essential reproducibility details"
     review_weight_overrides:
       factual_accuracy: 1.0
       statistical_review: 0.7
@@ -208,7 +208,7 @@ section_configs:
 | Tense | Present (field), Past (studies) | Past for performed procedures; Present for reusable system/algorithm behavior | Past (analyses), Present (figures) | Present (interpretations), Past (recaps) |
 | Voice | Active preferred | Passive/object-centered preferred; avoid `we` by default | Active for findings | Active preferred |
 | Interpretation | Contextual framing only | Not allowed | Not allowed | Required |
-| Citations | Heavy | Moderate (tools) | Minimal | Heavy |
+| Citations | Heavy | Moderate; attach tool/database/API/package/algorithm citations to the cited name | Minimal | Heavy |
 | Key constraint | Clear gap + contribution | Reproducible detail | Data-backed claims | Limitations acknowledged |
 
 ### Methods Structure Template
@@ -220,11 +220,13 @@ Use this Methods block pattern when writing new computational or multi-stage Met
 
 To [purpose of this block], [analysis/module/pipeline] was performed/used/applied to [data/input].
 [Data source, eligibility/filtering, preprocessing, and QC details].
-[Tool, model, database, package, or algorithm name] ([version/checkpoint]) was used with [key parameters, thresholds, covariates, random seed, correction method].
+[Tool, model, database, package, API, or algorithm name][ref] ([version/checkpoint]) was used with [key parameters, thresholds, covariates, random seed, correction method].
 [Conceptual output] was used for [next downstream step].
 ```
 
 The full section should usually follow: framework/system overview to input data and preprocessing to reference resources or model construction to main analysis modules to validation/support analyses to downstream prioritization or case-study analyses to statistics to software/code/data availability.
+
+Methods citation placement: when a citation supports a named tool, database, API, package, model, or algorithm, place the citation marker immediately after that name on first mention rather than delaying it to the end of the sentence. This keeps attribution unambiguous in dense tool/database Methods prose: `STAligner [37]`, `Tangram [38]`, `CellChat [39]`, `Scanpy [40] and Squidpy [41]`, `CELLxGENE [33]`, or `the OpenTargets GraphQL API [39]`. Use the target journal's marker style, but keep the same anchor placement.
 
 Tense rule for Methods: use past tense for procedures performed in this study (`The benchmark used 2,556 cases`; `Genes detected in fewer than five observations were removed`; `Outputs were scored by...`). Use present tense only for stable reusable behavior or definitions (`DeepMAST accepts spatial transcriptomics inputs`; `A supervisor agent routes the request`; `The workflow computes co-expression rates`).
 
@@ -802,7 +804,7 @@ For Methods and Results, Step 3 is constrained by `approved_blueprint`. The writ
 | Section | Paragraph Flow | Key Writing Rules |
 |---------|---------------|-------------------|
 | Introduction | Broad context to narrow problem to existing approaches to gap statement to contribution to roadmap | Funnel structure; numeric citations `[1]`; explicit gap; "we introduce/present/propose"; no over-promising; optional conceptual figures embedded and captioned when provided |
-| Methods | Framework/overview to data processing to analysis modules to statistics to software/code availability | Past tense for completed procedures; passive/object-centered prose preferred; avoid author-centered `we` by default and use subjects such as `DeepMAST`, `the module`, `the pipeline`, `the dataset`, or `the analysis`; report package/algorithm names, versions, key parameters, thresholds, random seeds, and public data/code access; keep local paths, internal functions, variable/object slot names, generated plot/table filenames, and repository artifacts out of the main prose unless they are public APIs or essential reproducibility details; optional workflow/pipeline figures embedded and captioned with reproducibility-relevant context |
+| Methods | Framework/overview to data processing to analysis modules to statistics to software/code availability | Past tense for completed procedures; passive/object-centered prose preferred; avoid author-centered `we` by default and use subjects such as `DeepMAST`, `the module`, `the pipeline`, `the dataset`, or `the analysis`; report package/algorithm names, versions, key parameters, thresholds, random seeds, and public data/code access; attach citations directly after citable tool/database/API/package/algorithm names on first mention; keep local paths, internal functions, variable/object slot names, generated plot/table filenames, and repository artifacts out of the main prose unless they are public APIs or essential reproducibility details; optional workflow/pipeline figures embedded and captioned with reproducibility-relevant context |
 | Results | Result rationale to method-brief to primary finding + stats to figure evidence/rationale to closing takeaway to transition to figure/table legends for available displays to Supplementary Materials links when files exist | No interpretation (save for Discussion); statistics inline; figures described as evidence, not just referenced; empirical subsections close with one data-backed takeaway; legends use `references/legend-patterns.md`; large supplementary tables/data are linked as artifacts |
 | Discussion | Recap finding to interpretation to literature comparison to implications to limitations to future | Interpretation required; compare with literature using numeric citations; no new data; appropriate hedging; end with broader impact; optional synthesis/model figures embedded and captioned without introducing new data |
 
@@ -1012,6 +1014,7 @@ Markdown-first, Word-ready output:
 - For Introduction, Methods, and Discussion figures: provide section-appropriate captions or short legends adjacent to the embed; do not force Results-style full legends unless the user requests them.
 - Statistics inline: `(p less than 0.05)`, `(n = 100)`
 - Numeric citation policy: use first-use ordered numeric citations in prose, e.g. `[1]`, `[2]`; use `[1,2]` for multiple non-consecutive citations and `[1-3]` for consecutive ranges.
+- Methods citation anchor policy: for citable tools, databases, APIs, packages, models, and algorithms, place the citation marker directly after the name on first mention (`STAligner [37]`, `CELLxGENE [33]`, `Scanpy [40] and Squidpy [41]`) instead of using a sentence-final citation that could refer to the whole sentence.
 - Add a final `## References` section to each generated Markdown section when at least one cited paper, dataset, tool, or link has source metadata.
 - Reference entries use the same numeric order as first citation and this identifier-first format: `[1] DOI: 10.xxxx/yyyy. "Full title."`, `[2] arXiv: 2603.22455. "Full title."`, or `[3] URL: https://example.org/page. "Full title." Optional source note.`
 - Reference identifier priority is DOI, then arXiv, then URL: for papers, use DOI whenever known; if DOI is unavailable, use arXiv when available; otherwise use URL.
@@ -1047,6 +1050,7 @@ Before final approval:
 - [ ] Structure matches learned patterns
 - [ ] Voice matches Target Voice Layer profile
 - [ ] Numeric citations are ordered by first use and each cited source with available metadata appears in `## References`
+- [ ] In Methods, citations for named tools, databases, APIs, packages, models, and algorithms are anchored immediately after the cited name on first mention
 - [ ] `## References` entries use identifier-first format with DOI, then arXiv, then URL priority and double-quoted titles
 - [ ] `## References` excludes structure-only and voice/tone-only reference papers unless they are explicitly cited as evidence
 - [ ] `## References` excludes local files, relative paths, absolute paths, repository artifacts, generated outputs, and local Markdown artifacts
@@ -1067,6 +1071,7 @@ Before final approval:
 **Methods-specific**:
 - [ ] Approved Methods Blueprint exists, or Lite Mode reduced Blueprint records `approval_status: skipped_by_user`
 - [ ] All tools and software versions stated
+- [ ] First mentions of cited tools, databases, APIs, packages, models, and algorithms use name-attached citations rather than sentence-final citations
 - [ ] All parameters explicitly specified (not "default")
 - [ ] Section follows a publication-style flow appropriate to reference papers: framework/overview, data processing, analysis modules, statistics, and software/code availability when applicable
 - [ ] Main Methods prose retains package/algorithm names and key parameters but excludes local paths, repository-internal file names, internal function names, variable/object slot names, generated plot/table filenames, and output artifact filenames unless they are public APIs or essential reproducibility details
