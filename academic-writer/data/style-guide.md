@@ -181,7 +181,7 @@ Methods
 ```
 
 **Key Characteristics**:
-- Justify dataset selection (not just "we used common benchmarks")
+- Justify dataset selection (not just "common benchmarks were used")
 - Parameter settings for all methods (enable reproducibility)
 - Statistical test for performance comparisons stated explicitly
 
@@ -570,12 +570,13 @@ introduction_rules:
 ```yaml
 methods_rules:
   tense:
-    procedures: "Past — 'Reads were aligned using...', 'We performed...'"
+    procedures: "Past — 'Reads were aligned using...', 'Differential expression analysis was performed...'"
     algorithm_description: "Present — 'The algorithm assigns each cell to...'"
-    design_rationale: "Past — 'We chose X because...'"
+    design_rationale: "Past/object-centered — 'X was selected because...'"
   voice:
-    preferred: "Passive for procedures — 'Cells were filtered if...'"
-    active_ok: "Design decisions and choices — 'We selected Leiden clustering because...'"
+    preferred: "Passive/object-centered for procedures — 'Cells were filtered if...', 'The module applies...'"
+    active_ok: "Object-centered active for stable framework behavior — 'DeepMAST integrates...', 'The module assigns...'"
+    avoid_by_default: "First-person 'we' in Methods unless the user or target journal explicitly requests it"
   interpretation:
     allowed: "No — no results, no interpretation in Methods"
     constraint: "Evaluation metrics may be defined but not discussed here"
@@ -678,15 +679,15 @@ discussion_rules:
 ### Methods Transitions
 
 **Between subsections**:
-- "Having defined the preprocessing pipeline, we next describe..."
+- "After preprocessing was defined, the next module..."
 - "Building on the output of [Step A], [Step B] takes as input..."
-- "To evaluate the performance of [method], we..."
+- "To evaluate the performance of [method], [benchmark/protocol] was..."
 - "The resulting [output] was then passed to..."
 
 **Rationale connectors**:
-- "We chose [method] because..."
+- "[Method] was selected because..."
 - "This approach was preferred over [alternative] due to..."
-- "To ensure reproducibility, we..."
+- "To ensure reproducibility, [parameter/version/seed] was..."
 
 ### Results Transitions
 
@@ -743,7 +744,7 @@ discussion_rules:
 | Rule | Introduction | Methods | Results | Discussion |
 |------|-------------|---------|---------|------------|
 | Primary tense | Present (field), Past (studies) | Past | Past (analyses), Present (figures) | Present (interpretations), Past (recaps) |
-| Voice preference | Active preferred, mixed OK | Passive preferred | Active for findings | Active preferred |
+| Voice preference | Active preferred, mixed OK | Passive/object-centered preferred; avoid `we` by default | Active for findings | Active preferred |
 | Interpretation | Contextual framing only | Not allowed | Not allowed | Required |
 | Citations | Heavy | Moderate (tools) | Minimal | Heavy |
 | Key constraint | Clear gap + contribution | Reproducible detail | Data-backed claims | Limitations acknowledged |
@@ -755,7 +756,7 @@ discussion_rules:
 ### Voice (General)
 - **Passive**: Methods and procedural descriptions
 - **Active**: Results and findings (preferred for clarity)
-- **"We"**: Acceptable if journal style permits
+- **"We"**: Avoid in Methods by default; acceptable elsewhere if journal style permits
 
 *Note: When Target Voice Layer is populated, its voice profile takes precedence over these defaults.*
 

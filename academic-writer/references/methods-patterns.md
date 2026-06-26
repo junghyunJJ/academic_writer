@@ -49,18 +49,19 @@ Methods
 - **Prompt documentation**: references to supplementary figures showing exact prompts
 - **Iterative design**: explicitly describes retry/fix loops and termination conditions
 - **Modular description**: each pipeline component described as self-contained unit
-- **Passive voice preferred**: "Data were preprocessed..." / "The agent was configured..."
-- **Past tense throughout**: "We used..." / "The model was trained..."
+- **Passive/object-centered voice preferred**: "Data were preprocessed..." / "The agent was configured..." / "The module performs..."
+- **Tense discipline**: past tense for completed procedures; present tense only for stable framework or algorithm behavior
+- **Avoid author-centered `we` by default**: use `DeepMAST`, `the framework`, `the module`, `the pipeline`, `the dataset`, or `the analysis` as subjects unless the user or target journal explicitly requests first person
 - **Publication-level abstraction**: retain package names, algorithm names, databases, model checkpoints, key thresholds, random seeds, and formulas; omit local file paths, repository-internal filenames, internal function names, variable/object slot names, generated plot/table filenames, and output artifact filenames from main prose unless they are public APIs or essential reproducibility details
 
 ### Example System Overview Paragraph
-> "An overview of the implementation of [ToolName] is highlighted in Algorithm 1 and Figure 1. In the following sections, we go into more detail on each step of [ToolName]'s procedure and showcase the prompts used for those steps. Implementation of [ToolName] used Python (version [X.Y.Z]) and the following packages: [package1] (version [X.Y.Z]), [package2] (version [X.Y.Z]), and [package3] (version [X.Y.Z]). For the LLMs, we used checkpoint models [model1] and [model2]."
+> "The implementation of [ToolName] is summarized in Algorithm 1 and Figure 1. Each step of [ToolName]'s procedure and the prompts used for those steps are described below. [ToolName] was implemented in Python (version [X.Y.Z]) with [package1] (version [X.Y.Z]), [package2] (version [X.Y.Z]), and [package3] (version [X.Y.Z]). Checkpoint models [model1] and [model2] were used for LLM-based components."
 
 ### Example Preprocessing Paragraph
 > "The agent loads in the metadata of the [data type] data object and summarizes it by listing column names and the first [N] unique values from each column. Then, the agent loads in a [manuscript/report] about the [biological context] and, optionally, a set of analyses already performed on the dataset. This information is summarized using the prompt shown in Supplementary Figure [N] and is passed to the prompts as [variable_name]."
 
 ### Example Iterative Execution Paragraph
-> "Before execution, [ToolName] first self-critiques the [blueprint/plan], identifying potential weaknesses and retrieving documentation from the [libraries/functions] referenced in the code to verify that they are being used appropriately. The [plan/blueprint] and code are then revised as needed by the agent, after which the code is appended to the [execution environment] for execution. If the code execution fails, the agent iteratively rewrites the code for up to F attempts; if errors persist, [ToolName] is told to revise its analytical trajectory. In this work, we set F = [N], as empirically, the [success metric] saturates after that mark (Supplementary Figure [N])."
+> "Before execution, [ToolName] self-critiques the [blueprint/plan], identifies potential weaknesses, and retrieves documentation from the [libraries/functions] referenced in the code to verify appropriate use. The [plan/blueprint] and code are then revised as needed, after which the code is appended to the [execution environment] for execution. If code execution fails, the agent iteratively rewrites the code for up to F attempts; if errors persist, [ToolName] revises its analytical trajectory. In this work, F was set to [N] because the [success metric] empirically saturated after that mark (Supplementary Figure [N])."
 
 ---
 
@@ -107,7 +108,7 @@ Methods
 - **Human evaluation rigor**: rubrics, inter-rater agreement, evaluator qualifications
 
 ### Example Benchmark Construction Paragraph
-> "We searched for published papers that focused primarily on analyzing [data type] datasets. For [N] such papers, we used [extraction method] to extract the [relevant content] and each [analysis/evaluation item] performed in the paper using the prompt in Supplementary Figure [N]. A subset of the curated examples were reviewed by experts to check that the extracted information accurately reflects the content of the paper."
+> "Published papers focused primarily on analyzing [data type] datasets were identified. For [N] such papers, [extraction method] was used to extract the [relevant content] and each [analysis/evaluation item] performed in the paper using the prompt in Supplementary Figure [N]. A subset of the curated examples were reviewed by experts to check that the extracted information accurately reflects the content of the paper."
 
 ### Example Human Evaluation Paragraph
 > "Each [case study / output] was evaluated by two independent [PhD-level / domain-expert] researchers, one of whom was a [coauthor / author] of the respective [case study paper / reference work], along with an [evaluation rubric] (Supplementary Figure [N]). For each [evaluation item], reviewers were asked to assess [criterion 1] (on a scale of [range]), whether [criterion 2] (yes, mostly, or no), whether [criterion 3] (yes, mostly, or no), and whether [criterion 4] (yes or no). Concordance rates between each rater and the [automated judge] were [X%] and [Y%], respectively, indicating that the [judge] is a reliable heuristic."
@@ -261,11 +262,11 @@ Code is available at [URL/repository].
 ```markdown
 ### Evaluation
 
-To evaluate [method/tool], we [designed/assembled/curated] a benchmark comprising
+To evaluate [method/tool], a benchmark was [designed/assembled/curated] comprising
 [N] [items] spanning [characteristic range].
 
 **Metrics**: [Metric 1] measures [what]; [Metric 2] captures [what].
-**Baselines**: We compared against [N] methods: [Method1][ref], [Method2][ref], [Method3][ref].
+**Baselines**: [Method/tool] was compared against [N] methods: [Method1][ref], [Method2][ref], [Method3][ref].
 **Protocol**: [Cross-validation scheme / held-out strategy / replicate runs].
 **Statistical testing**: Significance was assessed using [test] with [correction] at alpha = [threshold].
 ```
@@ -463,3 +464,4 @@ respective publications. The [benchmark/evaluation] dataset is available from
 7. **Missing sample size tracking**: Report n at each analysis stage, not just initial
 8. **No error handling description**: For iterative pipelines, describe failure modes and fallbacks
 9. **Implementation-log prose**: Do not turn Methods into a list of internal scripts, function calls, generated figures, or CSV/H5AD filenames; keep those in repository documentation, Source Artifacts, Reproducibility Artifacts, Supplementary Materials, or Code availability
+10. **Author-centered Methods prose**: Avoid defaulting to `we used`, `we chose`, or `we implemented`; use passive/object-centered alternatives unless first person is explicitly requested

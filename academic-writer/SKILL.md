@@ -145,10 +145,10 @@ section_configs:
     reference_file: "references/methods-patterns.md"
     writing_rules:
       tense: "past tense dominant"
-      voice: "passive preferred for procedures, active for decisions"
+      voice: "passive/object-centered preferred; avoid first-person 'we' in Methods unless the user or target journal explicitly requests it"
       interpretation: "not allowed — describe, don't interpret"
       citations: "moderate — cite tools, databases, algorithms"
-      key_constraint: "must be reproducible at manuscript level: use a reference-paper flow (framework, data processing, analysis modules, statistics, software/code availability), retain package/algorithm names and key parameters, and keep internal file paths, function names, variable names, generated plot/table filenames, and repository-local artifacts out of the main Methods prose unless they are public APIs or essential reproducibility details"
+      key_constraint: "must be reproducible at manuscript level: use a reference-paper flow (framework, data processing, analysis modules, statistics, software/code availability), write with framework/module/pipeline/data as grammatical subjects rather than author-centered 'we', retain package/algorithm names and key parameters, and keep internal file paths, function names, variable names, generated plot/table filenames, and repository-local artifacts out of the main Methods prose unless they are public APIs or essential reproducibility details"
     review_weight_overrides:
       factual_accuracy: 1.0
       statistical_review: 0.7
@@ -206,7 +206,7 @@ section_configs:
 | Rule | Introduction | Methods | Results | Discussion |
 |------|-------------|---------|---------|------------|
 | Tense | Present (field), Past (studies) | Past | Past (analyses), Present (figures) | Present (interpretations), Past (recaps) |
-| Voice | Active preferred | Passive preferred | Active for findings | Active preferred |
+| Voice | Active preferred | Passive/object-centered preferred; avoid `we` by default | Active for findings | Active preferred |
 | Interpretation | Contextual framing only | Not allowed | Not allowed | Required |
 | Citations | Heavy | Moderate (tools) | Minimal | Heavy |
 | Key constraint | Clear gap + contribution | Reproducible detail | Data-backed claims | Limitations acknowledged |
@@ -288,7 +288,7 @@ search_parameters:
 | Section | Query 1 | Query 2 | Query 3 | Query 4 |
 |---------|---------|---------|---------|---------|
 | Introduction | "field significance importance relevance" | "however despite gap limitation remains" | "we introduce present propose here" | *field-specific* |
-| Methods | "procedures implementation experimental design" | "we used employed applied implemented" | "parameters settings configuration threshold" | *field-specific* |
+| Methods | "procedures implementation experimental design" | "was used were applied implemented tool descriptions" | "parameters settings configuration threshold" | *field-specific* |
 | Results | "Results section findings statistical analysis" | "we found demonstrated showed revealed indicated" | "Figure Table panel legend caption comparison significantly" | *field-specific* |
 | Discussion | "suggest demonstrate indicate consistent with" | "consistent with previous findings prior work" | "limitation future direction caveat" | *field-specific* |
 
@@ -788,7 +788,7 @@ For Methods and Results, Step 3 is constrained by `approved_blueprint`. The writ
 | Section | Paragraph Flow | Key Writing Rules |
 |---------|---------------|-------------------|
 | Introduction | Broad context -> narrow to problem -> existing approaches -> gap statement -> contribution -> roadmap | Funnel structure; numeric citations `[1]`; explicit gap; "we introduce/present/propose"; no over-promising; optional conceptual figures embedded and captioned when provided |
-| Methods | Framework/overview -> data processing -> analysis modules -> statistics -> software/code availability | Past tense; passive preferred; report package/algorithm names, versions, key parameters, thresholds, random seeds, and public data/code access; keep local paths, internal functions, variable/object slot names, generated plot/table filenames, and repository artifacts out of the main prose unless they are public APIs or essential reproducibility details; optional workflow/pipeline figures embedded and captioned with reproducibility-relevant context |
+| Methods | Framework/overview -> data processing -> analysis modules -> statistics -> software/code availability | Past tense for completed procedures; passive/object-centered prose preferred; avoid author-centered `we` by default and use subjects such as `DeepMAST`, `the module`, `the pipeline`, `the dataset`, or `the analysis`; report package/algorithm names, versions, key parameters, thresholds, random seeds, and public data/code access; keep local paths, internal functions, variable/object slot names, generated plot/table filenames, and repository artifacts out of the main prose unless they are public APIs or essential reproducibility details; optional workflow/pipeline figures embedded and captioned with reproducibility-relevant context |
 | Results | Result rationale -> method-brief -> primary finding + stats -> figure evidence/rationale -> closing takeaway -> transition -> figure/table legends for available displays -> Supplementary Materials links when files exist | No interpretation (save for Discussion); statistics inline; figures described as evidence, not just referenced; empirical subsections close with one data-backed takeaway; legends use `references/legend-patterns.md`; large supplementary tables/data are linked as artifacts |
 | Discussion | Recap finding -> interpretation -> literature comparison -> implications -> limitations -> future | Interpretation required; compare with literature using numeric citations; no new data; appropriate hedging; end with broader impact; optional synthesis/model figures embedded and captioned without introducing new data |
 
