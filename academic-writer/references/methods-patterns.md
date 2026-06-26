@@ -8,12 +8,13 @@ Methods sections require maximum reproducibility at manuscript level: every scie
 2. [Pattern B: Benchmark/Evaluation Methods](#pattern-b-benchmarkevaluation-methods)
 3. [Pattern C: Statistical Analysis Methods](#pattern-c-statistical-analysis-methods)
 4. [Pattern D: Multi-omics Integration Methods](#pattern-d-multi-omics-integration-methods)
-5. [Subsection Writing Templates](#subsection-writing-templates)
-6. [Algorithm/Pseudocode Presentation Templates](#algorithmpseudocode-presentation-templates)
-7. [Parameter Reporting Conventions](#parameter-reporting-conventions)
-8. [Tool Citation Patterns](#tool-citation-patterns)
-9. [Reproducibility Checklist](#reproducibility-checklist)
-10. [Software and Data Availability Patterns](#software-and-data-availability-patterns)
+5. [Purpose-First Methods Block Template](#purpose-first-methods-block-template)
+6. [Subsection Writing Templates](#subsection-writing-templates)
+7. [Algorithm/Pseudocode Presentation Templates](#algorithmpseudocode-presentation-templates)
+8. [Parameter Reporting Conventions](#parameter-reporting-conventions)
+9. [Tool Citation Patterns](#tool-citation-patterns)
+10. [Reproducibility Checklist](#reproducibility-checklist)
+11. [Software and Data Availability Patterns](#software-and-data-availability-patterns)
 
 ---
 
@@ -49,6 +50,7 @@ Methods
 - **Prompt documentation**: references to supplementary figures showing exact prompts
 - **Iterative design**: explicitly describes retry/fix loops and termination conditions
 - **Modular description**: each pipeline component described as self-contained unit
+- **Purpose-first blocks**: each major method block opens with one short sentence explaining why the block exists, then gives data, tool, parameter, and output details
 - **Passive/object-centered voice preferred**: "Data were preprocessed..." / "The agent was configured..." / "The module performs..."
 - **Tense discipline**: past tense for completed procedures; present tense only for stable framework or algorithm behavior
 - **Avoid author-centered `we` by default**: use `DeepMAST`, `the framework`, `the module`, `the pipeline`, `the dataset`, or `the analysis` as subjects unless the user or target journal explicitly requests first person
@@ -62,6 +64,36 @@ Methods
 
 ### Example Iterative Execution Paragraph
 > "Before execution, [ToolName] self-critiques the [blueprint/plan], identifies potential weaknesses, and retrieves documentation from the [libraries/functions] referenced in the code to verify appropriate use. The [plan/blueprint] and code are then revised as needed, after which the code is appended to the [execution environment] for execution. If code execution fails, the agent iteratively rewrites the code for up to F attempts; if errors persist, [ToolName] revises its analytical trajectory. In this work, F was set to [N] because the [success metric] empirically saturated after that mark (Supplementary Figure [N])."
+
+---
+
+## Purpose-First Methods Block Template
+
+Use this compact structure for new Methods sections, especially multi-step computational papers modeled after association-study or agent-system manuscripts:
+
+```markdown
+### [Method Block / Analysis Step]
+
+To [purpose of this block], [analysis/module/pipeline] was performed/used/applied to [data/input].
+[Data source, eligibility/filtering, preprocessing, and QC details].
+[Tool, model, database, package, or algorithm name] ([version/checkpoint]) was used with [key parameters, thresholds, covariates, random seed, correction method].
+[Conceptual output] was used for [next downstream step].
+```
+
+Recommended full-section order:
+
+1. Framework or system overview
+2. Input data, samples, or benchmark construction
+3. Reference resources, model training, or feature construction
+4. Main analysis modules in pipeline order
+5. Validation, colocalization, sensitivity, or support analyses
+6. Downstream prioritization, case studies, or translational analyses
+7. Statistical testing, multiple-testing correction, and thresholds
+8. Software, code, and data availability
+
+Tense rule:
+- Use past tense for procedures performed in the study: "The benchmark used 2,556 cases"; "Genes detected in fewer than five observations were removed"; "Outputs were scored by..."
+- Use present tense for stable reusable behavior, structures, functions, or definitions: "DeepMAST accepts spatial transcriptomics inputs"; "A supervisor agent routes the request"; "The workflow computes co-expression rates."
 
 ---
 

@@ -108,7 +108,7 @@ Multi-agent system for writing publication-quality IMRAD sections by learning fr
 |-------|------|-------|--------|
 | **Section Analyzer** | Extract structure patterns for SECTION_TYPE | RAG search results + reference patterns | Structure Layer for style guide |
 | **Style Extractor** | Extract voice/tone from Target Voice collection | RAG search results | Target Voice Layer for style guide |
-| **Section Writer** | Write section via tiered interview process | User data + merged style guide + RAG few-shot | Interview -> Outline -> Draft section; Markdown figure embeds/captions for all sections; full Results figure/table legends when available; hybrid supplementary materials Markdown plus linked CSV/TSV artifacts |
+| **Section Writer** | Write section via tiered interview process | User data + merged style guide + RAG few-shot | Interview to Outline to Draft section; Markdown figure embeds/captions for all sections; full Results figure/table legends when available; hybrid supplementary materials Markdown plus linked CSV/TSV artifacts |
 | **Section Reviewer** | Section-weighted multi-pass review | Draft + source data | Review report + revision diffs + WHY |
 | **Pattern Learner** | Learn from feedback, section-tagged | Approved sections + feedback | Style guide updates (both layers) |
 | **Paper Preprocessor** | *Fallback*: Extract section from PDFs | Reference PDFs + SECTION_TYPE | Extracted section text + metadata |
@@ -144,11 +144,11 @@ section_configs:
   methods:
     reference_file: "references/methods-patterns.md"
     writing_rules:
-      tense: "past tense dominant"
+      tense: "past tense for completed study procedures; present tense only for reusable system behavior, algorithm behavior, structures, functions, or definitions"
       voice: "passive/object-centered preferred; avoid first-person 'we' in Methods unless the user or target journal explicitly requests it"
       interpretation: "not allowed — describe, don't interpret"
       citations: "moderate — cite tools, databases, algorithms"
-      key_constraint: "must be reproducible at manuscript level: use a reference-paper flow (framework, data processing, analysis modules, statistics, software/code availability), write with framework/module/pipeline/data as grammatical subjects rather than author-centered 'we', retain package/algorithm names and key parameters, and keep internal file paths, function names, variable names, generated plot/table filenames, and repository-local artifacts out of the main Methods prose unless they are public APIs or essential reproducibility details"
+      key_constraint: "must be reproducible at manuscript level: use a reference-paper flow (framework, data processing, analysis modules, statistics, software/code availability), open each major method block with a short purpose sentence before implementation details, write with framework/module/pipeline/data as grammatical subjects rather than author-centered 'we', retain package/algorithm names and key parameters, and keep internal file paths, function names, variable names, generated plot/table filenames, and repository-local artifacts out of the main Methods prose unless they are public APIs or essential reproducibility details"
     review_weight_overrides:
       factual_accuracy: 1.0
       statistical_review: 0.7
@@ -205,11 +205,28 @@ section_configs:
 
 | Rule | Introduction | Methods | Results | Discussion |
 |------|-------------|---------|---------|------------|
-| Tense | Present (field), Past (studies) | Past | Past (analyses), Present (figures) | Present (interpretations), Past (recaps) |
+| Tense | Present (field), Past (studies) | Past for performed procedures; Present for reusable system/algorithm behavior | Past (analyses), Present (figures) | Present (interpretations), Past (recaps) |
 | Voice | Active preferred | Passive/object-centered preferred; avoid `we` by default | Active for findings | Active preferred |
 | Interpretation | Contextual framing only | Not allowed | Not allowed | Required |
 | Citations | Heavy | Moderate (tools) | Minimal | Heavy |
 | Key constraint | Clear gap + contribution | Reproducible detail | Data-backed claims | Limitations acknowledged |
+
+### Methods Structure Template
+
+Use this Methods block pattern when writing new computational or multi-stage Methods sections:
+
+```markdown
+### [Method Block / Analysis Step]
+
+To [purpose of this block], [analysis/module/pipeline] was performed/used/applied to [data/input].
+[Data source, eligibility/filtering, preprocessing, and QC details].
+[Tool, model, database, package, or algorithm name] ([version/checkpoint]) was used with [key parameters, thresholds, covariates, random seed, correction method].
+[Conceptual output] was used for [next downstream step].
+```
+
+The full section should usually follow: framework/system overview to input data and preprocessing to reference resources or model construction to main analysis modules to validation/support analyses to downstream prioritization or case-study analyses to statistics to software/code/data availability.
+
+Tense rule for Methods: use past tense for procedures performed in this study (`The benchmark used 2,556 cases`; `Genes detected in fewer than five observations were removed`; `Outputs were scored by...`). Use present tense only for stable reusable behavior or definitions (`DeepMAST accepts spatial transcriptomics inputs`; `A supervisor agent routes the request`; `The workflow computes co-expression rates`).
 
 ### Review Weight Summary
 
@@ -228,8 +245,8 @@ Discussion adds: Over-interpretation Check (extra pass).
 ### Hourglass Model Awareness
 
 Introduction and Discussion are mirror opposites:
-- **Introduction**: Funnel (broad context -> specific question)
-- **Discussion**: Inverted Funnel (specific findings -> broad significance)
+- **Introduction**: Funnel (broad context to specific question)
+- **Discussion**: Inverted Funnel (specific findings to broad significance)
 
 When both sections exist, the section-writer enforces this symmetry:
 - Discussion opening references the Introduction's gap statement
@@ -293,9 +310,9 @@ search_parameters:
 | Discussion | "suggest demonstrate indicate consistent with" | "consistent with previous findings prior work" | "limitation future direction caveat" | *field-specific* |
 
 **Real-time few-shot queries** (for Section Writer, during prose):
-- Subsection topic keywords -> Target Voice collection (primary)
-- Structure reference -> Structure collection (secondary, when needed)
-- Results legend writing -> Target Voice query `"figure legend caption panel table notation"` plus `references/legend-patterns.md`
+- Subsection topic keywords to Target Voice collection (primary)
+- Structure reference to Structure collection (secondary, when needed)
+- Results legend writing to Target Voice query `"figure legend caption panel table notation"` plus `references/legend-patterns.md`
 
 ---
 
@@ -411,16 +428,16 @@ run_reference_layers:
       status: "provided|none|unreadable"
       notes: "[same_as_structure|separate_voice_reference|voice_only|no_direct_references|style notes]"
   merge_policy:
-    structure_priority: "user_provided_structure_refs > RAG structure layer > references/{SECTION_TYPE}-patterns.md > data/style-guide.md"
-    voice_priority: "user_provided_voice_refs > RAG target voice layer > data/style-guide.md"
+    structure_priority: "user_provided_structure_refs before RAG structure layer before references/{SECTION_TYPE}-patterns.md before data/style-guide.md"
+    voice_priority: "user_provided_voice_refs before RAG target voice layer before data/style-guide.md"
     persistence: "run_specific_by_default; update data/style-guide.md only after user approval or Pattern Learner trigger"
   open_reference_questions: "[missing paths, unreadable files, unresolved page ranges, or none]"
 ```
 
 #### Processing rules
 
-1. Process `structure_references` with Paper Preprocessor -> Section Analyzer -> run-specific Structure Layer.
-2. Process `voice_references` with Paper Preprocessor -> Style Extractor -> run-specific Target Voice Layer.
+1. Process `structure_references` with Paper Preprocessor to Section Analyzer to run-specific Structure Layer.
+2. Process `voice_references` with Paper Preprocessor to Style Extractor to run-specific Target Voice Layer.
 3. Require structure references before writing; voice/tone references remain optional once structure references exist.
 4. If a reference is unreadable, ask for a corrected location once; if still unavailable, mark `unreadable` and continue with RAG/style guide.
 5. Keep user-provided reference layers run-specific unless the user approves long-term learning.
@@ -548,12 +565,12 @@ rag_health_check:
 **Input**: Structure Layer + Target Voice Layer from Phase 0a/0b
 
 **Priority Rules** (conflict resolution):
-- Structure -> user-provided Structure Layer first, then RAG/static Structure Layer
-- Voice/tone -> user-provided Target Voice Layer first, then RAG/static Target Voice Layer
-- Statistics -> Target Voice Layer unless a user-provided structure reference imposes a journal/reporting convention
-- Transitions -> Target Voice Layer
-- Figure refs -> Structure Layer (with Voice overlay)
-- Figure/table legends -> Structure Layer + `references/legend-patterns.md` (with Target Voice overlay)
+- Structure: user-provided Structure Layer first, then RAG/static Structure Layer
+- Voice/tone: user-provided Target Voice Layer first, then RAG/static Target Voice Layer
+- Statistics: Target Voice Layer unless a user-provided structure reference imposes a journal/reporting convention
+- Transitions: Target Voice Layer
+- Figure refs: Structure Layer (with Voice overlay)
+- Figure/table legends: Structure Layer + `references/legend-patterns.md` (with Target Voice overlay)
 
 The merged guide is the complete `data/style-guide.md` -- no separate file needed. The writer reads the complete style guide and applies priority rules during writing.
 
@@ -597,7 +614,7 @@ Supplementary outputs use a hybrid policy:
 - **Supplementary Data**: always represent as separate data files or linked existing files, with a short Markdown description. Never paste full supplementary data payloads into the section body.
 
 Large supplementary table threshold:
-- A supplementary table is large if it has `>20 rows` or more than `8 columns`.
+- A supplementary table is large if it has more than `20 rows` or more than `8 columns`.
 - Large supplementary tables are written or linked as separate CSV/TSV artifacts instead of full Markdown tables.
 - Default generated target: `supplementary/supplementary_table_X.csv`.
 - Use TSV only when the user provides TSV or explicitly requests TSV; otherwise generate CSV.
@@ -657,7 +674,7 @@ Step 3: If Yes → Auto-extract cross-reference points
         (see Cross-Reference Extraction Table)
 ```
 
-**Cross-Reference Extraction Table** (Writing Now x Existing Section -> Auto-Extracted Elements):
+**Cross-Reference Extraction Table** (Writing Now x Existing Section to Auto-Extracted Elements):
 
 | Writing Now | Existing Section | Auto-Extracted Elements |
 |-------------|-----------------|------------------------|
@@ -689,7 +706,7 @@ Step 3: If Yes → Auto-extract cross-reference points
 | Q1 | What is the core motivation and research question? | gap-elicitation | Follow-up: "knowledge gap? methodology gap? application gap?" |
 | Q2 | What is the most important limitation (gap) of prior work? | contrastive-probe | "What was tried before, why insufficient?" |
 | Q3 | Summarize the paper's main contribution in one sentence | intent-crystallization | Forces core message articulation |
-| Q4 | How broad should the background be? (minimal <-> extensive) | scope-calibration | Auto-adapt to target journal audience |
+| Q4 | How broad should the background be? (minimal to extensive) | scope-calibration | Auto-adapt to target journal audience |
 | Q5 | Key references or papers to position against? | reference-anchoring | Can trigger RAG search |
 
 **Methods** (5 core + follow-ups):
@@ -698,7 +715,7 @@ Step 3: If Yes → Auto-extract cross-reference points
 |---|----------|------|---------------|
 | Q1 | What type of study is this? (computational, experimental, etc.) | structural-classifier | Determines section template |
 | Q2 | Data/samples: what, how many, from where? | core-content | Follow-up: inclusion/exclusion criteria |
-| Q3 | Describe the analysis pipeline step by step (raw data -> final result) | workflow-elicitation | Encourage numbered steps |
+| Q3 | Describe the analysis pipeline step by step (raw data to final result) | workflow-elicitation | Encourage numbered steps |
 | Q4 | What software/tools and versions were used? | reproducibility | Follow-up: custom scripts, parameters |
 | Q5 | Preferred subsection order for Methods? | structure-preference | Default: pipeline order |
 
@@ -753,10 +770,10 @@ Methods/Results Lite Mode is available only when the user explicitly says "outli
 
 | Step | Introduction | Methods | Results | Discussion |
 |------|-------------|---------|---------|------------|
-| 2a: Skeleton | Funnel: broad -> problem -> gap -> contribution | **Blueprint skeleton**: subsection order, organization principle, method steps | **Blueprint skeleton**: subsection order, narrative arc, planned findings | Interpretive: summary -> comparison -> limitations -> future |
+| 2a: Skeleton | Funnel: broad to problem to gap to contribution | **Blueprint skeleton**: subsection order, organization principle, method steps | **Blueprint skeleton**: subsection order, narrative arc, planned findings | Interpretive: summary to comparison to limitations to future |
 | 2b: Details / Matrix | Per-paragraph key points + citations | **Blueprint matrix**: block, subsection, procedure, data/input, tool/version, parameters, output, reproducibility risk | **Blueprint matrix**: block, subsection, result rationale, claim/finding, evidence source, figure/table, figure rationale, statistics, closing takeaway, scope limits, legend status/missing fields | Per-subsection interpretation + citations |
 | 2c: Verification | Conceptual figure placement (if any) | Gap/risk check: missing versions, parameters, input/output transitions | Gap/risk check: missing result rationale, unsupported claims, orphan or decorative figures, missing statistics, missing closing takeaway, missing legend fields | Back-references to specific Results |
-| 2d: Approval / Connection | Transition leading into Methods/Results | **Strong HITL approval gate** before prose; emits `approved_blueprint` | **Strong HITL approval gate** before prose; emits `approved_blueprint` | Limitation <-> future direction pairing |
+| 2d: Approval / Connection | Transition leading into Methods/Results | **Strong HITL approval gate** before prose; emits `approved_blueprint` | **Strong HITL approval gate** before prose; emits `approved_blueprint` | Limitation to future direction pairing |
 
 For Methods and Results, the approved Blueprint is passed to the reviewer as `approved_blueprint`:
 
@@ -776,7 +793,7 @@ The writer must persist the same object in `paper_context.methods_blueprint` or 
 
 #### Step 3: Prose + RAG Few-Shot
 
-Per subsection: extract topic keywords -> RAG search Target Voice collection -> use as style exemplars -> write prose matching merged style guide.
+Per subsection: extract topic keywords, run RAG search against the Target Voice collection, use matches as style exemplars, then write prose matching the merged style guide.
 
 For Methods and Results, Step 3 is constrained by `approved_blueprint`. The writer must pause and return to Step 2d for Blueprint revision approval before adding any new method step, result claim, statistic, figure/table placement, tool, parameter, or subsection that is not represented in the approved Blueprint.
 
@@ -784,10 +801,10 @@ For Methods and Results, Step 3 is constrained by `approved_blueprint`. The writ
 
 | Section | Paragraph Flow | Key Writing Rules |
 |---------|---------------|-------------------|
-| Introduction | Broad context -> narrow to problem -> existing approaches -> gap statement -> contribution -> roadmap | Funnel structure; numeric citations `[1]`; explicit gap; "we introduce/present/propose"; no over-promising; optional conceptual figures embedded and captioned when provided |
-| Methods | Framework/overview -> data processing -> analysis modules -> statistics -> software/code availability | Past tense for completed procedures; passive/object-centered prose preferred; avoid author-centered `we` by default and use subjects such as `DeepMAST`, `the module`, `the pipeline`, `the dataset`, or `the analysis`; report package/algorithm names, versions, key parameters, thresholds, random seeds, and public data/code access; keep local paths, internal functions, variable/object slot names, generated plot/table filenames, and repository artifacts out of the main prose unless they are public APIs or essential reproducibility details; optional workflow/pipeline figures embedded and captioned with reproducibility-relevant context |
-| Results | Result rationale -> method-brief -> primary finding + stats -> figure evidence/rationale -> closing takeaway -> transition -> figure/table legends for available displays -> Supplementary Materials links when files exist | No interpretation (save for Discussion); statistics inline; figures described as evidence, not just referenced; empirical subsections close with one data-backed takeaway; legends use `references/legend-patterns.md`; large supplementary tables/data are linked as artifacts |
-| Discussion | Recap finding -> interpretation -> literature comparison -> implications -> limitations -> future | Interpretation required; compare with literature using numeric citations; no new data; appropriate hedging; end with broader impact; optional synthesis/model figures embedded and captioned without introducing new data |
+| Introduction | Broad context to narrow problem to existing approaches to gap statement to contribution to roadmap | Funnel structure; numeric citations `[1]`; explicit gap; "we introduce/present/propose"; no over-promising; optional conceptual figures embedded and captioned when provided |
+| Methods | Framework/overview to data processing to analysis modules to statistics to software/code availability | Past tense for completed procedures; passive/object-centered prose preferred; avoid author-centered `we` by default and use subjects such as `DeepMAST`, `the module`, `the pipeline`, `the dataset`, or `the analysis`; report package/algorithm names, versions, key parameters, thresholds, random seeds, and public data/code access; keep local paths, internal functions, variable/object slot names, generated plot/table filenames, and repository artifacts out of the main prose unless they are public APIs or essential reproducibility details; optional workflow/pipeline figures embedded and captioned with reproducibility-relevant context |
+| Results | Result rationale to method-brief to primary finding + stats to figure evidence/rationale to closing takeaway to transition to figure/table legends for available displays to Supplementary Materials links when files exist | No interpretation (save for Discussion); statistics inline; figures described as evidence, not just referenced; empirical subsections close with one data-backed takeaway; legends use `references/legend-patterns.md`; large supplementary tables/data are linked as artifacts |
+| Discussion | Recap finding to interpretation to literature comparison to implications to limitations to future | Interpretation required; compare with literature using numeric citations; no new data; appropriate hedging; end with broader impact; optional synthesis/model figures embedded and captioned without introducing new data |
 
 **Integration pass** (after prose, section-specific checks):
 - **Introduction**: numeric citation completeness, gap statement presence, contribution clarity, conceptual figure embed/caption check when provided
@@ -840,7 +857,7 @@ revision_diff_enhanced:
 
 **Learning triggers**:
 - User approves final section
-- Significant reviewer corrections (>3)
+- Significant reviewer corrections (more than 3)
 - Periodic review (every 10 outputs)
 - Style Extractor voice accuracy below threshold
 
@@ -850,9 +867,9 @@ revision_diff_enhanced:
 
 When RAG is unavailable or returns insufficient results:
 
-**Primary** -> RAG Search (3+ relevant chunks) -> Continue pipeline
-**Fallback 1** -> Paper Preprocessor (PDF direct processing, section-aware) -> Section Analyzer
-**Fallback 2** -> User Input (paste text, provide page ranges) -> Continue
+**Primary**: RAG Search (3+ relevant chunks), then continue pipeline
+**Fallback 1**: Paper Preprocessor (PDF direct processing, section-aware), then Section Analyzer
+**Fallback 2**: User Input (paste text, provide page ranges), then continue
 
 **Fallback triggers**: RAG MCP server unavailable, collection empty/unconfigured, fewer than 3 relevant chunks returned, or user explicitly provides PDFs.
 
@@ -990,14 +1007,14 @@ Markdown-first, Word-ready output:
 - File-backed figures in any section: embed with Markdown image syntax, e.g. `![Figure 1](figures/figure1.png)`, placed near the first substantive reference or immediately before the relevant caption/legend. Use the user-provided path unless the user asks for path normalization.
 - For Results with available displays: separate `## Figure Legends` output with `Main Figures`, `Main Tables`, `Supplementary Figures`, and `Supplementary Tables` subsections as applicable
 - For Results with supplementary files: after `## Figure Legends`, include `## Supplementary Materials` with one entry per supplementary figure, supplementary table artifact, and Supplementary Data file
-- Large supplementary tables (`>20 rows` or more than `8 columns`) are linked as `supplementary/supplementary_table_X.csv` by default; use `.tsv` only for user-provided TSV or explicit TSV requests
+- Large supplementary tables (more than `20 rows` or more than `8 columns`) are linked as `supplementary/supplementary_table_X.csv` by default; use `.tsv` only for user-provided TSV or explicit TSV requests
 - Supplementary Data is always linked as separate files or existing artifacts with a short Markdown description and value semantics
 - For Introduction, Methods, and Discussion figures: provide section-appropriate captions or short legends adjacent to the embed; do not force Results-style full legends unless the user requests them.
-- Statistics inline: `(p < 0.05)`, `(n = 100)`
+- Statistics inline: `(p less than 0.05)`, `(n = 100)`
 - Numeric citation policy: use first-use ordered numeric citations in prose, e.g. `[1]`, `[2]`; use `[1,2]` for multiple non-consecutive citations and `[1-3]` for consecutive ranges.
 - Add a final `## References` section to each generated Markdown section when at least one cited paper, dataset, tool, or link has source metadata.
 - Reference entries use the same numeric order as first citation and this identifier-first format: `[1] DOI: 10.xxxx/yyyy. "Full title."`, `[2] arXiv: 2603.22455. "Full title."`, or `[3] URL: https://example.org/page. "Full title." Optional source note.`
-- Reference identifier priority is `DOI > arXiv > URL`: for papers, use DOI whenever known; if DOI is unavailable, use arXiv when available; otherwise use URL.
+- Reference identifier priority is DOI, then arXiv, then URL: for papers, use DOI whenever known; if DOI is unavailable, use arXiv when available; otherwise use URL.
 - Only external citable sources belong in `## References`: DOI, arXiv ID, or a public URL.
 - Public URL means an `http://` or `https://` URL that readers can resolve outside the local repository.
 - Do not use `URL:` for local files, relative paths, absolute paths, repository artifacts, generated outputs, code files, figures, CSV/TSV/JSON/JSONL files, or local Markdown artifacts.
@@ -1030,7 +1047,7 @@ Before final approval:
 - [ ] Structure matches learned patterns
 - [ ] Voice matches Target Voice Layer profile
 - [ ] Numeric citations are ordered by first use and each cited source with available metadata appears in `## References`
-- [ ] `## References` entries use identifier-first format with DOI > arXiv > URL priority and double-quoted titles
+- [ ] `## References` entries use identifier-first format with DOI, then arXiv, then URL priority and double-quoted titles
 - [ ] `## References` excludes structure-only and voice/tone-only reference papers unless they are explicitly cited as evidence
 - [ ] `## References` excludes local files, relative paths, absolute paths, repository artifacts, generated outputs, and local Markdown artifacts
 - [ ] Unsupported claims are marked `[needs: citation]`; incomplete reference entries are marked `[needs: reference metadata]`
@@ -1041,7 +1058,7 @@ Before final approval:
 - [ ] Revision diff items resolved
 
 **Introduction-specific**:
-- [ ] Funnel structure (broad -> specific) maintained
+- [ ] Funnel structure (broad to specific) maintained
 - [ ] Gap statement explicit and positioned correctly
 - [ ] Contribution statement present and matched to actual Results
 - [ ] All existing work claims have numeric citations or `[needs: citation]`
@@ -1065,7 +1082,7 @@ Before final approval:
 - [ ] Each figure/table has an explicit evidentiary role for a claim, not just a descriptive placement
 - [ ] Available main and supplementary figure/table legends drafted, or explicitly omitted because no display metadata exists
 - [ ] Partial legends preserve known information and mark missing values as `[needs: ...]` without inventing statistics, sample sizes, encodings, or scale bars
-- [ ] Large supplementary tables (`>20 rows` or more than `8 columns`) are saved or linked as CSV/TSV artifacts rather than inlined in Markdown
+- [ ] Large supplementary tables (more than `20 rows` or more than `8 columns`) are saved or linked as CSV/TSV artifacts rather than inlined in Markdown
 - [ ] Supplementary Data files are linked with short descriptions, value semantics, and `[needs: ...]` markers for unresolved fields
 - [ ] When supplementary files exist, `## Supplementary Materials` appears after Results `## Figure Legends`
 - [ ] Each empirical/evaluation subsection ends with a one-sentence data-backed closing takeaway
@@ -1091,18 +1108,34 @@ Before final approval:
 
 ---
 
+## Common Issues
+
+### Missing structure references
+
+Ask for at least one structure reference paper, PDF, URL, DOI, PMID, arXiv ID, RAG collection, or local paper directory before writing. Use static section patterns only after the user explicitly declines direct references or RAG is unavailable.
+
+### Methods prose reads like an implementation log
+
+Move local paths, internal script names, function names, generated filenames, and repository artifacts out of the main prose. Keep public tools, versions, parameters, thresholds, accessions, formulas, and conceptual outputs in the Methods.
+
+### Methods tense is inconsistent
+
+Rewrite one-time study procedures in past tense and reusable system behavior in present tense. Use the simple check: performed once for this paper means past tense; stable system or algorithm behavior means present tense.
+
+---
+
 ## Continuous Improvement
 
 The system improves over time:
 
-1. **More reference papers in RAG** -> Better pattern diversity (per section)
-2. **More approved outputs** -> Refined style guide (both layers, section-tagged)
-3. **Reviewer feedback** -> Eliminated common errors (tracked per section)
-4. **Pattern versioning** -> Trackable improvement
-5. **Reporting compliance tracking** -> Fewer guideline gaps over time
-6. **RAG query refinement** -> Better retrieval quality
-7. **Voice accuracy tracking** -> More faithful style emulation
-8. **Cross-section coherence** -> Better consistency across IMRAD sections
+1. **More reference papers in RAG**: Better pattern diversity (per section)
+2. **More approved outputs**: Refined style guide (both layers, section-tagged)
+3. **Reviewer feedback**: Eliminated common errors (tracked per section)
+4. **Pattern versioning**: Trackable improvement
+5. **Reporting compliance tracking**: Fewer guideline gaps over time
+6. **RAG query refinement**: Better retrieval quality
+7. **Voice accuracy tracking**: More faithful style emulation
+8. **Cross-section coherence**: Better consistency across IMRAD sections
 
 Check improvement metrics in `data/feedback-log.md`.
 
@@ -1113,7 +1146,7 @@ Check improvement metrics in `data/feedback-log.md`.
 - `SKILL.md` -- This orchestrator
 - `agents/section-analyzer.md` -- Structure pattern extraction agent (parameterized by SECTION_TYPE)
 - `agents/style-extractor.md` -- Target Voice extraction agent (section-aware queries)
-- `agents/section-writer.md` -- Multi-stage content creation agent (Tiered Interview -> Outline -> Prose + RAG)
+- `agents/section-writer.md` -- Multi-stage content creation agent (Tiered Interview to Outline to Prose + RAG)
 - `agents/section-reviewer.md` -- Section-weighted multi-pass review agent (7 passes + pedagogical WHY)
 - `agents/pattern-learner.md` -- Continuous learning agent (section-tagged, both layers)
 - `agents/paper-preprocessor.md` -- Fallback PDF preprocessing agent (section-aware extraction)

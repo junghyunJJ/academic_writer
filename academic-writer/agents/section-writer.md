@@ -671,6 +671,7 @@ methods_blueprint:
     content:
       - "Target length or journal word budget, if known"
       - "Organization principle: reference-paper flow by default: framework/overview → data processing → analysis modules → statistics → software/code availability"
+      - "Each major method block should have a purpose sentence before implementation details"
       - "Subsection order and titles"
       - "Major procedure/method step under each subsection"
     output_format: |
@@ -1005,10 +1006,11 @@ methods_prose:
     5_software_code_availability: "Software versions, public code/data availability, and reproducibility environment"
 
   writing_rules:
+    - "Each major method block starts with a brief purpose sentence, then gives data/input, processing, tool/version/parameter, and output/downstream-use details"
     - "Past tense for procedures performed ('reads were aligned', 'clusters were identified')"
+    - "Use present tense only for reusable system/algorithm behavior, structures, functions, or definitions ('DeepMAST accepts...', 'the supervisor routes...', 'the workflow computes...')"
     - "Use passive/object-centered prose by default; prefer subjects such as `DeepMAST`, `the module`, `the pipeline`, `the dataset`, or `the analysis` over author-centered `we`"
     - "For design decisions, prefer object-centered rationale ('X was selected because...', 'This design was chosen because...') over 'We chose...'"
-    - "Present tense is acceptable for stable framework behavior ('the module assigns...', 'DeepMAST integrates...')"
     - "Sufficient detail for reproduction — every parameter value stated"
     - "Software versions must be explicit (e.g., 'STAR v2.7.10a')"
     - "Use publication-level abstraction: keep package names, algorithm names, model names, databases, key thresholds, seeds, and statistical formulas; omit local paths, repository-internal files, internal functions, variable/object slot names, generated plot/table filenames, and output artifact filenames from main Methods prose unless they are public APIs or essential reproducibility details"
@@ -1342,11 +1344,11 @@ style_rules:
     key_constraint: "Clear gap statement followed by specific contribution"
 
   methods:
-    tense: "Past tense for procedures performed"
+    tense: "Past tense for procedures performed; present tense only for reusable system/algorithm behavior, structures, functions, or definitions"
     voice: "Passive/object-centered preferred; avoid first-person 'we' unless the user or target journal explicitly requests it"
     interpretation: "Not allowed — only describe what was done"
     citations: "Moderate — cite established tools and methods"
-    key_constraint: "Sufficient detail for manuscript-level reproducibility without leaking repository-internal implementation identifiers into main prose"
+    key_constraint: "Each method block opens with purpose, then gives reproducible detail without leaking repository-internal implementation identifiers into main prose"
 
   results:
     tense: "Past tense for completed analyses; present tense for figure descriptions"
@@ -1463,6 +1465,8 @@ Before submission to Reviewer, verify all applicable items:
 - [ ] Every key parameter has its value stated
 - [ ] Pipeline steps are complete and ordered
 - [ ] Main Methods follows the reference-paper flow: framework/overview, data processing, analysis modules, statistics, software/code availability
+- [ ] Each major method block opens with a short purpose sentence before implementation details
+- [ ] Methods tense separates completed study procedures from stable reusable system/algorithm behavior
 - [ ] Main Methods uses passive/object-centered prose and avoids first-person `we` unless explicitly requested
 - [ ] Main prose excludes local paths, repository-internal file names, internal function names, variable/object slot names, generated plot/table filenames, and output artifact filenames unless they are public APIs or essential reproducibility details
 - [ ] No results or interpretation leaked in
